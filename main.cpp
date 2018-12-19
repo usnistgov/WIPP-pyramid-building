@@ -2,6 +2,8 @@
 #include <FastImage/api/FastImage.h>
 #include <FastImage/TileLoaders/GrayscaleTiffTileLoader.h>
 #include "Helper.h"
+#include "rules/WriteTileRule.h"
+#include "tasks/WriteTileTask.h"
 
 int main() {
 
@@ -19,25 +21,58 @@ int main() {
     // Create the fast image with the tile loader
     auto *fi = new fi::FastImage<uint32_t>(tileLoader, 0);
 
+    fi->getFastImageOptions()->setNumberOfViewParallel(4);
+
+    auto graph = new htgs::TaskGraphConf<fi::View<uint32_t>, htgs::VoidData >();
+
+    auto bookeeper = new htgs::Bookkeeper< fi::View<uint32_t> >();
+
+    auto writeRule = new WriteTileRule();
+
+    auto writeTask = new WriteTileTask();
+
+    graph->setGraphConsumerTask(bookeeper);
+    graph->addRuleEdge(bookeeper, writeRule, writeTask);
+
+    htgs::TaskGraphRuntime *runtime = new htgs::TaskGraphRuntime(graph);
+
+    runtime->executeRuntime();
+
 
     auto
-            numTileRow = fi->getNumberTilesWidth(0),
-            numTileCol = fi->getNumberTilesHeight(0);
+            numTileRow = fi->getNumberTilesHeight(0),
+            numTileCol = fi->getNumberTilesWidth(0);
+
 
 
     std::cout << numTileRow << "," << numTileCol << std::endl;
 
     fi->configureAndRun();
 
-    for(auto i = 0; i <= ceil(numTileRow/2); i++){
-        for(auto j = 0; j <= ceil(numTileCol/2); j++){
-            std::cout << 2*i << "," << 2*j << std::endl;
-            std::cout << 2*i << "," << 2*j+1 << std::endl;
-            std::cout << 2*i+1 << "," << 2*j << std::endl;
-            std::cout << 2*i+1 << "," << 2*j+1 << std::endl;
+    uint32_t numberBlockHeight,numberBlockWidth = 0;
 
+    numberBlockHeight = ceil((double)numTileRow/2);
+    numberBlockWidth = ceil((double)numTileCol/2);
 
-            fi->requestTile(i,j,false,0);
+    for(auto i = 0; i < numberBlockHeight; i++){
+        for(auto j = 0; j < numberBlockWidth; j++){
+            if(2*j < numTileCol && 2*i < numTileRow) {
+                std::cout << 2*i << "," << 2*j << std::endl;
+                fi->requestTile(2 * i, 2 * j, false, 0);
+            }
+            if(2*j+1 < numTileCol) {
+                std::cout << 2 * i << "," << 2 * j + 1 << std::endl;
+                fi->requestTile(2 * i, 2 * j + 1, false, 0);
+            }
+            if(2*i+1 < numTileRow) {
+                std::cout << 2 * i + 1 << "," << 2 * j << std::endl;
+                fi->requestTile(2 * i + 1, 2 * j, false, 0);
+            }
+            if(2*j+1 < numTileCol && 2*i+1 < numTileRow) {
+                std::cout << 2 * i + 1 << "," << 2 * j + 1 << std::endl;
+                fi->requestTile(2 * i + 1, 2 * j + 1, false, 0);
+            }
+
         }
     }
 
@@ -47,15 +82,15 @@ int main() {
     int32_t tileHeight = 0;
     uint32_t* data;
 
-
-    while(fi->isGraphProcessingTiles()){
+    while(fi->isGraphProcessingTiles()) {
         auto view = fi->getAvailableViewBlocking();
         if(view != nullptr){
-             view->get()->getTileHeight();
-             view->get()->getTileWidth();
-             data = view->get()->getData();
-             std::cout << data[0] << std::endl;
-             view->releaseMemory();
+            view->get()->getTileHeight();
+            view->get()->getTileWidth();
+            data = view->get()->getData();
+            std::cout << data[0] << std::endl;
+            // view->releaseMemory();
+            graph->produceData(view->get());
         }
     }
 
