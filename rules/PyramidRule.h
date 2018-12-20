@@ -18,18 +18,28 @@ public:
         numLevel = ceil(log2(maxDim)) + 1;
 
 
-        levelGridSizes.push_back({numTileCol, numTileRow});
-
         double levelCol, levelRow;
         levelCol = numTileCol;
         levelRow = numTileRow;
 
-        for(uint32_t l=1; l<numLevel; l++){
-            levelCol = ceil(levelCol/2);
-            levelRow = ceil(levelRow /2);
+        for(uint32_t l=0; l<numLevel; l++){
             std::array<uint32_t,2> gridSize = { (uint32_t)levelCol, (uint32_t)levelRow };
             levelGridSizes.push_back(gridSize);
+            levelCol = ceil(levelCol/2);
+            levelRow = ceil(levelRow /2);
         }
+
+        grids.resize(numLevel);
+
+        levelCol = numTileCol;
+        levelRow = numTileRow;
+
+        for (auto it = grids.begin() ; it != grids.end(); ++it) {
+            it->resize(levelCol * levelRow);
+            levelCol = ceil(levelCol/2);
+            levelRow = ceil(levelRow /2);
+        }
+
     }
 
     void applyRule(std::shared_ptr<MemoryData<fi::View<uint32_t>>> data, size_t pipelineId) override {
@@ -45,28 +55,101 @@ public:
         std::cout << "tile : (" << col << "," << row << ") ; block (" << blockCol << "," << blockRow << ")"  << std::endl;
         std::cout << "level: " << level << " ; grid size: (" << levelGridSizes[level][0] << "," <<  levelGridSizes[level][1] << ")" << std::endl;
 
+        auto gridCol = levelGridSizes[level][0];
+        auto gridRow = levelGridSizes[level][1];
+
+        grids.at(level).at(row * gridCol + col) = data;
+
+        if(col >= gridCol -1 && row >= gridRow -1){
+            std::cout << "corner case : block size 1 " << std::endl;
+            //sendTile
+            return;
+
+        }
+
+        if(col >= gridCol -1 ){
+            std::cout << "corner case : column block size 2 " << std::endl;
+            if(row % 2 == 0 && grids.at(level).at( (row + 1) * gridCol + col).get() != nullptr) {
+                //send 2 tiles
+            }
+            return;
+        }
+
+        if(row >= gridRow -1){
+            std::cout << "corner case : row block size 2 " << std::endl;
+            if(row % 2 == 0 && grids.at(level).at( (row - 1) * gridCol + col).get() != nullptr) {
+                //send 2 tiles
+            }
+            return;
+        }
+
+        if(col % 2 == 0 && row % 2 == 0) {
+            //check SE
+            if( grids.at(level).at(row * gridCol + col + 1).get() != nullptr &&
+                grids.at(level).at( (row + 1) * gridCol + col).get() != nullptr &&
+                grids.at(level).at( (row + 1) * gridCol + col + 1).get() != nullptr){
+                //sendTile
+                //std::shared_ptr<MemoryData<fi::View<uint32_t>>> t[4] = {data, data, data, data};
+            };
+
+        }
+
+        else if(col % 2 != 0 || row % 2 == 0){
+            //check SW
+            if( grids.at(level).at(row * gridCol + col - 1).get() != nullptr &&
+                grids.at(level).at( (row + 1) * gridCol + col).get() != nullptr &&
+                grids.at(level).at( (row + 1) * gridCol + col - 1).get() != nullptr){
+                //sendTile
+            }
+        }
+
+        else if(col % 2 == 0 || row % 2 != 0){
+            //check NE
+            if( grids.at(level).at(row * gridCol + col + 1).get() != nullptr &&
+                grids.at(level).at( (row - 1) * gridCol + col).get() != nullptr &&
+                grids.at(level).at( (row - 1) * gridCol + col + 1).get() != nullptr){
+                //sendTile
+            }
+        }
+
+        else if(col % 2 != 0 || row % 2 != 0){
+            //check NW
+            if( grids.at(level).at(row * gridCol + col - 1).get() != nullptr &&
+                grids.at(level).at( (row - 1) * gridCol + col).get() != nullptr &&
+                grids.at(level).at( (row - 1) * gridCol + col - 1).get() != nullptr){
+                //sendTile
+            }
+        }
+
+
+
         //add to block
-        std::vector<std::vector<fi::View<uint32_t>>> l = levels.at(level);
-        std::vector<fi::View<uint32_t>> b = l.at(blockCol * levelGridSizes[level][0] + blockRow);
-        b.push_back(data->get(0));
+//        std::vector<std::vector<fi::View<uint32_t>>> l = levels.at(level);
+//        std::vector<fi::View<uint32_t>> b = l.at(blockCol * levelGridSizes[level][0] + blockRow);
+//        b.push_back(data->get(0));
+//
+//
+//        //if block is full, send block
+//        if(blockCol == floor(levelGridSizes[level][0]) && blockRow == floor(levelGridSizes[level][1]) && b.size() == 1){
+//            //block is full
+//        }
+//        if(blockCol == floor(levelGridSizes[level][0]) && blockRow && b.size() == 2){
+//
+//        }
+//        if(blockRow == floor(levelGridSizes[level][1]) && blockRow && b.size() == 2){
+//
+//        }
+//        if(blockRow && b.size() == 4){
+//
+//        }
 
 
-        //if block is full, send block
-        if(blockCol = floor(levelGridSizes[level][0]) && blockRow == floor(levelGridSizes[level][1]) && b.size() == 1){
-            //block is full
-        }
-        if(blockCol = floor(levelGridSizes[level][0]) && blockRow && b.size() == 2){
 
-        }
-        if(blockRow = floor(levelGridSizes[level][1]) && blockRow && b.size() == 2){
-
-        }
-        if(blockRow && b.size() == 4){
-
-        }
+    }
 
 
-
+    const std::vector<std::vector<std::shared_ptr<MemoryData<fi::View<uint32_t>>>>> &getGrids() const {
+        return grids;
     }
 
 
@@ -75,7 +158,8 @@ private:
     uint32_t numTileRow;
     uint32_t numLevel;
     std::vector<std::array<uint32_t,2>> levelGridSizes;
-    std::vector<std::vector<std::vector<fi::View<uint32_t>>>> levels;
+    std::vector<std::vector<std::vector<fi::View<uint32_t>*>>> levels;
+    std::vector<std::vector<std::shared_ptr<htgs::MemoryData<fi::View<uint32_t>>>>> grids;
 
 
 

@@ -9,8 +9,8 @@
 
 int main() {
 
-    std::string pathImage = "/Users/gerardin/Documents/projects/pyramidio/pyramidio/src/test/resources/dataset2/images/tiled-pc/tiled_stitched_c01t020p1.ome.tif";
-
+    //std::string pathImage = "/Users/gerardin/Documents/projects/pyramidio/pyramidio/src/test/resources/dataset2/images/tiled-pc/tiled_stitched_c01t020p1.ome.tif";
+    std::string pathImage ="/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/tiledMaison.tiff";
     fi::ATileLoader<uint32_t> *tileLoader = nullptr;
 
     auto extension = Helper::getExtension(pathImage);
