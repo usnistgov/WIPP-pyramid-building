@@ -12,7 +12,7 @@ class WriteTileTask : public htgs::ITask<htgs::MemoryData<fi::View<uint32_t>>,ht
 public:
     void executeTask(std::shared_ptr<htgs::MemoryData<fi::View<uint32_t>>> data) override {
 
-        std::cout << "write tile : " << data->get()->getRow() << "," << data->get()->getCol() << std::endl;
+     //   std::cout << "write tile : " << data->get()->getRow() << "," << data->get()->getCol() << std::endl;
         data->releaseMemory();
     }
 

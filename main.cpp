@@ -63,19 +63,19 @@ int main() {
     for(auto i = 0; i < numberBlockHeight; i++){
         for(auto j = 0; j < numberBlockWidth; j++){
             if(2*j < numTileCol && 2*i < numTileRow) {
-                std::cout << 2*i << "," << 2*j << std::endl;
+//                std::cout << 2*i << "," << 2*j << std::endl;
                 fi->requestTile(2 * i, 2 * j, false, 0);
             }
             if(2*j+1 < numTileCol) {
-                std::cout << 2 * i << "," << 2 * j + 1 << std::endl;
+//                std::cout << 2 * i << "," << 2 * j + 1 << std::endl;
                 fi->requestTile(2 * i, 2 * j + 1, false, 0);
             }
             if(2*i+1 < numTileRow) {
-                std::cout << 2 * i + 1 << "," << 2 * j << std::endl;
+//                std::cout << 2 * i + 1 << "," << 2 * j << std::endl;
                 fi->requestTile(2 * i + 1, 2 * j, false, 0);
             }
             if(2*j+1 < numTileCol && 2*i+1 < numTileRow) {
-                std::cout << 2 * i + 1 << "," << 2 * j + 1 << std::endl;
+//                std::cout << 2 * i + 1 << "," << 2 * j + 1 << std::endl;
                 fi->requestTile(2 * i + 1, 2 * j + 1, false, 0);
             }
 
@@ -94,17 +94,20 @@ int main() {
             view->get()->getTileHeight();
             view->get()->getTileWidth();
             data = view->get()->getData();
-            std::cout << data[0] << std::endl;
+//            std::cout << data[0] << std::endl;
             // view->releaseMemory();
             graph->produceData(view);
+
         }
     }
 
-
-    std::cout << "Hello, World!" << std::endl;
-
+    graph->finishedProducingData();
 
     delete fi;
+
+    runtime->waitForRuntime();
+
+    delete runtime;
 
 
     return 0;

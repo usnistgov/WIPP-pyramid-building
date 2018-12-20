@@ -18,7 +18,7 @@ public:
     }
 
     ITask<MemoryData<fi::View<uint32_t>>, VoidData> *copy() override {
-        return nullptr;
+        return new CreateTileTask();
     }
 };
 
