@@ -23,9 +23,9 @@ int main() {
 
     fi->getFastImageOptions()->setNumberOfViewParallel(4);
 
-    auto graph = new htgs::TaskGraphConf<fi::View<uint32_t>, htgs::VoidData >();
+    auto graph = new htgs::TaskGraphConf<htgs::MemoryData<fi::View<uint32_t>>, htgs::VoidData >();
 
-    auto bookeeper = new htgs::Bookkeeper< fi::View<uint32_t> >();
+    auto bookeeper = new htgs::Bookkeeper< htgs::MemoryData<fi::View<uint32_t>> >();
 
     auto writeRule = new WriteTileRule();
 
@@ -90,7 +90,7 @@ int main() {
             data = view->get()->getData();
             std::cout << data[0] << std::endl;
             // view->releaseMemory();
-            graph->produceData(view->get());
+            graph->produceData(view);
         }
     }
 

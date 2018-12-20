@@ -8,15 +8,15 @@
 #include <htgs/api/ITask.hpp>
 #include "FastImage/api/FastImage.h"
 
-class WriteTileTask : public htgs::ITask<fi::View<uint32_t>,htgs::VoidData> {
+class WriteTileTask : public htgs::ITask<htgs::MemoryData<fi::View<uint32_t>>,htgs::VoidData> {
 public:
-    void executeTask(std::shared_ptr<fi::View<uint32_t>> data) override {
+    void executeTask(std::shared_ptr<htgs::MemoryData<fi::View<uint32_t>>> data) override {
 
-        std::cout << "write tile : " << data->getRow() << "," << data->getCol() << std::endl;
-
+        std::cout << "write tile : " << data->get()->getRow() << "," << data->get()->getCol() << std::endl;
+        data->releaseMemory();
     }
 
-    ITask<fi::View<uint32_t>, VoidData> *copy() override {
+    ITask<htgs::MemoryData<fi::View<uint32_t>>, VoidData> *copy() override {
         return new WriteTileTask();
     }
 
