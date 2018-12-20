@@ -17,7 +17,6 @@ public:
 
         numLevel = ceil(log2(maxDim)) + 1;
 
-        std::vector<std::vector<std::vector<fi::View<uint32_t>>>> levels ;
 
         levelGridSizes.push_back({numTileCol, numTileRow});
 
@@ -47,15 +46,26 @@ public:
         std::cout << "level: " << level << " ; grid size: (" << levelGridSizes[level][0] << "," <<  levelGridSizes[level][1] << ")" << std::endl;
 
         //add to block
+        std::vector<std::vector<fi::View<uint32_t>>> l = levels.at(level);
+        std::vector<fi::View<uint32_t>> b = l.at(blockCol * levelGridSizes[level][0] + blockRow);
+        b.push_back(data->get(0));
 
-        //if blockISfull, send block
 
-        if(col % 2 != 0) {
-            std::cout << "col is odd number " << std::endl;
-            if(col == levelGridSizes[level][0] - 1){
-                std::cout << "end of col" << std::endl;
-            }
+        //if block is full, send block
+        if(blockCol = floor(levelGridSizes[level][0]) && blockRow == floor(levelGridSizes[level][1]) && b.size() == 1){
+            //block is full
         }
+        if(blockCol = floor(levelGridSizes[level][0]) && blockRow && b.size() == 2){
+
+        }
+        if(blockRow = floor(levelGridSizes[level][1]) && blockRow && b.size() == 2){
+
+        }
+        if(blockRow && b.size() == 4){
+
+        }
+
+
 
     }
 
@@ -65,6 +75,7 @@ private:
     uint32_t numTileRow;
     uint32_t numLevel;
     std::vector<std::array<uint32_t,2>> levelGridSizes;
+    std::vector<std::vector<std::vector<fi::View<uint32_t>>>> levels;
 
 
 
