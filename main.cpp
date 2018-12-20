@@ -4,6 +4,8 @@
 #include "Helper.h"
 #include "rules/WriteTileRule.h"
 #include "tasks/WriteTileTask.h"
+#include "rules/PyramidRule.h"
+#include "tasks/CreateTileTask.h"
 
 int main() {
 
@@ -23,22 +25,6 @@ int main() {
 
     fi->getFastImageOptions()->setNumberOfViewParallel(4);
 
-    auto graph = new htgs::TaskGraphConf<htgs::MemoryData<fi::View<uint32_t>>, htgs::VoidData >();
-
-    auto bookeeper = new htgs::Bookkeeper< htgs::MemoryData<fi::View<uint32_t>> >();
-
-    auto writeRule = new WriteTileRule();
-
-    auto writeTask = new WriteTileTask();
-
-    graph->setGraphConsumerTask(bookeeper);
-    graph->addRuleEdge(bookeeper, writeRule, writeTask);
-
-    htgs::TaskGraphRuntime *runtime = new htgs::TaskGraphRuntime(graph);
-
-    runtime->executeRuntime();
-
-
     auto
             numTileRow = fi->getNumberTilesHeight(0),
             numTileCol = fi->getNumberTilesWidth(0);
@@ -46,6 +32,26 @@ int main() {
 
 
     std::cout << numTileRow << "," << numTileCol << std::endl;
+
+    auto graph = new htgs::TaskGraphConf<htgs::MemoryData<fi::View<uint32_t>>, htgs::VoidData >();
+
+    auto bookeeper = new htgs::Bookkeeper< htgs::MemoryData<fi::View<uint32_t>> >();
+
+    auto writeRule = new WriteTileRule();
+
+    auto pyramidRule = new PyramidRule(numTileCol,numTileRow);
+
+    auto writeTask = new WriteTileTask();
+    auto createTileTask = new CreateTileTask();
+
+    graph->setGraphConsumerTask(bookeeper);
+    graph->addRuleEdge(bookeeper, writeRule, writeTask);
+    graph->addRuleEdge(bookeeper, pyramidRule, createTileTask);
+
+    htgs::TaskGraphRuntime *runtime = new htgs::TaskGraphRuntime(graph);
+
+    runtime->executeRuntime();
+
 
     fi->configureAndRun();
 

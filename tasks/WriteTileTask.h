@@ -20,7 +20,6 @@ public:
         return new WriteTileTask();
     }
 
-
 };
 
 #endif //PYRAMIDBUILDING_WRITETILETASK_H
