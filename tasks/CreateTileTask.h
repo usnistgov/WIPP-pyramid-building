@@ -10,16 +10,23 @@
 
 class CreateTileTask : public htgs::ITask<htgs::MemoryData<fi::View<uint32_t>>,htgs::VoidData> {
 
+
+
 public:
     CreateTileTask() {}
 
     void executeTask(std::shared_ptr<MemoryData<fi::View<uint32_t>>> data) override {
-
+        ++count;
+        std::cout << "create tile : count : " << count << std::endl;
     }
 
     ITask<MemoryData<fi::View<uint32_t>>, VoidData> *copy() override {
         return new CreateTileTask();
     }
+
+
+private :
+    std::atomic<int> count = {0} ;
 };
 
 

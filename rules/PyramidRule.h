@@ -58,66 +58,97 @@ public:
         auto gridCol = levelGridSizes[level][0];
         auto gridRow = levelGridSizes[level][1];
 
+        auto SOUTH = (row + 1) * gridCol + col;
+        auto NORTH = (row - 1) * gridCol + col;
+        auto EAST = row * gridCol + col + 1;
+        auto WEST = row * gridCol + col - 1;
+        auto NORTH_WEST = (row -1) * gridCol + col - 1;
+        auto NORTH_EAST = (row -1) * gridCol + col + 1;
+        auto SOUTH_WEST = (row +1) * gridCol + col - 1;
+        auto SOUTH_EAST = (row +1) * gridCol + col + 1;
+
+
         grids.at(level).at(row * gridCol + col) = data;
 
-        if(col >= gridCol -1 && row >= gridRow -1){
+        if(col >= gridCol -1 && row >= gridRow -1 && col % 2 ==0 && row % 2 ==0) {
             std::cout << "corner case : block size 1 " << std::endl;
             //sendTile
+            this->addResult(data);
             return;
-
         }
 
-        if(col >= gridCol -1 ){
+        if(col >= gridCol -1 && col % 2 == 0){
             std::cout << "corner case : column block size 2 " << std::endl;
-            if(row % 2 == 0 && grids.at(level).at( (row + 1) * gridCol + col).get() != nullptr) {
+            if(row % 2 == 0 && grids.at(level).at(SOUTH).get() != nullptr) {
                 //send 2 tiles
+                this->addResult(data);
+            }
+            else if (row % 2 != 0 && grids.at(level).at(NORTH).get() != nullptr) {
+                //send 2 tiles
+                this->addResult(data);
             }
             return;
         }
 
-        if(row >= gridRow -1){
+        if(row >= gridRow -1 && row % 2 == 0){
             std::cout << "corner case : row block size 2 " << std::endl;
-            if(row % 2 == 0 && grids.at(level).at( (row - 1) * gridCol + col).get() != nullptr) {
+            if(col % 2 == 0 && grids.at(level).at(EAST).get() != nullptr) {
                 //send 2 tiles
+                this->addResult(data);
+            }
+            else if (col % 2 != 0 && grids.at(level).at(WEST).get() != nullptr ) {
+                //send 2 tiles
+                this->addResult(data);
             }
             return;
         }
 
         if(col % 2 == 0 && row % 2 == 0) {
+            std::cout << "check SE " << std::endl;
             //check SE
-            if( grids.at(level).at(row * gridCol + col + 1).get() != nullptr &&
-                grids.at(level).at( (row + 1) * gridCol + col).get() != nullptr &&
-                grids.at(level).at( (row + 1) * gridCol + col + 1).get() != nullptr){
+            if( grids.at(level).at(EAST).get() != nullptr &&
+                grids.at(level).at(SOUTH).get() != nullptr &&
+                grids.at(level).at(SOUTH_EAST).get() != nullptr){
                 //sendTile
                 //std::shared_ptr<MemoryData<fi::View<uint32_t>>> t[4] = {data, data, data, data};
+                std::cout << "new tile! " << std::endl;
+                this->addResult(data);
             };
-
         }
 
-        else if(col % 2 != 0 || row % 2 == 0){
+        else if(col % 2 != 0 && row % 2 == 0){
             //check SW
-            if( grids.at(level).at(row * gridCol + col - 1).get() != nullptr &&
-                grids.at(level).at( (row + 1) * gridCol + col).get() != nullptr &&
-                grids.at(level).at( (row + 1) * gridCol + col - 1).get() != nullptr){
+            std::cout << "check SW " << std::endl;
+            if( grids.at(level).at(WEST).get() != nullptr &&
+                grids.at(level).at(SOUTH).get() != nullptr &&
+                grids.at(level).at(SOUTH_WEST).get() != nullptr){
                 //sendTile
+                std::cout << "new tile! " << std::endl;
+                this->addResult(data);
             }
         }
 
-        else if(col % 2 == 0 || row % 2 != 0){
+        else if(col % 2 == 0 && row % 2 != 0){
             //check NE
-            if( grids.at(level).at(row * gridCol + col + 1).get() != nullptr &&
-                grids.at(level).at( (row - 1) * gridCol + col).get() != nullptr &&
-                grids.at(level).at( (row - 1) * gridCol + col + 1).get() != nullptr){
+            std::cout << "check NE " << std::endl;
+            if( grids.at(level).at(NORTH).get() != nullptr &&
+                grids.at(level).at(NORTH_EAST).get() != nullptr &&
+                grids.at(level).at(EAST).get() != nullptr){
                 //sendTile
+                std::cout << "new tile! " << std::endl;
+                this->addResult(data);
             }
         }
 
-        else if(col % 2 != 0 || row % 2 != 0){
+        else if(col % 2 != 0 && row % 2 != 0){
             //check NW
-            if( grids.at(level).at(row * gridCol + col - 1).get() != nullptr &&
-                grids.at(level).at( (row - 1) * gridCol + col).get() != nullptr &&
-                grids.at(level).at( (row - 1) * gridCol + col - 1).get() != nullptr){
+            std::cout << "check NW " << std::endl;
+            if( grids.at(level).at(NORTH_WEST).get() != nullptr &&
+                grids.at(level).at(NORTH).get() != nullptr &&
+                grids.at(level).at(WEST).get() != nullptr){
                 //sendTile
+                std::cout << "new tile! " << std::endl;
+                this->addResult(data);
             }
         }
 
