@@ -11,7 +11,7 @@
 #include "../data/FakeTile.h"
 #include "../rules/MatrixMemoryRule.h"
 
-class CreateTileTask : public htgs::ITask<TileRequest<uint32_t>, htgs::MemoryData<fi::View<uint32_t>> > {
+class CreateTileTask : public htgs::ITask<TileRequest<uint32_t>, Tile<uint32_t> > {
 
 
 public:
@@ -21,47 +21,43 @@ public:
         auto block = data->getBlock();
 
         uint32_t level = 0;
-        auto tile = new FakeTile<uint32_t>(0,0,0);
+        Tile<uint32_t> *tile = nullptr;
         htgs::m_data_t<fi::View<uint32_t>> t ;
 
         switch (block.size()){
             //bottom right single block
             case 1:
                 //downsample and send new tile
-                level = block[0]->get()->getPyramidLevel();
-                tile = new FakeTile<uint32_t>(1024, 1024,level+1);
-                t = this->getMemory<fi::View<uint32_t>>("PYRAMID_TILE", new MatrixMemoryRule(1));
-                this->addResult(t.get());
+                level = block[0]->getLevel();
+                tile = new Tile<uint32_t>(0,0,level+1, nullptr);
+                this->addResult(tile);
                 break;
             //bottom horizontal block
             case 2:
                 //blend resize and downsample and send new tile
-                level = block[0]->get()->getPyramidLevel();
-                tile = new FakeTile<uint32_t>(1024, 1024,level+1);
-                t = this->getMemory<fi::View<uint32_t>>("PYRAMID_TILE", new MatrixMemoryRule(1));
-                this->addResult(t);
+                level = block[0]->getLevel();
+                tile = new Tile<uint32_t>(0,0,level+1, nullptr);
+                this->addResult(tile);
                 break;
             //right vertical block
             case 3:
                 //blend resize and downsample and send new tile
-                level = block[0]->get()->getPyramidLevel();
-                tile = new FakeTile<uint32_t>(1024, 1024,level+1);
-                t = this->getMemory<fi::View<uint32_t>>("PYRAMID_TILE", new MatrixMemoryRule(1));
-                this->addResult(t);
+                level = block[0]->getLevel();
+                tile = new Tile<uint32_t>(0,0,level+1, nullptr);
+                this->addResult(tile);
                 break;
             //regular block
             case 4:
                 //blend resize and downsample and send new tile
-                level = block[0]->get()->getPyramidLevel();
-                tile = new FakeTile<uint32_t>(1024, 1024,level+1);
-                t = this->getMemory<fi::View<uint32_t>>("PYRAMID_TILE", new MatrixMemoryRule(1));
-                this->addResult(t);
+                level = block[0]->getLevel();
+                tile = new Tile<uint32_t>(0,0,level+1, nullptr);
+                this->addResult(tile);
                 break;
         }
     }
 
 
-    ITask<TileRequest<uint32_t>, htgs::MemoryData<fi::View<uint32_t>>> *copy() override {
+    htgs::ITask<TileRequest<uint32_t>, Tile<uint32_t> > *copy() override {
         return new CreateTileTask();
     }
 

@@ -7,19 +7,20 @@
 
 #include <htgs/api/IData.hpp>
 #include <FastImage/api/FastImage.h>
+#include "./Tile.h"
 
 template <class Type>
 class TileRequest : public htgs::IData {
 
 public:
-    TileRequest(const std::vector<std::shared_ptr<htgs::MemoryData<fi::View<Type>>>> &block) : block(block) {}
+    TileRequest(const std::vector<std::shared_ptr<Tile<Type>>> &block) : block(block) {}
 
-    const std::vector<std::shared_ptr<htgs::MemoryData<fi::View<Type>>>> &getBlock() const {
+    const std::vector<std::shared_ptr<Tile<Type>>> &getBlock() const {
         return block;
     }
 
 private:
-    std::vector<std::shared_ptr<htgs::MemoryData<fi::View<Type>>>> block;
+    std::vector<std::shared_ptr<Tile<Type>>> block;
 
 
 };

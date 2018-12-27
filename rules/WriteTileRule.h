@@ -7,15 +7,15 @@
 
 #include <cstdint>
 #include <FastImage/api/FastImage.h>
-#include "../data/TileRequest.h"
+#include "../data/Tile.h"
 
-class WriteTileRule : public htgs::IRule<htgs::MemoryData<fi::View<uint32_t>>,htgs::MemoryData<fi::View<uint32_t>>> {
+class WriteTileRule : public htgs::IRule< Tile<uint32_t>, Tile<uint32_t>> {
 public:
     WriteTileRule(uint32_t level = 0) : level(level) {};
 
-    void applyRule(std::shared_ptr<MemoryData<fi::View<uint32_t>>> data, size_t pipelineId) override {
-        if(data->get()->getPyramidLevel()   >= level) {
-                    this->addResult(data);
+    void applyRule(std::shared_ptr<Tile<uint32_t>> data, size_t pipelineId) override {
+        if(data->getLevel() >= level) {
+            this->addResult(data);
         }
     }
 

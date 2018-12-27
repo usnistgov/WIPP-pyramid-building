@@ -8,6 +8,7 @@
 #include "tasks/CreateTileTask.h"
 #include "utils/MatrixAllocator.h"
 #include "utils/FakeTileAllocator.h"
+#include "data/Tile.h"
 
 int main() {
 
@@ -37,9 +38,9 @@ int main() {
 
     std::cout << numTileRow << "," << numTileCol << std::endl;
 
-    auto graph = new htgs::TaskGraphConf<htgs::MemoryData<fi::View<uint32_t>>, htgs::VoidData >();
+    auto graph = new htgs::TaskGraphConf<Tile<uint32_t>, htgs::VoidData >();
 
-    auto bookeeper = new htgs::Bookkeeper< htgs::MemoryData<fi::View<uint32_t>> >();
+    auto bookeeper = new htgs::Bookkeeper<Tile<uint32_t>>();
 
     auto writeRule = new WriteTileRule();
 
@@ -52,8 +53,8 @@ int main() {
     graph->addEdge(createTileTask,bookeeper);
     graph->addRuleEdge(bookeeper, writeRule, writeTask);
     graph->addRuleEdge(bookeeper, pyramidRule, createTileTask);
-    auto matAlloc = new FakeTileAllocator();
-    graph->addMemoryManagerEdge("PYRAMID_TILE", createTileTask, matAlloc, 4, htgs::MMType::Static);
+//    auto matAlloc = new FakeTileAllocator();
+//    graph->addMemoryManagerEdge("PYRAMID_TILE", createTileTask, matAlloc, 4, htgs::MMType::Static);
 
     htgs::TaskGraphRuntime *runtime = new htgs::TaskGraphRuntime(graph);
 
@@ -98,12 +99,13 @@ int main() {
     while(fi->isGraphProcessingTiles()) {
         auto view = fi->getAvailableViewBlocking();
         if(view != nullptr){
-            view->get()->getTileHeight();
-            view->get()->getTileWidth();
-            data = view->get()->getData();
+      //      view->get()->getTileHeight();
+    //        view->get()->getTileWidth();
+  //          data = view->get()->getData();
 //            std::cout << data[0] << std::endl;
-            // view->releaseMemory();
-            graph->produceData(view);
+            auto tile = new Tile<uint32_t>(view);
+            graph->produceData(tile);
+
 
         }
     }

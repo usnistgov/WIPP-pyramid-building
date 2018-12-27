@@ -11,4 +11,4 @@ include_directories(${HTGS_INCLUDE_DIR})
 include_directories(${FastImage_INCLUDE_DIR})
 link_libraries(${FastImage_LIBRARIES})
 
-add_executable(pyramidBuilding main.cpp Helper.cpp Helper.h rules/WriteTileRule.h data/TileRequest.h tasks/WriteTileTask.h rules/PyramidRule.h tasks/CreateTileTask.h data/Block.h data/FakeTile.h utils/MatrixAllocator.h rules/MatrixMemoryRule.h utils/FakeTileAllocator.h)
+add_executable(pyramidBuilding main.cpp Helper.cpp Helper.h rules/WriteTileRule.h data/TileRequest.h tasks/WriteTileTask.h rules/PyramidRule.h tasks/CreateTileTask.h data/FakeTile.h utils/MatrixAllocator.h rules/MatrixMemoryRule.h utils/FakeTileAllocator.h data/Tile.h)

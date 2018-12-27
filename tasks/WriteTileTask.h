@@ -7,16 +7,19 @@
 
 #include <htgs/api/ITask.hpp>
 #include "FastImage/api/FastImage.h"
+#include "../data/Tile.h"
 
-class WriteTileTask : public htgs::ITask<htgs::MemoryData<fi::View<uint32_t>>,htgs::VoidData> {
+class WriteTileTask : public htgs::ITask<Tile<uint32_t>,htgs::VoidData> {
 public:
-    void executeTask(std::shared_ptr<htgs::MemoryData<fi::View<uint32_t>>> data) override {
+
+    void executeTask(std::shared_ptr<Tile<uint32_t>> data) override {
 
      //   std::cout << "write tile : " << data->get()->getRow() << "," << data->get()->getCol() << std::endl;
-        data->releaseMemory();
+    // find out how to call the destructr    ~data();
+       data.reset();
     }
 
-    ITask<htgs::MemoryData<fi::View<uint32_t>>, VoidData> *copy() override {
+    ITask<Tile<uint32_t>, VoidData> *copy() override {
         return new WriteTileTask();
     }
 
