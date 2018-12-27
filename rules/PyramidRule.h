@@ -8,8 +8,9 @@
 #include <FastImage/api/FastImage.h>
 #include <math.h>
 #include <array>
+#include "../data/TileRequest.h"
 
-class PyramidRule : public htgs::IRule<htgs::MemoryData<fi::View<uint32_t>>,htgs::MemoryData<fi::View<uint32_t>>> {
+class PyramidRule : public htgs::IRule<htgs::MemoryData<fi::View<uint32_t>>, TileRequest<uint32_t>> {
 
 public:
     PyramidRule(uint32_t numTileCol, uint32_t numTileRow) :  numTileCol(numTileCol), numTileRow(numTileRow) {
@@ -73,7 +74,8 @@ public:
         if(col >= gridCol -1 && row >= gridRow -1 && col % 2 ==0 && row % 2 ==0) {
             std::cout << "corner case : block size 1 " << std::endl;
             //sendTile
-            this->addResult(data);
+            std::vector<std::shared_ptr<htgs::MemoryData<fi::View<uint32_t>>>> block{data};
+            this->addResult(new TileRequest<uint32_t>(block));
             return;
         }
 
@@ -81,11 +83,13 @@ public:
             std::cout << "corner case : column block size 2 " << std::endl;
             if(row % 2 == 0 && grids.at(level).at(SOUTH).get() != nullptr) {
                 //send 2 tiles
-                this->addResult(data);
+                std::vector<std::shared_ptr<htgs::MemoryData<fi::View<uint32_t>>>> block{ data, nullptr, grids.at(level).at(SOUTH) };
+                this->addResult(new TileRequest<uint32_t>(block));
             }
             else if (row % 2 != 0 && grids.at(level).at(NORTH).get() != nullptr) {
                 //send 2 tiles
-                this->addResult(data);
+                std::vector<std::shared_ptr<htgs::MemoryData<fi::View<uint32_t>>>> block{ grids.at(level).at(NORTH), nullptr, data };
+                this->addResult(new TileRequest<uint32_t>(block));
             }
             return;
         }
@@ -94,11 +98,13 @@ public:
             std::cout << "corner case : row block size 2 " << std::endl;
             if(col % 2 == 0 && grids.at(level).at(EAST).get() != nullptr) {
                 //send 2 tiles
-                this->addResult(data);
+                std::vector<std::shared_ptr<htgs::MemoryData<fi::View<uint32_t>>>> block{ data, grids.at(level).at(EAST) };
+                this->addResult(new TileRequest<uint32_t>(block));
             }
             else if (col % 2 != 0 && grids.at(level).at(WEST).get() != nullptr ) {
                 //send 2 tiles
-                this->addResult(data);
+                std::vector<std::shared_ptr<htgs::MemoryData<fi::View<uint32_t>>>> block{ grids.at(level).at(WEST), data };
+                this->addResult(new TileRequest<uint32_t>(block));
             }
             return;
         }
@@ -110,9 +116,9 @@ public:
                 grids.at(level).at(SOUTH).get() != nullptr &&
                 grids.at(level).at(SOUTH_EAST).get() != nullptr){
                 //sendTile
-                //std::shared_ptr<MemoryData<fi::View<uint32_t>>> t[4] = {data, data, data, data};
                 std::cout << "new tile! " << std::endl;
-                this->addResult(data);
+                std::vector<std::shared_ptr<htgs::MemoryData<fi::View<uint32_t>>>> block{ data, grids.at(level).at(EAST), grids.at(level).at(SOUTH), grids.at(level).at(SOUTH_EAST)};
+                this->addResult(new TileRequest<uint32_t>(block));
             };
         }
 
@@ -124,7 +130,8 @@ public:
                 grids.at(level).at(SOUTH_WEST).get() != nullptr){
                 //sendTile
                 std::cout << "new tile! " << std::endl;
-                this->addResult(data);
+                std::vector<std::shared_ptr<htgs::MemoryData<fi::View<uint32_t>>>> block{ grids.at(level).at(WEST), data, grids.at(level).at(SOUTH_WEST), grids.at(level).at(SOUTH)};
+                this->addResult(new TileRequest<uint32_t>(block));
             }
         }
 
@@ -136,7 +143,8 @@ public:
                 grids.at(level).at(EAST).get() != nullptr){
                 //sendTile
                 std::cout << "new tile! " << std::endl;
-                this->addResult(data);
+                std::vector<std::shared_ptr<htgs::MemoryData<fi::View<uint32_t>>>> block{ grids.at(level).at(NORTH), grids.at(level).at(NORTH_EAST), data, grids.at(level).at(EAST)};
+                this->addResult(new TileRequest<uint32_t>(block));
             }
         }
 
@@ -148,7 +156,8 @@ public:
                 grids.at(level).at(WEST).get() != nullptr){
                 //sendTile
                 std::cout << "new tile! " << std::endl;
-                this->addResult(data);
+                std::vector<std::shared_ptr<htgs::MemoryData<fi::View<uint32_t>>>> block{ grids.at(level).at(NORTH_WEST), grids.at(level).at(NORTH), grids.at(level).at(WEST), data};
+                this->addResult(new TileRequest<uint32_t>(block));
             }
         }
 

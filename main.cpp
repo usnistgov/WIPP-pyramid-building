@@ -6,11 +6,13 @@
 #include "tasks/WriteTileTask.h"
 #include "rules/PyramidRule.h"
 #include "tasks/CreateTileTask.h"
+#include "utils/MatrixAllocator.h"
+#include "utils/FakeTileAllocator.h"
 
 int main() {
 
-    std::string pathImage = "/Users/gerardin/Documents/projects/pyramidio/pyramidio/src/test/resources/dataset2/images/tiled-pc/tiled_stitched_c01t020p1.ome.tif";
-    //std::string pathImage ="/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/tiledMaison.tiff";
+   // std::string pathImage = "/Users/gerardin/Documents/projects/pyramidio/pyramidio/src/test/resources/dataset2/images/tiled-pc/tiled_stitched_c01t020p1.ome.tif";
+    std::string pathImage ="/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/tiledMaison.tiff";
 //    std::string pathImage ="/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/circleTiled.tiff";
   //  std::string pathImage ="/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/tiled16_tracer.tiff";
     fi::ATileLoader<uint32_t> *tileLoader = nullptr;
@@ -47,8 +49,11 @@ int main() {
     auto createTileTask = new CreateTileTask();
 
     graph->setGraphConsumerTask(bookeeper);
+    graph->addEdge(createTileTask,bookeeper);
     graph->addRuleEdge(bookeeper, writeRule, writeTask);
     graph->addRuleEdge(bookeeper, pyramidRule, createTileTask);
+    auto matAlloc = new FakeTileAllocator();
+    graph->addMemoryManagerEdge("PYRAMID_TILE", createTileTask, matAlloc, 4, htgs::MMType::Static);
 
     htgs::TaskGraphRuntime *runtime = new htgs::TaskGraphRuntime(graph);
 
@@ -103,7 +108,7 @@ int main() {
         }
     }
 
-    graph->finishedProducingData();
+   // graph->finishedProducingData();
 
     delete fi;
 

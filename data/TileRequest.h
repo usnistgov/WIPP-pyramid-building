@@ -12,20 +12,14 @@ template <class Type>
 class TileRequest : public htgs::IData {
 
 public:
-    TileRequest(uint32_t level, const fi::View<Type> &view) : level(level), view(view) {}
+    TileRequest(const std::vector<std::shared_ptr<htgs::MemoryData<fi::View<Type>>>> &block) : block(block) {}
 
-    uint32_t getLevel() const {
-        return level;
-    }
-
-    const fi::View<Type> &getView() const {
-        return view;
+    const std::vector<std::shared_ptr<htgs::MemoryData<fi::View<Type>>>> &getBlock() const {
+        return block;
     }
 
 private:
-    uint32_t level;
-    fi::View<Type> view;
-
+    std::vector<std::shared_ptr<htgs::MemoryData<fi::View<Type>>>> block;
 
 
 };
