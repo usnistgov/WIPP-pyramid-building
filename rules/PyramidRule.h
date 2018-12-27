@@ -50,6 +50,11 @@ public:
         auto row = data->getRow();
         auto level = data->getLevel();
 
+
+        if(level == this->numLevel){
+            return;
+        }
+
         auto blockCol = floor(col / 2);
         auto blockRow = floor(row / 2);
 
@@ -68,7 +73,6 @@ public:
         auto NORTH_EAST = (row -1) * gridCol + col + 1;
         auto SOUTH_WEST = (row +1) * gridCol + col - 1;
         auto SOUTH_EAST = (row +1) * gridCol + col + 1;
-
 
         grids.at(level).at(row * gridCol + col) = data;
 

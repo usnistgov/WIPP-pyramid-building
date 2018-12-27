@@ -14,9 +14,14 @@ public:
 
     void executeTask(std::shared_ptr<Tile<uint32_t>> data) override {
 
-     //   std::cout << "write tile : " << data->get()->getRow() << "," << data->get()->getCol() << std::endl;
-    // find out how to call the destructr    ~data();
-       data.reset();
+
+        //   std::cout << "write tile : " << data->get()->getRow() << "," << data->get()->getCol() << std::endl;
+        // find out how to call the destructr    ~data();
+        printf( "ref count for tile : %d %d %d :: %d \n", data->getRow() , data->getCol() , data->getLevel() , data.use_count());
+
+        if(data->getLevel() == 0){
+            data->getOrigin()->releaseMemory();
+        }
     }
 
     ITask<Tile<uint32_t>, VoidData> *copy() override {

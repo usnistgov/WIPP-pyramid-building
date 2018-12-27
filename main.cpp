@@ -13,8 +13,8 @@
 int main() {
 
    // std::string pathImage = "/Users/gerardin/Documents/projects/pyramidio/pyramidio/src/test/resources/dataset2/images/tiled-pc/tiled_stitched_c01t020p1.ome.tif";
-    std::string pathImage ="/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/tiledMaison.tiff";
-//    std::string pathImage ="/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/circleTiled.tiff";
+   // std::string pathImage ="/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/tiledMaison.tiff";
+    std::string pathImage ="/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/circleTiled.tiff";
   //  std::string pathImage ="/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/tiled16_tracer.tiff";
     fi::ATileLoader<uint32_t> *tileLoader = nullptr;
 
@@ -110,12 +110,13 @@ int main() {
         }
     }
 
-   // graph->finishedProducingData();
+    graph->finishedProducingData();
+
+
+
+    runtime->executeAndWaitForRuntime();
 
     delete fi;
-
-    runtime->waitForRuntime();
-
     delete runtime;
 
 

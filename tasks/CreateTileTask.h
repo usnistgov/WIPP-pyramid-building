@@ -20,7 +20,11 @@ public:
     void executeTask(std::shared_ptr<TileRequest<uint32_t>> data) override {
         auto block = data->getBlock();
 
-        uint32_t level = 0;
+
+        uint32_t level = block[0]->getLevel();
+        uint32_t row = floor(block[0]->getRow() / 2);
+        uint32_t col = floor(block[0]->getCol() /2);
+
         Tile<uint32_t> *tile = nullptr;
         htgs::m_data_t<fi::View<uint32_t>> t ;
 
@@ -28,29 +32,28 @@ public:
             //bottom right single block
             case 1:
                 //downsample and send new tile
-                level = block[0]->getLevel();
-                tile = new Tile<uint32_t>(0,0,level+1, nullptr);
+                tile = new Tile<uint32_t>(row,col,level+1, nullptr);
                 this->addResult(tile);
                 break;
             //bottom horizontal block
             case 2:
                 //blend resize and downsample and send new tile
                 level = block[0]->getLevel();
-                tile = new Tile<uint32_t>(0,0,level+1, nullptr);
+                tile = new Tile<uint32_t>(row,col,level+1, nullptr);
                 this->addResult(tile);
                 break;
             //right vertical block
             case 3:
                 //blend resize and downsample and send new tile
                 level = block[0]->getLevel();
-                tile = new Tile<uint32_t>(0,0,level+1, nullptr);
+                tile = new Tile<uint32_t>(row,col,level+1, nullptr);
                 this->addResult(tile);
                 break;
             //regular block
             case 4:
                 //blend resize and downsample and send new tile
                 level = block[0]->getLevel();
-                tile = new Tile<uint32_t>(0,0,level+1, nullptr);
+                tile = new Tile<uint32_t>(row,col,level+1, nullptr);
                 this->addResult(tile);
                 break;
         }

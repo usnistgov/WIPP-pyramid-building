@@ -17,6 +17,7 @@ public:
         if(data->getLevel() >= level) {
             this->addResult(data);
         }
+        data.reset();
     }
 
 private:
