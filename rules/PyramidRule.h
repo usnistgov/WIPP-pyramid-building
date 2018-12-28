@@ -51,19 +51,34 @@ public:
         auto level = data->getLevel();
 
 
+
+        if(level > 0) {
+            auto l = grids[level - 1];
+            auto gridCol = levelGridSizes[level-1][0];
+            auto gridRow = levelGridSizes[level-1][1];
+
+            size_t i1 = 2 *row * gridCol + 2 * col;
+            size_t i2 = 2* row * gridCol + 2 * col + 1;
+            size_t i3 = (2 *row + 1) * gridCol + 2 * col;
+            size_t i4 = (2 * row + 1) * gridCol + 2 * col + 1;
+            removeFromCache(l, i1);
+            removeFromCache(l, i2);
+            removeFromCache(l, i3);
+            removeFromCache(l, i4);
+        }
+
         if(level == this->numLevel){
             return;
         }
 
-        auto blockCol = floor(col / 2);
-        auto blockRow = floor(row / 2);
-
-        std::cout << "apply pyramid rule" << std::endl;
-        std::cout << "tile : (" << col << "," << row << ") ; block (" << blockCol << "," << blockRow << ")"  << std::endl;
-        std::cout << "level: " << level << " ; grid size: (" << levelGridSizes[level][0] << "," <<  levelGridSizes[level][1] << ")" << std::endl;
+        std::ostringstream oss;
+        oss << "applying pyramid rule \n" << "tile : (" << row << "," << col << ")" <<
+                                          " - grid size at level: " << level << " (" << levelGridSizes[level][0] << "," <<  levelGridSizes[level][1] << ")";
+        std::cout  << oss.str() << std::endl;
 
         auto gridCol = levelGridSizes[level][0];
         auto gridRow = levelGridSizes[level][1];
+
 
         auto SOUTH = (row + 1) * gridCol + col;
         auto NORTH = (row - 1) * gridCol + col;
@@ -194,6 +209,17 @@ public:
 
 
 private:
+
+    void removeFromCache(std::vector<std::shared_ptr<Tile<uint32_t>>> l, size_t index){
+        if ((index >= 0 && index < l.size()) && (l[index] != NULL)){
+            auto tile = l[index].get();
+            if(tile->getLevel() == 0){
+                tile->getOrigin()->releaseMemory();
+            }
+            delete l[index].get();
+        }
+    }
+
     uint32_t numTileCol;
     uint32_t numTileRow;
     uint32_t numLevel;

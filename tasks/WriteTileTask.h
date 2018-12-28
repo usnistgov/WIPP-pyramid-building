@@ -17,16 +17,21 @@ public:
 
         //   std::cout << "write tile : " << data->get()->getRow() << "," << data->get()->getCol() << std::endl;
         // find out how to call the destructr    ~data();
-        printf( "ref count for tile : %d %d %d :: %d \n", data->getRow() , data->getCol() , data->getLevel() , data.use_count());
+      //  printf( "ref count for tile : %d %d %d :: %d \n", data->getRow() , data->getCol() , data->getLevel() , data.use_count());
 
-        if(data->getLevel() == 0){
-            data->getOrigin()->releaseMemory();
-        }
+//        if(data->getLevel() == 0){
+//            data->getOrigin()->releaseMemory();
+//            std::ostringstream oss;
+//            oss << "count of tile release : " << ++count;
+//            std::cout  << oss.str() << std::endl;
+//        }
     }
 
     ITask<Tile<uint32_t>, VoidData> *copy() override {
         return new WriteTileTask();
     }
+
+    uint32_t count;
 
 };
 

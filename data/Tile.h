@@ -59,6 +59,7 @@ private :
     UserType *_data;
     htgs::m_data_t<fi::View<UserType>> _origin;
 
+
 };
 
 

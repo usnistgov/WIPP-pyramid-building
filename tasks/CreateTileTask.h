@@ -20,6 +20,10 @@ public:
     void executeTask(std::shared_ptr<TileRequest<uint32_t>> data) override {
         auto block = data->getBlock();
 
+        std::cout << "Create Tile Task - " << *data.get() << std::endl;
+
+
+
 
         uint32_t level = block[0]->getLevel();
         uint32_t row = floor(block[0]->getRow() / 2);

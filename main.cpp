@@ -105,8 +105,6 @@ int main() {
 //            std::cout << data[0] << std::endl;
             auto tile = new Tile<uint32_t>(view);
             graph->produceData(tile);
-
-
         }
     }
 
