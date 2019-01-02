@@ -19,6 +19,9 @@ public:
     Fov(const std::string &path, uint32_t x, uint32_t y, const cv::Rect &tileOverlap) : path(path), x(x), y(y),
                                                                                         tileOverlap(tileOverlap) {}
 
+    Fov(const std::string &path, uint32_t x, uint32_t y, const cv::Rect &tileOverlap,
+        const cv::Rect &globalCoordinatesTileOverlap) : path(path), x(x), y(y), tileOverlap(tileOverlap),
+                                                        globalCoordinatesTileOverlap(globalCoordinatesTileOverlap) {}
 
 private:
 
@@ -26,6 +29,7 @@ private:
     uint32_t x;
     uint32_t y;
     cv::Rect tileOverlap;
+    cv::Rect globalCoordinatesTileOverlap;
 
 };
 

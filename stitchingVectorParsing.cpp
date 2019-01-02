@@ -26,7 +26,7 @@ int main() {
 
     std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/images/";
 
-    std::map<std::pair<uint32_t,uint32_t> , std::vector<cv::Rect>> grid;
+    std::map<std::pair<uint32_t,uint32_t> , std::vector<Fov*>> grid;
 
     //full image dim
     uint32_t imageWidth = 0;
@@ -55,6 +55,8 @@ int main() {
 
 
     while (std::getline(infile, line)) {
+
+        //parse stitching vector
         std::istringstream iss(line);
         uint32_t x,y;
         std::string file;
@@ -80,6 +82,8 @@ int main() {
             }
         }
 
+        //we check the first FOV to retrieve FOV's width and height.
+        //NOTE : we expect all FOVs to have the same size
         if(fovWidth == 0 || fovHeight == 0){
             TIFF *tiff = TIFFOpen((directory+file).c_str(), "r");
             TIFFGetField(tiff,TIFFTAG_IMAGEWIDTH,&fovWidth);
@@ -88,6 +92,7 @@ int main() {
 
         cv::Rect fov = cv::Rect(x, y, fovWidth, fovHeight);
 
+        //Find overlap between patial FOVs and each pyramid tile.
         uint32_t startX, startY, endX, endY = 0;
         startX = x / tileSize;
         startY =  y / tileSize;
@@ -99,11 +104,13 @@ int main() {
 
         for(uint32_t i = startX; i <= endX ; i++) {
             for(uint32_t j = startY; j <= endY ; j++) {
-                cv::Rect tile = cv::Rect(i * tileSize, j * tileSize, tileSize, tileSize);
-                cv::Rect intersection = tile & fov;
-                relativeX = intersection.x - i*tileSize;
+                cv::Rect tile = cv::Rect(i * tileSize, j * tileSize, tileSize, tileSize); //tile in the global coordinates
+                cv::Rect intersection = tile & fov; //intersection with fov in the global coordinates
+                relativeX = intersection.x - i*tileSize; //calculate the local coordinates
                 relativeY = intersection.y - j*tileSize;
                 cv::Rect tileFOV = cv::Rect(relativeX, relativeY, intersection.width, intersection.height);
+
+                Fov *fov3 = new Fov(file, x,y, tileFOV, intersection);
 
                 //add to a list for a map entry at key (i,j)
                 //FOr now we add to a vector;
@@ -114,52 +121,19 @@ int main() {
                 auto it = grid.find(index);
 
                 if(it != grid.end()) {
-                    it->second.push_back(tileFOV);
+                    it->second.push_back(fov3);
                 }
                 else {
-                    std::vector<cv::Rect> tileFovs({tileFOV});
+                    std::vector<Fov*> tileFovs({fov3});
                     grid.insert(std::make_pair(index, tileFovs));
                 }
             }
         }
-
-
+        
 
         Fov *fov2 = new Fov(file, x,y);
         fovs.push_back(fov2);
     }
 
     std::cout << "done" << std::endl;
-
-    //read the first tile to get the tile width and height
-
-    //for each fov divide by grid size to figure in which tile it appears.
-    //add subregion to each tile.
-
-    //calculate image width and height (accumulating in the loop).
-
-    //calculate grid size
-
-
-
-
-//    Mat image;
-//    image = imread(, CV_LOAD_IMAGE_ANYDEPTH);   // Read the file
-//
-//    if(! image.data )                              // Check for invalid input
-//    {
-//        cout <<  "Could not open or find the image" << std::endl ;
-//        return -1;
-//    }
-//
-//    namedWindow( "Display window", WINDOW_AUTOSIZE );// Create a window for display.
-//    imshow( "Display window", image );                   // Show our image inside it.
-//
-//    waitKey(0);                                          // Wait for a keystroke in the window
-//    return 0;
-
-
-
-
-// process pair (a,b)
 }
