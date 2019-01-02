@@ -14,9 +14,11 @@ public:
     WriteTileRule(uint32_t level = 0) : level(level) {};
 
     void applyRule(std::shared_ptr<Tile<uint32_t>> data, size_t pipelineId) override {
+
         if(data->getLevel() >= level) {
             this->addResult(data);
         }
+
      //   data.reset();
     }
 

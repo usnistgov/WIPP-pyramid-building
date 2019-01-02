@@ -9,6 +9,7 @@
 #include "utils/MatrixAllocator.h"
 #include "utils/FakeTileAllocator.h"
 #include "data/Tile.h"
+#include <htgs/log/TaskGraphSignalHandler.hpp>
 
 int main() {
 
@@ -16,6 +17,10 @@ int main() {
    // std::string pathImage ="/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/tiledMaison.tiff";
     std::string pathImage ="/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/circleTiled.tiff";
   //  std::string pathImage ="/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/tiled16_tracer.tiff";
+
+    std::string tiffOut ="/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/tiffOut.tiff";
+
+
     fi::ATileLoader<uint32_t> *tileLoader = nullptr;
 
     auto extension = Helper::getExtension(pathImage);
@@ -38,7 +43,7 @@ int main() {
 
     std::cout << numTileRow << "," << numTileCol << std::endl;
 
-    auto graph = new htgs::TaskGraphConf<Tile<uint32_t>, htgs::VoidData >();
+    auto graph = new htgs::TaskGraphConf<Tile<uint32_t>, Tile<uint32_t> >();
 
     auto bookeeper = new htgs::Bookkeeper<Tile<uint32_t>>();
 
@@ -46,17 +51,21 @@ int main() {
 
     auto pyramidRule = new PyramidRule(numTileCol,numTileRow);
 
-    auto writeTask = new WriteTileTask();
+    auto writeTask = new WriteTileTask(tiffOut.c_str() , fi->getImageWidth(), fi->getImageHeight(), fi->getTileWidth(), fi->getTileHeight());
     auto createTileTask = new CreateTileTask();
 
     graph->setGraphConsumerTask(bookeeper);
     graph->addEdge(createTileTask,bookeeper);
     graph->addRuleEdge(bookeeper, writeRule, writeTask);
     graph->addRuleEdge(bookeeper, pyramidRule, createTileTask);
+    graph->addGraphProducerTask(writeTask);
 //    auto matAlloc = new FakeTileAllocator();
 //    graph->addMemoryManagerEdge("PYRAMID_TILE", createTileTask, matAlloc, 4, htgs::MMType::Static);
 
     htgs::TaskGraphRuntime *runtime = new htgs::TaskGraphRuntime(graph);
+
+    htgs::TaskGraphSignalHandler::registerTaskGraph(graph);
+    htgs::TaskGraphSignalHandler::registerSignal(SIGTERM   );
 
     runtime->executeRuntime();
 
@@ -90,7 +99,11 @@ int main() {
         }
     }
 
+
     fi->finishedRequestingTiles();
+
+
+
 
     int32_t tileWidth = 0;
     int32_t tileHeight = 0;
@@ -106,18 +119,24 @@ int main() {
             auto tile = new Tile<uint32_t>(view);
             graph->produceData(tile);
         }
+
     }
 
     graph->finishedProducingData();
 
+    while(!graph->isOutputTerminated()){
+        auto r = graph->consumeData();
+        if(r == nullptr){
+            break;
+        }
+        std::cout << r->getLevel() << ": " << r->getRow() << "," << r->getCol() << std::endl;
+    }
 
-
-    runtime->executeAndWaitForRuntime();
+    std::cout << "we should be done" << std::endl;
+    runtime->waitForRuntime();
 
     delete fi;
     delete runtime;
 
-
-    return 0;
 }
 

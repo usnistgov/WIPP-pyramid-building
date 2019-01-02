@@ -52,23 +52,26 @@ public:
 
 
 
-        if(level > 0) {
-            auto l = grids[level - 1];
-            auto gridCol = levelGridSizes[level-1][0];
-            auto gridRow = levelGridSizes[level-1][1];
+//        if(level > 0) {
+//            auto l = grids[level - 1];
+//            auto gridCol = levelGridSizes[level-1][0];
+//            auto gridRow = levelGridSizes[level-1][1];
+//
+//            size_t i1 = 2 *row * gridCol + 2 * col;
+//            size_t i2 = 2* row * gridCol + 2 * col + 1;
+//            size_t i3 = (2 *row + 1) * gridCol + 2 * col;
+//            size_t i4 = (2 * row + 1) * gridCol + 2 * col + 1;
+//            removeFromCache(l, i1);
+//            removeFromCache(l, i2);
+//            removeFromCache(l, i3);
+//            removeFromCache(l, i4);
+//        }
 
-            size_t i1 = 2 *row * gridCol + 2 * col;
-            size_t i2 = 2* row * gridCol + 2 * col + 1;
-            size_t i3 = (2 *row + 1) * gridCol + 2 * col;
-            size_t i4 = (2 * row + 1) * gridCol + 2 * col + 1;
-            removeFromCache(l, i1);
-            removeFromCache(l, i2);
-            removeFromCache(l, i3);
-            removeFromCache(l, i4);
-        }
-
-        if(level == this->numLevel){
+        if(level == this->numLevel -1){
+            this->shutdownRule(pipelineId);
+            this->addResult(nullptr);
             return;
+       //         return;
         }
 
         std::ostringstream oss;

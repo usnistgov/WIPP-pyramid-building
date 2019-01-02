@@ -28,6 +28,19 @@ public:
         blockType = initBlockType();
     }
 
+    BlockType initBlockType() {
+        switch (block.size()) {
+            case 1:
+                return BlockType::Single;
+            case 2:
+                return BlockType::Horizontal;
+            case 3:
+                return BlockType::Vertical;
+            case 4:
+                return BlockType::Full;
+        }
+    }
+
     const std::vector<std::shared_ptr<Tile<Type>>> &getBlock() const {
         return block;
     }
@@ -41,24 +54,13 @@ public:
         // auto info = printf("Block Info - Level: %d. Index: (%d , %d). Type: %s" , block.level, block.row, block.col, blockTypeToString(block.blockType));
 //        auto info = std::string("Block - Level: ") + block.level + " Index: (" + block.row + "," + block.col + ")" + "Type: " +  blockTypeToString(block.blockType);
 //        os << info << std:endl;
-        os << "Block - Level: " << block.level << " Index: (" << block.row << "," << block.col << ")" << "Type: " << blockTypeToString(block.blockType) << std::endl;
+        os << "Tile - Level: " << block.level + 1 << " from: Block - Level: " << block.level << " Index: (" << block.row << "," << block.col << ")" << "Type: " << blockTypeToString(block.blockType) << std::endl;
         return os;
     }
 
 private:
 
-    BlockType initBlockType() {
-        switch (block.size()) {
-            case 1:
-                return BlockType::Single;
-            case 2:
-                return BlockType::Horizontal;
-            case 3:
-                return BlockType::Vertical;
-            case 4:
-                return BlockType::Full;
-        }
-    }
+
 
     std::vector<std::shared_ptr<Tile<Type>>> block;
     uint32_t row;
