@@ -155,6 +155,11 @@ public:
 
                     assert(overlapInTileRef.width == overlapInFovRef.width);
                     assert(overlapInTileRef.height == overlapInFovRef.height);
+                    assert(overlapInTileRef.x >= 0);
+                    assert(overlapInTileRef.y >= 0);
+                    assert(overlapInFovRef.x >= 0);
+                    assert(overlapInFovRef.y >= 0);
+
 
                     //add to a list for a map entry at key (i,j)
                     //For now we add to a vector;

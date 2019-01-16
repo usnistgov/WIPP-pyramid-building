@@ -79,7 +79,9 @@ int main() {
                 endRow = ( overlapFov.y + overlapFov.height ) / tileHeight;
 
                 //nb of tiles to load
-                auto nbOfTileToLoad = (endCol - startCol) * (endRow - startRow);
+                //TODO CHANGE BACK AFTER DEBUGGING
+               // auto nbOfTileToLoad = (endCol - startCol) * (endRow - startRow);
+                auto nbOfTileToLoad = 1;
 
                 auto *fi = new fi::FastImage<uint32_t>(tileLoader, 0);
                 fi->getFastImageOptions()->setNumberOfViewParallel(nbOfTileToLoad);
@@ -88,7 +90,7 @@ int main() {
                 //load all tiles for this FOV.
                 for (uint32_t j=startCol; j <= endCol; ++j){
                     for(uint32_t i=startRow; i <= endRow; i++ ){
-                        fi->requestTile(j,i,false,0);
+                        fi->requestTile(i,j,false,0);
                     }
                 }
                 fi->finishedRequestingTiles();
@@ -97,9 +99,10 @@ int main() {
 
                 while(fi->isGraphProcessingTiles()) {
 
-                    auto view = fi->getAvailableViewBlocking()->get();
+                    auto pview = fi->getAvailableViewBlocking();
 
-                    if(view != nullptr){
+                    if(pview != nullptr){
+                        auto view = pview->get();
                         //tile origin in FOV global coordinates
                         uint32_t tileOriginX = view->getGlobalXOffset();
                         uint32_t tileOriginY = view->getGlobalYOffset();
@@ -137,6 +140,7 @@ int main() {
                                 tile[ index1D ] = val;
                             }
                         } //DONE copying the relevant portion of one tile of the FOV in this pyramid tile
+                        pview->releaseMemory();
                     }
                 } //DONE copying the relevant portion of the FOV in this pyramid tile
 
