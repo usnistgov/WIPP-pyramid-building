@@ -120,15 +120,10 @@ public:
 
             //Find out across how many pyramid tiles span the current FOV
             uint32_t startCol, startRow, endCol, endRow = 0;
-            startCol = fovGlobalX / (tileSize -1);
-            startRow =  fovGlobalY / (tileSize -1);
-            endCol = (fovGlobalX + fovWidth) / (tileSize -1);
-            endRow = (fovGlobalY + fovHeight) / (tileSize -1);
-
-            uint32_t relativeX;
-            uint32_t relativeY;
-            uint32_t fovRelativeX;
-            uint32_t fovRelativeY;
+            startCol = fovGlobalX / tileSize;
+            startRow =  fovGlobalY / tileSize;
+            endCol =  (fovGlobalX + fovWidth) / tileSize;
+            endRow = (fovGlobalY + fovHeight) / tileSize;
 
             //compute overlap between an FOV and each pyramid tile.
             for(uint32_t i = startCol; i <= endCol ; i++) {
@@ -137,6 +132,16 @@ public:
 
                     //global coordinates
                     cv::Rect intersection = tile & fov;
+
+                    //TODO CHECK if this is the correct solution
+                    if(intersection.width == 0 || intersection.height == 0){
+                        continue;
+                    }
+
+                    int32_t relativeX = 0;
+                    int32_t relativeY = 0;
+                    int32_t fovRelativeX = 0;
+                    int32_t fovRelativeY = 0;
 
                     //coordinates relative to the tile origin
                     relativeX = intersection.x - i*tileSize;
