@@ -17,16 +17,15 @@
 #include <assert.h>
 
 /**
- * The algorithm to generate the lowest level of the pyramid.
+ * This algorithm generates the lowest level of the pyramid.
  * Each pyramid tile is composed of a set of partial FOVs.
- * FOVs are tiled-tiff. Each ROI of each tile is processed and copied back in the pyramid tile.
+ * FOVs are tiled-tiff. Each ROI of each tile is processed asynchronously and copied back in the pyramid tile.
  * The algorithm is parallelized at the FOV tile-level using FastImage.
- * @return segmentation fault for now :)
+ * @return a map that associated 2D coordinates to a tile.
  */
 
 int main() {
     std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/stitching_vector/img-global-positions-1.txt";
-
     std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/tiled-images/";
 
     //pyramid
@@ -40,17 +39,20 @@ int main() {
     auto tileWidth = reader->getFovTileWidth();
     auto tileHeight = reader->getFovTileHeight();
 
-    //TODO CHECK we also assume for now that pyramid tile size is a multiple of the underlying FOV tile size.
+    //TODO CHECK we assume all tiles are square. This is not necessary but it is safe to assume for the first tests.
     assert(tileWidth == tileHeight);
+
+    //TODO CHECK we also assume for now that pyramid tile size is a multiple of the underlying FOV tile size.
     //assert(pyramidTileSize % tileWidth == 0);
 
-    //TODO CHECK might not be necessary, but use to to the number of Threads for the tile loader.
-    auto maxNumberOfTilesToLoad = ( pyramidTileSize / tileWidth ) * ( pyramidTileSize / tileHeight );
+    //TODO CHECK might not be necessary, but used to determine the max number of threads used by the tile loader.
+    auto maxNumberOfTilesToLoad = ceil( (float)pyramidTileSize / tileWidth ) * ceil( (float)pyramidTileSize / tileHeight );
+
 
     //generating the lowest level of the pyramid represented by a grid of pyramid tile.
     for ( auto it = grid.begin(); it != grid.end(); ++it ) {
 
-        uint32_t tile[pyramidTileSize]; //the pyramid tile we will be filling from partial FOVs.
+        uint32_t tile[ pyramidTileSize*pyramidTileSize ]; //the pyramid tile we will be filling from partial FOVs.
 
         //iterating over each partial FOV.
         for(auto it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
@@ -87,28 +89,26 @@ int main() {
                 for (uint32_t j=startCol; j <= endCol; ++j){
                     for(uint32_t i=startRow; i <= endRow; i++ ){
                         fi->requestTile(j,i,false,0);
-                        // auto view = fi->getAvailableViewBlocking();
-                        // needs to keep track if we need to add padding or not.
                     }
                 }
-
                 fi->finishedRequestingTiles();
 
                 uint32_t xOriginGlobal, yOriginGlobal, xOrigin,yOrigin,width,height;
 
                 while(fi->isGraphProcessingTiles()) {
-                    auto view = fi->getAvailableViewBlocking()->get();
-                    if(view != nullptr){
 
-                        //tile origin in global coordinates
+                    auto view = fi->getAvailableViewBlocking()->get();
+
+                    if(view != nullptr){
+                        //tile origin in FOV global coordinates
                         uint32_t tileOriginX = view->getGlobalXOffset();
                         uint32_t tileOriginY = view->getGlobalYOffset();
 
-                        //start index in global coordinates
+                        //start index in FOV global coordinates
                         xOriginGlobal = std::max<uint32_t>(tileOriginX, overlapFov.x);
                         yOriginGlobal = std::max<uint32_t>(tileOriginY, overlapFov.y);
 
-                        //start index in local coordinates
+                        //start index in local coordinates (FOV tile)
                         xOrigin = xOriginGlobal - tileOriginX;
                         yOrigin = yOriginGlobal - tileOriginY;
 
@@ -116,21 +116,25 @@ int main() {
                         width = overlapFov.width - (xOriginGlobal - overlapFov.x);
                         height = overlapFov.height - (yOriginGlobal - overlapFov.y);
 
-                        //get all pixels for this tile
-                        for(uint32_t i = xOrigin; i < width; i++){
-                            for(uint32_t j = yOrigin; j < height; j++){
-                                auto val = view->getPixel(i,j);
+                        //how many fit in this tile?
+                        auto endX = std::min(width, tileWidth);
+                        auto endY = std::min(height, tileHeight);
 
-                                //FOVOverlap coordinates
+                        //get all pixels for this ROI
+                        for(uint32_t j = yOrigin; j < endY -1 ; j++){
+                            for(uint32_t i = xOrigin; i < endX -1; i++){
+                                auto val = view->getPixel(i,j);
+                                //FOVOverlap coordinates (those are not the global coordinates, but relative to the partial FOV)
                                 auto xInFOVOverlap = tileOriginX + i - overlapFov.x;
                                 auto yInFOVOverlap = tileOriginY + j - overlapFov.y;
 
-                                //TileOverlapCoordinates
+                                //TileOverlap coordinates
                                 auto overlapTile = fov->getTileOverlap();
 
-                                //to get the final tile, we transform the coordinates of the pixel obtained in the FOVOverlap coordinates
+                                //to get the final tile, we report the coordinates of the pixel obtained in the FOVOverlap coordinates
                                 //into the the tileOverlap coordinates.
-                                tile[ (overlapTile.x + xInFOVOverlap) * overlapTile.width + overlapTile.y + j] = val;
+                                auto index1D = (overlapTile.y + yInFOVOverlap) * overlapTile.width + overlapTile.x + xInFOVOverlap;
+                                tile[ index1D ] = val;
                             }
                         } //DONE copying the relevant portion of one tile of the FOV in this pyramid tile
                     }
