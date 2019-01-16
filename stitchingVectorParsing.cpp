@@ -149,6 +149,23 @@ int main() {
                 delete fi;
             }
 
+            auto outputdir = "output_";
+            auto outputfile = (outputdir + filename).c_str();
+            TIFF* tif = TIFFOpen(outputfile, "w");
+            TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, pyramidTileSize);
+            TIFFSetField(tif, TIFFTAG_IMAGELENGTH, pyramidTileSize);
+            TIFFSetField(tif, TIFFTAG_TILELENGTH, pyramidTileSize);
+            TIFFSetField(tif, TIFFTAG_TILEWIDTH, pyramidTileSize);
+            TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, 32);
+            TIFFSetField(tif, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
+            TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, 1);
+            TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+            TIFFSetField(tif, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
+            TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+            TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
+            TIFFWriteTile(tif, tile, 0, 0, 0, 0);
+            TIFFClose(tif);
+
         } //DONE generating the pyramid tile
 
     } //DONE generating the lowest level of the pyramid
