@@ -31,6 +31,10 @@ int main() {
     //pyramid
     uint32_t pyramidTileSize = 256;
 
+
+    //TODO REMOVE FOR DEBUG ONLY
+    int counter=0;
+
     //TODO test that directory and vector and not mixed up
     auto reader = new MistStitchedImageReader(directory, vector, pyramidTileSize);
     auto grid = reader->getGrid();
@@ -52,7 +56,8 @@ int main() {
     //generating the lowest level of the pyramid represented by a grid of pyramid tile.
     for ( auto it = grid.begin(); it != grid.end(); ++it ) {
 
-        uint32_t tile[ pyramidTileSize*pyramidTileSize ]; //the pyramid tile we will be filling from partial FOVs.
+        uint32_t tile[ pyramidTileSize * pyramidTileSize ]; //the pyramid tile we will be filling from partial FOVs.
+        memset( tile, 0, pyramidTileSize * pyramidTileSize*sizeof(uint32_t) );
 
         //iterating over each partial FOV.
         for(auto it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
@@ -101,31 +106,33 @@ int main() {
 
                     auto pview = fi->getAvailableViewBlocking();
 
+                     std::cout << "debug view : " << pview;
+
                     if(pview != nullptr){
                         auto view = pview->get();
                         //tile origin in FOV global coordinates
                         uint32_t tileOriginX = view->getGlobalXOffset();
                         uint32_t tileOriginY = view->getGlobalYOffset();
 
-                        //start index in FOV global coordinates
+                        //start index in FOV global coordinates (top left corner of the rectangle to copy)
                         xOriginGlobal = std::max<uint32_t>(tileOriginX, overlapFov.x);
                         yOriginGlobal = std::max<uint32_t>(tileOriginY, overlapFov.y);
 
-                        //start index in local coordinates (FOV tile)
+                        //start index in local coordinates (top left corner of the ROI rectangle in the current FOV tile)
                         xOrigin = xOriginGlobal - tileOriginX;
                         yOrigin = yOriginGlobal - tileOriginY;
 
-                        //nb of pixels left in the ROI
+                        //nb of pixels left in the ROI at this point
                         width = overlapFov.width - (xOriginGlobal - overlapFov.x);
                         height = overlapFov.height - (yOriginGlobal - overlapFov.y);
 
-                        //how many fit in this tile?
+                        //how many fit in this tile? (width and height of the ROI rectangle)
                         auto endX = std::min(width, tileWidth);
                         auto endY = std::min(height, tileHeight);
 
                         //get all pixels for this ROI
-                        for(uint32_t j = yOrigin; j < endY -1 ; j++){
-                            for(uint32_t i = xOrigin; i < endX -1; i++){
+                        for(uint32_t j = yOrigin; j < endY ; j++){
+                            for(uint32_t i = xOrigin; i < endX ; i++){
                                 auto val = view->getPixel(i,j);
                                 //FOVOverlap coordinates (those are not the global coordinates, but relative to the partial FOV)
                                 auto xInFOVOverlap = tileOriginX + i - overlapFov.x;
@@ -134,10 +141,24 @@ int main() {
                                 //TileOverlap coordinates
                                 auto overlapTile = fov->getTileOverlap();
 
+                                auto xInTile = overlapTile.x + xInFOVOverlap;
+                                auto yInTile = overlapTile.y + yInFOVOverlap;
+
                                 //to get the final tile, we report the coordinates of the pixel obtained in the FOVOverlap coordinates
                                 //into the the tileOverlap coordinates.
-                                auto index1D = (overlapTile.y + yInFOVOverlap) * overlapTile.width + overlapTile.x + xInFOVOverlap;
+                                auto index1D = yInTile * pyramidTileSize + xInTile;
+
+                                assert( 0 <= index1D && index1D < 256 * 256);
+
+                                std::cout << index1D << ": " << val << std::endl;
+
+                                if(tile[index1D] != 0){
+                                    std::cout << "overwriting at index " << index1D << " old value : " << tile[index1D] << " with value : " << val << std:: endl;
+                                }
+
                                 tile[ index1D ] = val;
+
+
                             }
                         } //DONE copying the relevant portion of one tile of the FOV in this pyramid tile
                         pview->releaseMemory();
@@ -149,24 +170,28 @@ int main() {
                 delete fi;
             }
 
-            auto outputdir = "output_";
-            auto outputfile = (outputdir + filename).c_str();
-            TIFF* tif = TIFFOpen(outputfile, "w");
-            TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, pyramidTileSize);
-            TIFFSetField(tif, TIFFTAG_IMAGELENGTH, pyramidTileSize);
-            TIFFSetField(tif, TIFFTAG_TILELENGTH, pyramidTileSize);
-            TIFFSetField(tif, TIFFTAG_TILEWIDTH, pyramidTileSize);
-            TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, 32);
-            TIFFSetField(tif, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
-            TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, 1);
-            TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-            TIFFSetField(tif, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
-            TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
-            TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
-            TIFFWriteTile(tif, tile, 0, 0, 0, 0);
-            TIFFClose(tif);
+
 
         } //DONE generating the pyramid tile
+
+        ++counter;
+        auto outputFilename = "img_r" + std::to_string(it->first.first) + "_c" + std::to_string(it->first.second) + ".tif";
+        auto outputdir = "output_";
+        auto outputfile = (outputdir + outputFilename).c_str();
+        TIFF* tif = TIFFOpen(outputfile, "w");
+        TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, pyramidTileSize);
+        TIFFSetField(tif, TIFFTAG_IMAGELENGTH, pyramidTileSize);
+        TIFFSetField(tif, TIFFTAG_TILELENGTH, pyramidTileSize);
+        TIFFSetField(tif, TIFFTAG_TILEWIDTH, pyramidTileSize);
+        TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, 32);
+        TIFFSetField(tif, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
+        TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, 1);
+        TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+        TIFFSetField(tif, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
+        TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+        TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
+        TIFFWriteTile(tif, tile, 0, 0, 0, 0);
+        TIFFClose(tif);
 
     } //DONE generating the lowest level of the pyramid
 
