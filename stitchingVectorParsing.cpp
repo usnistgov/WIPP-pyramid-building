@@ -25,18 +25,18 @@
  */
 
 int main() {
-//    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/stitching_vector/img-global-positions-1.txt";
-//    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/tiled-images/";
+    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/stitching_vector/img-global-positions-1.txt";
+    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/tiled-images/";
 
 //    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset0/stitching_vector/img-global-positions-1.txt";
 //    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset0/images/";
 
-    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset01/stitching_vector/img-global-positions-1.txt";
-    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset01/images/";
+//    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset01/stitching_vector/img-global-positions-1.txt";
+//    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset01/images/";
 
     //pyramid
-//    uint32_t pyramidTileSize = 256;
-    uint32_t pyramidTileSize = 32;
+    uint32_t pyramidTileSize = 256;
+  //  uint32_t pyramidTileSize = 32;
 
 
     //TODO REMOVE FOR DEBUG ONLY
@@ -141,7 +141,7 @@ int main() {
                         //get all pixels for this ROI
                         for(uint32_t j = yOrigin; j < endY ; j++){
                             for(uint32_t i = xOrigin; i < endX ; i++){
-                                auto val = view->getPixel(i,j);
+                                auto val = view->getPixel(j,i);
                                 //FOVOverlap coordinates (those are not the global coordinates, but relative to the partial FOV)
                                 auto xInFOVOverlap = tileOriginX + i - overlapFov.x;
                                 auto yInFOVOverlap = tileOriginY + j - overlapFov.y;
@@ -158,10 +158,10 @@ int main() {
 
                                 assert( 0 <= index1D && index1D < 256 * 256);
 
-//                                std::cout << index1D << ": " << val << std::endl;
+                                std::cout << index1D << ": " << val << std::endl;
 
                                 if(tile[index1D] != 0){
-//                                    std::cout << "overwriting at index " << index1D << " old value : " << tile[index1D] << " with value : " << val << std:: endl;
+                                    std::cout << "overwriting at index " << index1D << " old value : " << tile[index1D] << " with value : " << val << std:: endl;
                                 }
 
                                 tile[ index1D ] = val;
@@ -171,30 +171,49 @@ int main() {
                         } //DONE copying the relevant portion of one tile of the FOV in this pyramid tile
                         pview->releaseMemory();
 
-                        ++counter;
-                        auto outputFilename = "img_r" + std::to_string(it->first.first) + "_c" + std::to_string(it->first.second) + "_t" + std::to_string(counter) + ".tif";
-                        auto outputdir = "output_";
-                        auto outputfile = (outputdir + outputFilename).c_str();
-                        TIFF* tif = TIFFOpen(outputfile, "w");
-                        TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, pyramidTileSize);
-                        TIFFSetField(tif, TIFFTAG_IMAGELENGTH, pyramidTileSize);
-                        TIFFSetField(tif, TIFFTAG_TILELENGTH, pyramidTileSize);
-                        TIFFSetField(tif, TIFFTAG_TILEWIDTH, pyramidTileSize);
-                        TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, 32);
-                        TIFFSetField(tif, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
-                        TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, 1);
-                        TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-                        TIFFSetField(tif, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
-                        TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
-                        TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
-                        TIFFWriteTile(tif, tile, 0, 0, 0, 0);
-                        TIFFClose(tif);
+//                        ++counter;
+//                        auto outputFilename = "img_r" + std::to_string(it->first.second) + "_c" + std::to_string(it->first.first) + "_t" + std::to_string(counter) + ".tif";
+//                        auto outputdir = "output_";
+//                        auto outputfile = (outputdir + outputFilename).c_str();
+//                        TIFF* tif = TIFFOpen(outputfile, "w");
+//                        TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, pyramidTileSize);
+//                        TIFFSetField(tif, TIFFTAG_IMAGELENGTH, pyramidTileSize);
+//                        TIFFSetField(tif, TIFFTAG_TILELENGTH, pyramidTileSize);
+//                        TIFFSetField(tif, TIFFTAG_TILEWIDTH, pyramidTileSize);
+//                        TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, 32);
+//                        TIFFSetField(tif, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
+//                        TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, 1);
+//                        TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+//                        TIFFSetField(tif, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
+//                        TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+//                        TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
+//                        TIFFWriteTile(tif, tile, 0, 0, 0, 0);
+//                        TIFFClose(tif);
                     }
                 } //DONE copying the relevant portion of the FOV in this pyramid tile
 
                 //TODO CHECK we should eventually cache the fast image instances since they are used for each overlap.
                 //depending on the overlap factor, some performance should be expected.
                 delete fi;
+
+                ++counter;
+                auto outputFilename = "img_r" + std::to_string(it->first.second) + "_c" + std::to_string(it->first.first) + ".tif";
+                auto outputdir = "output_";
+                auto outputfile = (outputdir + outputFilename).c_str();
+                TIFF* tif = TIFFOpen(outputfile, "w");
+                TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, pyramidTileSize);
+                TIFFSetField(tif, TIFFTAG_IMAGELENGTH, pyramidTileSize);
+                TIFFSetField(tif, TIFFTAG_TILELENGTH, pyramidTileSize);
+                TIFFSetField(tif, TIFFTAG_TILEWIDTH, pyramidTileSize);
+                TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, 32);
+                TIFFSetField(tif, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
+                TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, 1);
+                TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+                TIFFSetField(tif, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
+                TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+                TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
+                TIFFWriteTile(tif, tile, 0, 0, 0, 0);
+                TIFFClose(tif);
             }
 
 
