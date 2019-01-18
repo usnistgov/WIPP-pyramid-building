@@ -25,18 +25,18 @@
  */
 
 int main() {
-//    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/stitching_vector/img-global-positions-1.txt";
-//    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/tiled-images/";
+    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/stitching_vector/img-global-positions-1.txt";
+    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/tiled-images/";
 
-    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset02/stitching_vector/img-global-positions-1.txt";
-    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset02/images/";
+//    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset02/stitching_vector/img-global-positions-1.txt";
+//    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset02/images/";
 
 //    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset01/stitching_vector/img-global-positions-1.txt";
 //    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset01/images/";
 
     //pyramid
-  //  uint32_t pyramidTileSize = 256;
-    uint32_t pyramidTileSize = 32;
+    uint32_t pyramidTileSize = 256;
+//    uint32_t pyramidTileSize = 32;
 
 
     //TODO REMOVE FOR DEBUG ONLY
@@ -93,8 +93,8 @@ int main() {
 
                 //nb of tiles to load
                 //TODO CHANGE BACK AFTER DEBUGGING
-               // auto nbOfTileToLoad = (endCol - startCol) * (endRow - startRow);
-                auto nbOfTileToLoad = 1;
+                auto nbOfTileToLoad = (endCol - startCol + 1) * (endRow - startRow + 1);
+             //   auto nbOfTileToLoad = 1;
 
                 auto *fi = new fi::FastImage<uint32_t>(tileLoader, 0);
                 fi->getFastImageOptions()->setNumberOfViewParallel(nbOfTileToLoad);
@@ -113,7 +113,7 @@ int main() {
 
                     auto pview = fi->getAvailableViewBlocking();
 
-                     std::cout << "debug view : " << pview;
+                 //    std::cout << "debug view : " << pview;
 
                     if(pview != nullptr){
 
@@ -158,11 +158,11 @@ int main() {
 
                                 assert( 0 <= index1D && index1D < 256 * 256);
 
-                                std::cout << index1D << ": " << val << std::endl;
+                        //        std::cout << index1D << ": " << val << std::endl;
 
-                                if(tile[index1D] != 0){
-                                    std::cout << "overwriting at index " << index1D << " old value : " << tile[index1D] << " with value : " << val << std:: endl;
-                                }
+//                                if(tile[index1D] != 0){
+//                                    std::cout << "overwriting at index " << index1D << " old value : " << tile[index1D] << " with value : " << val << std:: endl;
+//                                }
 
                                 tile[ index1D ] = val;
 
@@ -195,28 +195,25 @@ int main() {
                 //TODO CHECK we should eventually cache the fast image instances since they are used for each overlap.
                 //depending on the overlap factor, some performance should be expected.
                 delete fi;
-
-                ++counter;
-                auto outputFilename = "img_r" + std::to_string(it->first.second) + "_c" + std::to_string(it->first.first) + ".tif";
-                auto outputdir = "output_";
-                auto outputfile = (outputdir + outputFilename).c_str();
-                TIFF* tif = TIFFOpen(outputfile, "w");
-                TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, pyramidTileSize);
-                TIFFSetField(tif, TIFFTAG_IMAGELENGTH, pyramidTileSize);
-                TIFFSetField(tif, TIFFTAG_TILELENGTH, pyramidTileSize);
-                TIFFSetField(tif, TIFFTAG_TILEWIDTH, pyramidTileSize);
-                TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, 32);
-                TIFFSetField(tif, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
-                TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, 1);
-                TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-                TIFFSetField(tif, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
-                TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
-                TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
-                TIFFWriteTile(tif, tile, 0, 0, 0, 0);
-                TIFFClose(tif);
             }
 
-
+            auto outputFilename = "img_r" + std::to_string(it->first.second) + "_c" + std::to_string(it->first.first) + ".tif";
+            auto outputdir = "output_";
+            auto outputfile = (outputdir + outputFilename).c_str();
+            TIFF* tif = TIFFOpen(outputfile, "w");
+            TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, pyramidTileSize);
+            TIFFSetField(tif, TIFFTAG_IMAGELENGTH, pyramidTileSize);
+            TIFFSetField(tif, TIFFTAG_TILELENGTH, pyramidTileSize);
+            TIFFSetField(tif, TIFFTAG_TILEWIDTH, pyramidTileSize);
+            TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, 32);
+            TIFFSetField(tif, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
+            TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, 1);
+            TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+            TIFFSetField(tif, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
+            TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+            TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
+            TIFFWriteTile(tif, tile, 0, 0, 0, 0);
+            TIFFClose(tif);
 
         } //DONE generating the pyramid tile
 
