@@ -1,2 +1,5 @@
 .idea
 cmake-build-debug
+resources/dataset0
+resources/dataset02
+resources/dataset03

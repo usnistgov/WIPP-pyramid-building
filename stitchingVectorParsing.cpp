@@ -25,11 +25,19 @@
  */
 
 int main() {
-    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/stitching_vector/img-global-positions-1.txt";
-    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/tiled-images/";
+//    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/stitching_vector/img-global-positions-1.txt";
+//    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/tiled-images/";
+
+//    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset0/stitching_vector/img-global-positions-1.txt";
+//    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset0/images/";
+
+    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset01/stitching_vector/img-global-positions-1.txt";
+    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset01/images/";
 
     //pyramid
-    uint32_t pyramidTileSize = 256;
+//    uint32_t pyramidTileSize = 256;
+    uint32_t pyramidTileSize = 32;
+
 
     //TODO REMOVE FOR DEBUG ONLY
     int counter=0;
@@ -80,8 +88,8 @@ int main() {
                 uint32_t startRow, startCol, endRow, endCol;
                 startCol = overlapFov.x /  tileWidth;
                 startRow = overlapFov.y / tileHeight;
-                endCol = ( overlapFov.x + overlapFov.width ) / tileWidth;
-                endRow = ( overlapFov.y + overlapFov.height ) / tileHeight;
+                endCol = ( overlapFov.x + overlapFov.width - 1 ) / tileWidth;
+                endRow = ( overlapFov.y + overlapFov.height - 1 ) / tileHeight;
 
                 //nb of tiles to load
                 //TODO CHANGE BACK AFTER DEBUGGING
@@ -92,7 +100,6 @@ int main() {
                 fi->getFastImageOptions()->setNumberOfViewParallel(nbOfTileToLoad);
                 fi->configureAndRun();
 
-                //load all tiles for this FOV.
                 for(uint32_t i=startRow; i <= endRow; i++ ){
                     for (uint32_t j=startCol; j <= endCol; ++j){
                         fi->requestTile(i,j,false,0);

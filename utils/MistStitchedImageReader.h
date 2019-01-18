@@ -81,7 +81,9 @@ public:
         std::string pair;
         while (std::getline(infile, line)) {
             std::istringstream iss(line);
-
+            if(line == ""){
+                continue;
+            }
             std::string file;
             while(std::getline(iss,pair,';')) {
                 std::string key, val;
@@ -122,8 +124,8 @@ public:
             uint32_t startCol, startRow, endCol, endRow = 0;
             startCol = fovGlobalX / tileSize;
             startRow =  fovGlobalY / tileSize;
-            endCol =  (fovGlobalX + fovWidth) / tileSize;
-            endRow = (fovGlobalY + fovHeight) / tileSize;
+            endCol =  (fovGlobalX + fovWidth - 1) / tileSize;
+            endRow = (fovGlobalY + fovHeight - 1) / tileSize;
 
             //compute overlap between an FOV and each pyramid tile.
             for(uint32_t i = startCol; i <= endCol ; i++) {
