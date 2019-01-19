@@ -2,11 +2,8 @@
 // Created by Gerardin, Antoine D. (Assoc) on 1/2/19.
 //
 
-#include <FastImage/api/FastImage.h>
-#include <FastImage/TileLoaders/GrayscaleTiffTileLoader.h>
-#include "Helper.h"
-
 #include "utils/MistStitchedImageReader.h"
+#include "utils/BaseTileGenerator.h"
 
 
 #define uint64 uint64_hack_
@@ -39,12 +36,6 @@ int main() {
     uint32_t pyramidTileSize = 256;
 //    uint32_t pyramidTileSize = 32;
 
-
-    //TODO REMOVE FOR DEBUG ONLY
-    int counter=0;
-
-
-    //TODO test that directory and vector and not mixed up
     auto reader = new MistStitchedImageReader(directory, vector, pyramidTileSize);
     auto grid = reader->getGrid();
 
@@ -55,135 +46,26 @@ int main() {
     //TODO CHECK we assume all tiles are square. This is not necessary but it is safe to assume for the first tests.
     assert(tileWidth == tileHeight);
 
-    //TODO CHECK we also assume for now that pyramid tile size is a multiple of the underlying FOV tile size.
+    //TODO CHECK we could assume for now that pyramid tile size is a multiple of the underlying FOV tile size.
+    //Will that be of any use?
     //assert(pyramidTileSize % tileWidth == 0);
 
     //generating the lowest level of the pyramid represented by a grid of pyramid tile.
+    //TODO instead of simply iterating through the grid entries, we could traverse blocks to speed up pyramid generation.
+    //TODO Make this an HTGS task and decouple from the TIFF write operation (this could be a PNG Write as well)
+    //TODO wrap the tile represented as a raw array into a Tile object and send it through the graph.
+
     for ( auto it = grid.begin(); it != grid.end(); ++it ) {
 
-        uint32_t tile[ pyramidTileSize * pyramidTileSize ]; //the pyramid tile we will be filling from partial FOVs.
-        memset( tile, 0, pyramidTileSize * pyramidTileSize*sizeof(uint32_t) );
+        //generate a pyramid tile
+        auto generator = new BaseTileGenerator(tileWidth, tileHeight, pyramidTileSize);
+        uint32_t* tile = generator->generateTile(it->first, it->second, directory);
 
-        //iterating over each partial FOV.
-        for(auto it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
-
-            auto fov = *it2;
-            auto filename = fov->getPath();
-            auto file = (directory + filename).c_str();
-            auto extension = Helper::getExtension(filename);
-
-            if(extension != "tiff" && extension != "tif") {
-                std::cout << "File Format not recognized !" << std::endl;
-            }
-
-            else {
-
-                auto overlapFov = fov->getFovCoordOverlap();
-
-                //coordinates in the grid of FOV tiles to load
-                uint32_t startRow, startCol, endRow, endCol;
-                startCol = overlapFov.x /  tileWidth;
-                startRow = overlapFov.y / tileHeight;
-                endCol = ( overlapFov.x + overlapFov.width - 1 ) / tileWidth;
-                endRow = ( overlapFov.y + overlapFov.height - 1 ) / tileHeight;
-
-                //nb of tiles to load - we load all tiles in parallel
-                auto nbOfTileToLoad = (endCol - startCol + 1) * (endRow - startRow + 1);
-
-                fi::ATileLoader<uint32_t> *tileLoader = new fi::GrayscaleTiffTileLoader<uint32_t>(directory + filename, nbOfTileToLoad);
-
-                auto *fi = new fi::FastImage<uint32_t>(tileLoader, 0);
-                fi->getFastImageOptions()->setNumberOfViewParallel(nbOfTileToLoad);
-                fi->configureAndRun();
-
-                for(uint32_t i=startRow; i <= endRow; i++ ){
-                    for (uint32_t j=startCol; j <= endCol; ++j){
-                        fi->requestTile(i,j,false,0);
-                    }
-                }
-                fi->finishedRequestingTiles();
-
-                uint32_t xOriginGlobal, yOriginGlobal, xOrigin,yOrigin,width,height;
-
-                while(fi->isGraphProcessingTiles()) {
-
-                    auto pview = fi->getAvailableViewBlocking();
-
-                 //    std::cout << "debug view : " << pview;
-
-                    if(pview != nullptr){
-
-                        auto view = pview->get();
-                        //tile origin in FOV global coordinates
-                        uint32_t tileOriginX = view->getGlobalXOffset();
-                        uint32_t tileOriginY = view->getGlobalYOffset();
-
-                        //start index in FOV global coordinates (top left corner of the rectangle to copy)
-                        xOriginGlobal = std::max<uint32_t>(tileOriginX, overlapFov.x);
-                        yOriginGlobal = std::max<uint32_t>(tileOriginY, overlapFov.y);
-
-                        //start index in local coordinates (top left corner of the ROI rectangle in the current FOV tile)
-                        xOrigin = xOriginGlobal - tileOriginX;
-                        yOrigin = yOriginGlobal - tileOriginY;
-
-                        //nb of pixels left in the ROI at this point
-                        width = overlapFov.width - (xOriginGlobal - overlapFov.x);
-                        height = overlapFov.height - (yOriginGlobal - overlapFov.y);
-
-                        //how many fit in this tile? (width and height of the ROI rectangle)
-                        auto endX = std::min(width, tileWidth);
-                        auto endY = std::min(height, tileHeight);
-
-                        //get all pixels for this ROI
-                        for(uint32_t j = yOrigin; j < endY ; j++){
-                            for(uint32_t i = xOrigin; i < endX ; i++){
-                                auto val = view->getPixel(j,i);
-                                //FOVOverlap coordinates (those are not the global coordinates, but relative to the partial FOV)
-                                auto xInFOVOverlap = tileOriginX + i - overlapFov.x;
-                                auto yInFOVOverlap = tileOriginY + j - overlapFov.y;
-
-                                //TileOverlap coordinates
-                                auto overlapTile = fov->getTileOverlap();
-
-                                auto xInTile = overlapTile.x + xInFOVOverlap;
-                                auto yInTile = overlapTile.y + yInFOVOverlap;
-
-                                //to get the final tile, we report the coordinates of the pixel obtained in the FOVOverlap coordinates
-                                //into the the tileOverlap coordinates.
-                                auto index1D = yInTile * pyramidTileSize + xInTile;
-
-                                assert( 0 <= index1D && index1D < 256 * 256);
-
-                        //        std::cout << index1D << ": " << val << std::endl;
-
-//                                if(tile[index1D] != 0){
-//                                    std::cout << "overwriting at index " << index1D << " old value : " << tile[index1D] << " with value : " << val << std:: endl;
-//                                }
-
-                                tile[ index1D ] = val;
-
-                            }
-                        } //DONE copying the relevant portion of one tile of the FOV in this pyramid tile
-                        pview->releaseMemory();
-
-                    }
-                } //DONE copying the relevant portion of the FOV in this pyramid tile
-
-                //TODO CHECK we should eventually cache the fast image instances since they are used for each overlap.
-                //depending on the overlap factor, some performance should be expected.
-                delete fi;
-            }
-
-            auto outputFilename = "img_r" + std::to_string(it->first.second) + "_c" + std::to_string(it->first.first) + ".tif";
-            auto outputdir = "output_";
-
-
-            auto w = new SingleTiledTiffWriter(outputdir + outputFilename, pyramidTileSize);
-            w->write(tile);
-
-        } //DONE generating the pyramid tile
-
-
+        //write as a tif output
+        auto outputFilename = "img_r" + std::to_string(it->first.second) + "_c" + std::to_string(it->first.first) + ".tif";
+        auto outputdir = "output_";
+        auto w = new SingleTiledTiffWriter(outputdir + outputFilename, pyramidTileSize);
+        w->write(tile);
 
     } //DONE generating the lowest level of the pyramid
 

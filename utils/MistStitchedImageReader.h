@@ -48,6 +48,9 @@ private:
 
 public:
 
+    //TODO test that directory and vector and not mixed up.
+    //TODO CHECK we cast fovGlobalX and fovGlobalY into signed 32bits integer. Enough?
+    //TODO CHECK we cast most values to 32bits integers.
     /**
      *
      * @param imageDirectoryPath where to locate the FOVs
@@ -69,8 +72,8 @@ public:
         uint32_t imageHeight = 0;
 
         //partial images (fovs)
-        uint32_t fovGlobalX = 0;
-        uint32_t fovGlobalY = 0;
+        int32_t fovGlobalX = 0;
+        int32_t fovGlobalY = 0;
 
         //parse stitching vector
         std::string line;
