@@ -20,18 +20,24 @@
 #include <opencv/cv.h>
 #include <map>
 
-#include "../data/Fov.h"
+#include "../data/PartialFov.h"
 #include <assert.h>
 
+//TODO CHECK we expect all FOVs to have the same size and the same tile size.
+/**
+ * @class MistStitchedImageReader MistStitchedImageReader.h
+ * @brief Parse the MIST stitching vector representing overlapping FOVs.
+ * @details A pyramid is composed at level 0 of tiles carved from a set of overlapping FOVs.
+ * The structure is stored in a grid structure : (row,col) -> vector of partial FOVs
+ */
 class MistStitchedImageReader {
-
 
 
 private:
     uint32_t pyramidTileSize;
     std::string imageDirectoryPath;
     std::string stitchingVectorPath;
-    std::map<std::pair<uint32_t,uint32_t> , std::vector<Fov*>> grid;
+    std::map<std::pair<uint32_t,uint32_t> , std::vector<PartialFov*>> grid;
 
     uint32_t fovWidth = 0;
     uint32_t fovHeight = 0;
@@ -41,11 +47,12 @@ private:
 
 
 public:
+
     /**
-     * @class MistStitchedImageReader MistStitchedImageReader.h
-     * @brief Create pyramid tiles from a set of overlapping partial images.
-     * @details A pyramid is composed at level 0 of tiles carved from a set of overlapping FOVs.
-     * The structure is stored in a grid : (row,col) -> vector of partial images (openCV rectangles)
+     *
+     * @param imageDirectoryPath where to locate the FOVs
+     * @param stitchingVectorPath  where to locate the corresponding stitching vector.
+     * @param pyramidTileSize size of pyramid tile.
      */
     MistStitchedImageReader(const std::string &imageDirectoryPath,
                             const std::string &stitchingVectorPath, uint32_t pyramidTileSize) :
@@ -64,17 +71,6 @@ public:
         //partial images (fovs)
         uint32_t fovGlobalX = 0;
         uint32_t fovGlobalY = 0;
-
-
-        //pyramid
-        //TODO NOT USED FOR NOW
-        uint32_t gridRowSize = 0;
-        uint32_t gridColSize = 0;
-
-
-        std::vector<Fov*> fovs({});
-        std::vector<cv::Rect> rects({});
-
 
         //parse stitching vector
         std::string line;
@@ -108,7 +104,7 @@ public:
             }
 
             //we check the first FOV to retrieve its width and height.
-            //TODO NOTE we expect all FOVs to have the same size and the same tile size.
+            //TODO CHECK we expect all FOVs to have the same size and the same tile size.
             if(fovWidth == 0 || fovHeight == 0 || fovTileWidth == 0 || fovTileHeight == 0){
                 TIFF *tiff = TIFFOpen((imageDirectoryPath+file).c_str(), "r");
                 TIFFGetField(tiff,TIFFTAG_IMAGEWIDTH,&fovWidth);
@@ -135,10 +131,7 @@ public:
                     //global coordinates
                     cv::Rect intersection = tile & fov;
 
-                    //TODO CHECK if this is the correct solution
-                    if(intersection.width == 0 || intersection.height == 0){
-                        continue;
-                    }
+                    assert(intersection.width != 0 || intersection.height != 0);
 
                     int32_t relativeX = 0;
                     int32_t relativeY = 0;
@@ -155,10 +148,7 @@ public:
                     fovRelativeY = intersection.y - fovGlobalY;
                     cv::Rect overlapInFovRef = cv::Rect(fovRelativeX, fovRelativeY, intersection.width, intersection.height);
 
-
-
-                    Fov *fov3 = new Fov(file, fovGlobalX,fovGlobalY, overlapInTileRef, intersection, overlapInFovRef);
-
+                    PartialFov *partialFov = new PartialFov(file, fovGlobalX,fovGlobalY, overlapInTileRef, intersection, overlapInFovRef);
 
                     assert(overlapInTileRef.width == overlapInFovRef.width);
                     assert(overlapInTileRef.height == overlapInFovRef.height);
@@ -167,37 +157,27 @@ public:
                     assert(overlapInFovRef.x >= 0);
                     assert(overlapInFovRef.y >= 0);
 
-
-                    //add to a list for a map entry at key (i,j)
-                    //For now we add to a vector;
-                    rects.push_back(overlapInTileRef);
-
+                    // add the partial FOV to the corresponding pyramid tile.
                     std::pair<uint32_t,uint32_t> index= std::make_pair(i,j);
-
-
                     auto it = grid.find(index);
 
                     if(it != grid.end()) {
-                        it->second.push_back(fov3);
+                        it->second.push_back(partialFov);
                     }
                     else {
-                        std::vector<Fov*> tileFovs({fov3});
+                        std::vector<PartialFov*> tileFovs({partialFov});
                         grid.insert(std::make_pair(index, tileFovs));
                     }
                 }
             }
 
-
-            Fov *fov2 = new Fov(file, fovGlobalX,fovGlobalY);
-            fovs.push_back(fov2);
         }
 
-        std::cout << "done" << std::endl;
     }
 
 
 
-    const std::map<std::pair<uint32_t, uint32_t>, std::vector<Fov *>> &getGrid() const {
+    const std::map<std::pair<uint32_t, uint32_t>, std::vector<PartialFov *>> &getGrid() const {
         return grid;
     }
 

@@ -15,6 +15,7 @@
 #undef uint64
 #undef int64
 #include <assert.h>
+#include "utils/SingleTiledTiffWriter.h"
 
 /**
  * This algorithm generates the lowest level of the pyramid.
@@ -57,10 +58,6 @@ int main() {
     //TODO CHECK we also assume for now that pyramid tile size is a multiple of the underlying FOV tile size.
     //assert(pyramidTileSize % tileWidth == 0);
 
-    //TODO CHECK might not be necessary, but used to determine the max number of threads used by the tile loader.
-    auto maxNumberOfTilesToLoad = ceil( (float)pyramidTileSize / tileWidth ) * ceil( (float)pyramidTileSize / tileHeight );
-
-
     //generating the lowest level of the pyramid represented by a grid of pyramid tile.
     for ( auto it = grid.begin(); it != grid.end(); ++it ) {
 
@@ -80,7 +77,6 @@ int main() {
             }
 
             else {
-                fi::ATileLoader<uint32_t> *tileLoader = new fi::GrayscaleTiffTileLoader<uint32_t>(directory + filename, maxNumberOfTilesToLoad);
 
                 auto overlapFov = fov->getFovCoordOverlap();
 
@@ -91,10 +87,10 @@ int main() {
                 endCol = ( overlapFov.x + overlapFov.width - 1 ) / tileWidth;
                 endRow = ( overlapFov.y + overlapFov.height - 1 ) / tileHeight;
 
-                //nb of tiles to load
-                //TODO CHANGE BACK AFTER DEBUGGING
+                //nb of tiles to load - we load all tiles in parallel
                 auto nbOfTileToLoad = (endCol - startCol + 1) * (endRow - startRow + 1);
-             //   auto nbOfTileToLoad = 1;
+
+                fi::ATileLoader<uint32_t> *tileLoader = new fi::GrayscaleTiffTileLoader<uint32_t>(directory + filename, nbOfTileToLoad);
 
                 auto *fi = new fi::FastImage<uint32_t>(tileLoader, 0);
                 fi->getFastImageOptions()->setNumberOfViewParallel(nbOfTileToLoad);
@@ -166,29 +162,10 @@ int main() {
 
                                 tile[ index1D ] = val;
 
-
                             }
                         } //DONE copying the relevant portion of one tile of the FOV in this pyramid tile
                         pview->releaseMemory();
 
-//                        ++counter;
-//                        auto outputFilename = "img_r" + std::to_string(it->first.second) + "_c" + std::to_string(it->first.first) + "_t" + std::to_string(counter) + ".tif";
-//                        auto outputdir = "output_";
-//                        auto outputfile = (outputdir + outputFilename).c_str();
-//                        TIFF* tif = TIFFOpen(outputfile, "w");
-//                        TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, pyramidTileSize);
-//                        TIFFSetField(tif, TIFFTAG_IMAGELENGTH, pyramidTileSize);
-//                        TIFFSetField(tif, TIFFTAG_TILELENGTH, pyramidTileSize);
-//                        TIFFSetField(tif, TIFFTAG_TILEWIDTH, pyramidTileSize);
-//                        TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, 32);
-//                        TIFFSetField(tif, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
-//                        TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, 1);
-//                        TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-//                        TIFFSetField(tif, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
-//                        TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
-//                        TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
-//                        TIFFWriteTile(tif, tile, 0, 0, 0, 0);
-//                        TIFFClose(tif);
                     }
                 } //DONE copying the relevant portion of the FOV in this pyramid tile
 
@@ -199,21 +176,10 @@ int main() {
 
             auto outputFilename = "img_r" + std::to_string(it->first.second) + "_c" + std::to_string(it->first.first) + ".tif";
             auto outputdir = "output_";
-            auto outputfile = (outputdir + outputFilename).c_str();
-            TIFF* tif = TIFFOpen(outputfile, "w");
-            TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, pyramidTileSize);
-            TIFFSetField(tif, TIFFTAG_IMAGELENGTH, pyramidTileSize);
-            TIFFSetField(tif, TIFFTAG_TILELENGTH, pyramidTileSize);
-            TIFFSetField(tif, TIFFTAG_TILEWIDTH, pyramidTileSize);
-            TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, 32);
-            TIFFSetField(tif, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
-            TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, 1);
-            TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-            TIFFSetField(tif, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
-            TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
-            TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
-            TIFFWriteTile(tif, tile, 0, 0, 0, 0);
-            TIFFClose(tif);
+
+
+            auto w = new SingleTiledTiffWriter(outputdir + outputFilename, pyramidTileSize);
+            w->write(tile);
 
         } //DONE generating the pyramid tile
 

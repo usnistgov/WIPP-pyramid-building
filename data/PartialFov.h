@@ -2,28 +2,28 @@
 // Created by Gerardin, Antoine D. (Assoc) on 1/2/19.
 //
 
-#ifndef PYRAMIDBUILDING_FOV_H
-#define PYRAMIDBUILDING_FOV_H
+#ifndef PYRAMIDBUILDING_PARTIALFOV_H
+#define PYRAMIDBUILDING_PARTIALFOV_H
 
 #include <string>
 #include <opencv/cv.h>
 
-class Fov {
+class PartialFov {
 
 public:
-    Fov() {}
+    PartialFov() {}
 
 
-    Fov(const std::string &path, uint32_t x, uint32_t y) : path(path), x(x), y(y) {}
+    PartialFov(const std::string &path, uint32_t x, uint32_t y) : path(path), x(x), y(y) {}
 
-    Fov(const std::string &path, uint32_t x, uint32_t y, const cv::Rect &tileOverlap) : path(path), x(x), y(y),
+    PartialFov(const std::string &path, uint32_t x, uint32_t y, const cv::Rect &tileOverlap) : path(path), x(x), y(y),
                                                                                         tileOverlap(tileOverlap) {}
 
-    Fov(const std::string &path, uint32_t x, uint32_t y, const cv::Rect &tileOverlap,
+    PartialFov(const std::string &path, uint32_t x, uint32_t y, const cv::Rect &tileOverlap,
         const cv::Rect &globalCoordinatesTileOverlap) : path(path), x(x), y(y), tileOverlap(tileOverlap),
                                                         globalCoordinatesTileOverlap(globalCoordinatesTileOverlap) {}
 
-    Fov(const std::string &path, uint32_t x, uint32_t y, const cv::Rect &tileOverlap,
+    PartialFov(const std::string &path, uint32_t x, uint32_t y, const cv::Rect &tileOverlap,
         const cv::Rect &globalCoordinatesTileOverlap, const cv::Rect &FovCoordOverlap) : path(path), x(x), y(y),
                                                                                          tileOverlap(tileOverlap),
                                                                                          globalCoordinatesTileOverlap(
@@ -67,4 +67,4 @@ private:
 
 };
 
-#endif //PYRAMIDBUILDING_FOV_H
+#endif //PYRAMIDBUILDING_PARTIALFOV_H
