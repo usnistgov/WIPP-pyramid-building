@@ -29,15 +29,15 @@ uint32_t* generateTile(uint32_t i, uint32_t j, std::map<std::pair<uint32_t, uint
     return tile;
 }
 
-//
-//void writeTile(uint32_t* tile, uint32 pyramidTileSize){
-//    //write as a tif output
-//    auto outputFilename = "img_r" + std::to_string(index.second) + "_c" + std::to_string(index.first) + ".tif";
-//    auto outputdir = "output_";
-//    auto w = new SingleTiledTiffWriter(outputdir + outputFilename, pyramidTileSize);
-//    w->write(tile);
-//    //         graph->produceData(tile);
-//}
+
+void writeTile(uint32_t row, uint32_t col, uint32_t* tile, uint32 pyramidTileSize){
+    //write as a tif output
+    auto outputFilename = "img_r" + std::to_string(row) + "_c" + std::to_string(col) + ".tif";
+    auto outputdir = "output_";
+    auto w = new SingleTiledTiffWriter(outputdir + outputFilename, pyramidTileSize);
+    w->write(tile);
+    //graph->produceData(tile);
+}
 
 int main() {
 
@@ -121,21 +121,25 @@ int main() {
 
             if(2*i < numTileCol && 2*j < numTileRow) {
                 std::cout << 2*j << "," << 2*i << std::endl;
-                generateTile(2 * j, 2 * i, grid, generator, directory);
+                auto tile = generateTile(2 * j, 2 * i, grid, generator, directory);
+                writeTile(2 * j, 2 * i,tile, pyramidTileSize);
             }
             if(2*i+1 < numTileCol) {
                 std::cout << 2 * j << "," << 2 * i + 1 << std::endl;
-                generateTile(2 * j, 2 * i + 1, grid, generator, directory);
+                auto tile = generateTile(2 * j, 2 * i + 1, grid, generator, directory);
+                writeTile(2 * j, 2 * i + 1, tile, pyramidTileSize);
             }
 
             if(2*j+1 < numTileRow) {
                 std::cout << 2 * j + 1 << "," << 2 * i << std::endl;
-                generateTile(2 * j + 1, 2 * i, grid, generator, directory);
+                auto tile = generateTile(2 * j + 1, 2 * i, grid, generator, directory);
+                writeTile(2 * j + 1, 2 * i, tile, pyramidTileSize);
             }
 
             if(2*j+1 < numTileRow && 2*i+1 < numTileCol) {
                 std::cout << 2 * j + 1 << "," << 2 * i + 1 << std::endl;
-                generateTile(2 * j + 1, 2 * i + 1, grid, generator, directory);
+                auto tile = generateTile(2 * j + 1, 2 * i + 1, grid, generator, directory);
+                writeTile(2 * j + 1, 2 * i + 1, tile, pyramidTileSize);
             }
         }
     }
