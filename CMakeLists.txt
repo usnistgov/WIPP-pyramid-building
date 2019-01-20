@@ -18,6 +18,9 @@ add_definitions(-DPROFILE)
 
 set(SOURCES Helper.cpp Helper.h rules/WriteTileRule.h data/TileRequest.h tasks/WriteTileTask.h rules/PyramidRule.h tasks/CreateTileTask.h data/FakeTile.h utils/MatrixAllocator.h rules/MatrixMemoryRule.h utils/FakeTileAllocator.h data/Tile.h data/BlockType.cpp data/BlockType.h data/PartialFov.h utils/MistStitchedImageReader.h testLibtiff.cpp)
 
+include_directories(".")
+
 add_executable(pyramidBuilding main.cpp ${SOURCES})
 add_executable(stitching stitchingVectorParsing.cpp ${SOURCES})
 add_executable(libtiff testLibtiff.cpp utils/SingleTiledTiffWriter.h utils/BaseTileGenerator.h)
+add_executable(pyramidBuilding2 building.cpp ${SOURCES})

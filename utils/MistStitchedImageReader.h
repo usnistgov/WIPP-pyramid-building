@@ -44,6 +44,9 @@ private:
     uint32_t fovTileWidth = 0;
     uint32_t fovTileHeight = 0;
 
+    uint32_t gridMaxRow = 0;
+    uint32_t gridMaxCol = 0;
+
 
 
 public:
@@ -127,6 +130,8 @@ public:
             endRow = (fovGlobalY + fovHeight - 1) / tileSize;
 
             //compute overlap between an FOV and each pyramid tile.
+
+            //TODO inverse traversal for consistency
             for(uint32_t i = startCol; i <= endCol ; i++) {
                 for(uint32_t j = startRow; j <= endRow ; j++) {
                     cv::Rect tile = cv::Rect(i * tileSize, j * tileSize, tileSize, tileSize); //tile global coordinates
@@ -161,7 +166,7 @@ public:
                     assert(overlapInFovRef.y >= 0);
 
                     // add the partial FOV to the corresponding pyramid tile.
-                    std::pair<uint32_t,uint32_t> index= std::make_pair(i,j);
+                    std::pair<uint32_t,uint32_t> index= std::make_pair(j,i);
                     auto it = grid.find(index);
 
                     if(it != grid.end()) {
@@ -170,6 +175,13 @@ public:
                     else {
                         std::vector<PartialFov*> tileFovs({partialFov});
                         grid.insert(std::make_pair(index, tileFovs));
+
+                        if(j > gridMaxRow){
+                            gridMaxRow = j;
+                        }
+                        if(i > gridMaxCol){
+                            gridMaxCol = i;
+                        }
                     }
                 }
             }
@@ -198,6 +210,14 @@ public:
 
     uint32_t getFovTileHeight() const {
         return fovTileHeight;
+    }
+
+    uint32_t getGridMaxRow() const {
+        return gridMaxRow;
+    }
+
+    uint32_t getGridMaxCol() const {
+        return gridMaxCol;
     }
 
 };

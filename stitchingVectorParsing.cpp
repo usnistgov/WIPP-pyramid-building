@@ -4,8 +4,6 @@
 
 #include "utils/MistStitchedImageReader.h"
 #include "utils/BaseTileGenerator.h"
-
-
 #define uint64 uint64_hack_
 #define int64 int64_hack_
 #include <tiffio.h>
