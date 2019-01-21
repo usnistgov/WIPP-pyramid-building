@@ -33,25 +33,25 @@ public:
             //bottom right single block
             case 1:
                 //downsample and send new tile
-                tile = new Tile<uint32_t>(row,col,level+1, nullptr);
+                tile = new Tile<uint32_t>(row,col,level+1, block[0]->getData());
                 break;
             //bottom horizontal block
             case 2:
                 //blend resize and downsample and send new tile
                 level = block[0]->getLevel();
-                tile = new Tile<uint32_t>(row,col,level+1, nullptr);
+                tile = new Tile<uint32_t>(row,col,level+1, block[0]->getData());
                 break;
             //right vertical block
             case 3:
                 //blend resize and downsample and send new tile
                 level = block[0]->getLevel();
-                tile = new Tile<uint32_t>(row,col,level+1, nullptr);
+                tile = new Tile<uint32_t>(row,col,level+1, block[0]->getData());
                 break;
             //regular block
             case 4:
                 //blend resize and downsample and send new tile
                 level = block[0]->getLevel();
-                tile = new Tile<uint32_t>(row,col,level+1, nullptr);
+                tile = new Tile<uint32_t>(row,col,level+1, block[0]->getData());
                 break;
         }
 
