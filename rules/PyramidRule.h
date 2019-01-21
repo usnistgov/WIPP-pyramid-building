@@ -15,15 +15,15 @@ class PyramidRule : public htgs::IRule<Tile<uint32_t>, BlockRequest<uint32_t>> {
 
 public:
     PyramidRule(uint32_t numTileCol, uint32_t numTileRow) :  numTileCol(numTileCol), numTileRow(numTileRow) {
-        auto maxDim = std::max(numTileCol,numTileRow);
 
+        //calculate pyramid depth
+        auto maxDim = std::max(numTileCol,numTileRow);
         numLevel = ceil(log2(maxDim)) + 1;
 
-
+        //calculate number of tiles for each level
         double levelCol, levelRow;
         levelCol = numTileCol;
         levelRow = numTileRow;
-
         for(uint32_t l=0; l<numLevel; l++){
             std::array<uint32_t,2> gridSize = { (uint32_t)levelCol, (uint32_t)levelRow };
             levelGridSizes.push_back(gridSize);
@@ -31,17 +31,20 @@ public:
             levelRow = ceil(levelRow /2);
         }
 
+        //dimension the tile cache for each level of the pyramid
         grids.resize(numLevel);
-
         levelCol = numTileCol;
         levelRow = numTileRow;
-
         for (auto it = grids.begin() ; it != grids.end(); ++it) {
             it->resize(levelCol * levelRow);
             levelCol = ceil(levelCol/2);
             levelRow = ceil(levelRow /2);
         }
 
+    }
+
+    std::string getName() override {
+        return "Pyramid Rule - Cache";
     }
 
     void applyRule(std::shared_ptr<Tile<uint32_t>> data, size_t pipelineId) override {
@@ -68,9 +71,11 @@ public:
 //        }
 
         if(level == this->numLevel -1){
-            this->shutdownRule(pipelineId);
-            this->addResult(nullptr);
+      //      this->shutdownRule(pipelineId);
+      //      this->addResult(nullptr);
+            done = true;
             return;
+
        //         return;
         }
 
@@ -208,6 +213,13 @@ public:
 
 
 
+
+
+
+    }
+
+    bool canTerminateRule(size_t pipelineId) override {
+        return done;
     }
 
 
@@ -228,6 +240,8 @@ private:
     uint32_t numLevel;
     std::vector<std::array<uint32_t,2>> levelGridSizes;
     std::vector<std::vector<std::shared_ptr<Tile<uint32_t>>>> grids;
+
+    bool done = false;
 
 
 

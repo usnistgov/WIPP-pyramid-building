@@ -73,8 +73,8 @@ int main() {
     //assert(pyramidTileSize % tileWidth == 0);
 
 
-    uint32_t numTileRow = reader->getGridMaxRow();
-    uint32_t numTileCol = reader->getGridMaxCol();
+    uint32_t numTileRow = reader->getGridMaxRow() + 1;
+    uint32_t numTileCol = reader->getGridMaxCol() + 1;
 
     std::cout << "numTileRow : " << numTileRow << ", numTileCol : " << numTileCol << std::endl;
 
@@ -94,10 +94,16 @@ int main() {
     auto outputTask = new OutputTask();
 
     graph->setGraphConsumerTask(baseTileTask);
-    graph->addEdge(baseTileTask, bookeeper);
-    graph->addEdge(createTileTask,bookeeper);
-    graph->addRuleEdge(bookeeper, pyramidRule, createTileTask);
-    graph->addRuleEdge(bookeeper, writeRule, outputTask);
+
+    //incoming edges from the bookeeper
+    graph->addEdge(baseTileTask, bookeeper); //pyramid base level tile
+    graph->addEdge(createTileTask,bookeeper); //pyramid higher level tile
+
+    //outgoing edges
+    graph->addRuleEdge(bookeeper, pyramidRule, createTileTask); //caching tiles and creating a tile at higher level;
+    graph->addRuleEdge(bookeeper, writeRule, outputTask); //exiting the graph;
+
+    //output task
     graph->addGraphProducerTask(outputTask);
 
 //    auto matAlloc = new FakeTileAllocator();

@@ -49,6 +49,8 @@ private:
     uint32_t gridMaxRow = 0;
     uint32_t gridMaxCol = 0;
 
+    uint32_t gridSize;
+
 
 
 public:
@@ -188,9 +190,7 @@ public:
             }
 
         }
-
     }
-
 
 
     const std::map<std::pair<uint32_t, uint32_t>, std::vector<PartialFov *>> &getGrid() const {

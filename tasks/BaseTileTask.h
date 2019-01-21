@@ -29,6 +29,10 @@ public:
         return new BaseTileTask(generator);
     }
 
+    std::string getName() override {
+        return "Base Tile Task";
+    }
+
 private:
 
     BaseTileGenerator* generator;

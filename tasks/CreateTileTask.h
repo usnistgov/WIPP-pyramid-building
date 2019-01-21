@@ -58,6 +58,9 @@ public:
         this->addResult(tile);
     }
 
+    std::string getName() override {
+        return "Pyramid Tile Task";
+    }
 
     htgs::ITask<BlockRequest<uint32_t>, Tile<uint32_t> > *copy() override {
         return new CreateTileTask();

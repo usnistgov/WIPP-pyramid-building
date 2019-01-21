@@ -15,11 +15,17 @@ public:
 
     void applyRule(std::shared_ptr<Tile<uint32_t>> data, size_t pipelineId) override {
 
-        if(data->getLevel() >= level) {
+        uint32_t l = data->getLevel();
+        if(l >= level) {
             this->addResult(data);
         }
 
      //   data.reset();
+    }
+
+
+    std::string getName() override {
+        return "Write Rule";
     }
 
 private:
