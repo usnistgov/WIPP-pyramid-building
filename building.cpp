@@ -6,6 +6,8 @@
 #include "tasks/WriteTileTask.h"
 #include "rules/PyramidRule.h"
 #include "tasks/CreateTileTask.h"
+#include "tasks/BaseTileTask.h"
+#include "tasks/OutputTask.h"
 #include "utils/MatrixAllocator.h"
 #include "utils/FakeTileAllocator.h"
 #include "data/Tile.h"
@@ -16,6 +18,7 @@
 #undef uint64
 #undef int64
 #include <assert.h>
+#include <data/TileRequest.h>
 #include "utils/SingleTiledTiffWriter.h"
 #include "utils/MistStitchedImageReader.h"
 #include "utils/BaseTileGenerator.h"
@@ -25,7 +28,7 @@ uint32_t* generateTile(uint32_t i, uint32_t j, std::map<std::pair<uint32_t, uint
     std::pair<uint32_t,uint32_t> index= std::make_pair(i,j);
     auto it = grid.find(index);
     assert(it != grid.end());
-    uint32_t* tile = generator->generateTile(index, it->second, directory);
+    uint32_t* tile = generator->generateTile(index);
     return tile;
 }
 
@@ -55,6 +58,7 @@ int main() {
 //    uint32_t pyramidTileSize = 32;
 
     auto reader = new MistStitchedImageReader(directory, vector, pyramidTileSize);
+
     auto grid = reader->getGrid();
 
     //TODO CHECK we assume that all FOV have the same tiling scheme.
@@ -69,42 +73,46 @@ int main() {
     //assert(pyramidTileSize % tileWidth == 0);
 
 
-
     uint32_t numTileRow = reader->getGridMaxRow();
     uint32_t numTileCol = reader->getGridMaxCol();
 
     std::cout << "numTileRow : " << numTileRow << ", numTileCol : " << numTileCol << std::endl;
 
-//    auto graph = new htgs::TaskGraphConf<Tile<uint32_t>, Tile<uint32_t> >();
-//
-//    auto bookeeper = new htgs::Bookkeeper<Tile<uint32_t>>();
-//
-//    auto writeRule = new WriteTileRule();
-//
-//    auto pyramidRule = new PyramidRule(numTileCol,numTileRow);
-//
-//    auto createTileTask = new CreateTileTask();
-//
-//    graph->setGraphConsumerTask(bookeeper);
-//    graph->addEdge(createTileTask,bookeeper);
-//    graph->addRuleEdge(bookeeper, writeRule, writeTask);
-//    graph->addRuleEdge(bookeeper, pyramidRule, createTileTask);
-//    graph->addGraphProducerTask(writeTask);
-////    auto matAlloc = new FakeTileAllocator();
-////    graph->addMemoryManagerEdge("PYRAMID_TILE", createTileTask, matAlloc, 4, htgs::MMType::Static);
-//
-//    htgs::TaskGraphRuntime *runtime = new htgs::TaskGraphRuntime(graph);
-//
-//    htgs::TaskGraphSignalHandler::registerTaskGraph(graph);
-//    htgs::TaskGraphSignalHandler::registerSignal(SIGTERM   );
-//
-//    runtime->executeRuntime();
+    auto graph = new htgs::TaskGraphConf<TileRequest, Tile<uint32_t> >();
 
+    BaseTileGenerator* generator = new BaseTileGenerator(reader);
+    auto baseTileTask = new BaseTileTask(generator);
 
+    auto bookeeper = new htgs::Bookkeeper<Tile<uint32_t>>();
+
+    auto writeRule = new WriteTileRule();
+
+    auto pyramidRule = new PyramidRule(numTileCol,numTileRow);
+
+    auto createTileTask = new CreateTileTask();
+
+    auto outputTask = new OutputTask();
+
+    graph->setGraphConsumerTask(baseTileTask);
+    graph->addEdge(baseTileTask, bookeeper);
+    graph->addEdge(createTileTask,bookeeper);
+    graph->addRuleEdge(bookeeper, pyramidRule, createTileTask);
+    graph->addRuleEdge(bookeeper, writeRule, outputTask);
+    graph->addGraphProducerTask(outputTask);
+
+//    auto matAlloc = new FakeTileAllocator();
+//    graph->addMemoryManagerEdge("PYRAMID_TILE", createTileTask, matAlloc, 4, htgs::MMType::Static);
+
+    htgs::TaskGraphRuntime *runtime = new htgs::TaskGraphRuntime(graph);
+
+    htgs::TaskGraphSignalHandler::registerTaskGraph(graph);
+    htgs::TaskGraphSignalHandler::registerSignal(SIGTERM   );
+
+    runtime->executeRuntime();
 
     //HTGS Graph
     //Create tileRequest
-    //Task1 : (TileRequest, Tile) base level tile generation : generate individual pyramid tiles
+    //Task1 : (BlockRequest, Tile) base level tile generation : generate individual pyramid tiles
     //Task2 : (Tile) Bookeeper : receive the pyramid tile and cache it. Generate request for higher level when it can.
     //Task3 : (Block, Tile) CreateDownscaledTile : create tile at higher level of the pyramid.
     //Task 4 : write the Tile;
@@ -115,52 +123,51 @@ int main() {
     numberBlockHeight = ceil((double)numTileRow/2);
     numberBlockWidth = ceil((double)numTileCol/2);
 
-    auto generator = new BaseTileGenerator(tileWidth, tileHeight, pyramidTileSize);
-
     //we traverse the grid in blocks to minimize memory footprint of the pyramid generation.
     for(uint32_t j = 0; j < numberBlockHeight; j++){
         for(uint32_t i = 0; i < numberBlockWidth; i++){
-
             if(2*i < numTileCol && 2*j < numTileRow) {
                 std::cout << 2*j << "," << 2*i << std::endl;
-                auto tile = generateTile(2 * j, 2 * i, grid, generator, directory);
-                writeTile(2 * j, 2 * i,tile, pyramidTileSize);
+                auto tileRequest = new TileRequest(2 * j, 2 * i);
+                graph->produceData(tileRequest);
             }
             if(2*i+1 < numTileCol) {
                 std::cout << 2 * j << "," << 2 * i + 1 << std::endl;
-                auto tile = generateTile(2 * j, 2 * i + 1, grid, generator, directory);
-                writeTile(2 * j, 2 * i + 1, tile, pyramidTileSize);
+                auto tileRequest = new TileRequest(2 * j, 2 * i + 1);
+                graph->produceData(tileRequest);
             }
 
             if(2*j+1 < numTileRow) {
                 std::cout << 2 * j + 1 << "," << 2 * i << std::endl;
-                auto tile = generateTile(2 * j + 1, 2 * i, grid, generator, directory);
-                writeTile(2 * j + 1, 2 * i, tile, pyramidTileSize);
+                auto tileRequest = new TileRequest(2 * j + 1, 2 * i);
+                graph->produceData(tileRequest);
             }
 
             if(2*j+1 < numTileRow && 2*i+1 < numTileCol) {
                 std::cout << 2 * j + 1 << "," << 2 * i + 1 << std::endl;
-                auto tile = generateTile(2 * j + 1, 2 * i + 1, grid, generator, directory);
-                writeTile(2 * j + 1, 2 * i + 1, tile, pyramidTileSize);
+                auto tileRequest = new TileRequest(2 * j + 1, 2 * i + 1);
+                graph->produceData(tileRequest);
             }
         }
     }
 
 
-//    graph->finishedProducingData();
-//
-//    while(!graph->isOutputTerminated()){
-//        auto r = graph->consumeData();
-//        if(r == nullptr){
-//            break;
-//        }
-//        std::cout << r->getLevel() << ": " << r->getRow() << "," << r->getCol() << std::endl;
-//    }
-//
-//    std::cout << "we should be done" << std::endl;
-//    runtime->waitForRuntime();
-//
-//    delete runtime;
+    graph->finishedProducingData();
+
+    //writeTile(2 * j, 2 * i,tile, pyramidTileSize);
+
+    while(!graph->isOutputTerminated()){
+        auto r = graph->consumeData();
+        if(r == nullptr){
+            break;
+        }
+        std::cout << "output : " << r->getLevel() << ": " << r->getRow() << "," << r->getCol() << std::endl;
+    }
+
+    std::cout << "we should be done" << std::endl;
+    runtime->waitForRuntime();
+
+    delete runtime;
 
 }
 

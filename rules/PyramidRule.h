@@ -9,9 +9,9 @@
 #include <math.h>
 #include <array>
 #include "../data/Tile.h"
-#include "../data/TileRequest.h"
+#include "data/BlockRequest.h"
 
-class PyramidRule : public htgs::IRule<Tile<uint32_t>, TileRequest<uint32_t>> {
+class PyramidRule : public htgs::IRule<Tile<uint32_t>, BlockRequest<uint32_t>> {
 
 public:
     PyramidRule(uint32_t numTileCol, uint32_t numTileRow) :  numTileCol(numTileCol), numTileRow(numTileRow) {
@@ -98,7 +98,7 @@ public:
             std::cout << "corner case : block size 1 " << std::endl;
             //sendTile
             std::vector<std::shared_ptr<Tile<uint32_t>>> block{data};
-            this->addResult(new TileRequest<uint32_t>(block));
+            this->addResult(new BlockRequest<uint32_t>(block));
             return;
         }
 
@@ -107,12 +107,12 @@ public:
             if(row % 2 == 0 && grids.at(level).at(SOUTH).get() != nullptr) {
                 //send 2 tiles
                 std::vector<std::shared_ptr<Tile<uint32_t>>> block{ data, nullptr, grids.at(level).at(SOUTH) };
-                this->addResult(new TileRequest<uint32_t>(block));
+                this->addResult(new BlockRequest<uint32_t>(block));
             }
             else if (row % 2 != 0 && grids.at(level).at(NORTH).get() != nullptr) {
                 //send 2 tiles
                 std::vector<std::shared_ptr<Tile<uint32_t>>> block{ grids.at(level).at(NORTH), nullptr, data };
-                this->addResult(new TileRequest<uint32_t>(block));
+                this->addResult(new BlockRequest<uint32_t>(block));
             }
             return;
         }
@@ -122,12 +122,12 @@ public:
             if(col % 2 == 0 && grids.at(level).at(EAST).get() != nullptr) {
                 //send 2 tiles
                 std::vector<std::shared_ptr<Tile<uint32_t>>> block{ data, grids.at(level).at(EAST) };
-                this->addResult(new TileRequest<uint32_t>(block));
+                this->addResult(new BlockRequest<uint32_t>(block));
             }
             else if (col % 2 != 0 && grids.at(level).at(WEST).get() != nullptr ) {
                 //send 2 tiles
                 std::vector<std::shared_ptr<Tile<uint32_t>>> block{ grids.at(level).at(WEST), data };
-                this->addResult(new TileRequest<uint32_t>(block));
+                this->addResult(new BlockRequest<uint32_t>(block));
             }
             return;
         }
@@ -141,7 +141,7 @@ public:
                 //sendTile
                 std::cout << "new tile! " << std::endl;
                 std::vector<std::shared_ptr<Tile<uint32_t>>> block{ data, grids.at(level).at(EAST), grids.at(level).at(SOUTH), grids.at(level).at(SOUTH_EAST)};
-                this->addResult(new TileRequest<uint32_t>(block));
+                this->addResult(new BlockRequest<uint32_t>(block));
             };
         }
 
@@ -154,7 +154,7 @@ public:
                 //sendTile
                 std::cout << "new tile! " << std::endl;
                 std::vector<std::shared_ptr<Tile<uint32_t>>> block{ grids.at(level).at(WEST), data, grids.at(level).at(SOUTH_WEST), grids.at(level).at(SOUTH)};
-                this->addResult(new TileRequest<uint32_t>(block));
+                this->addResult(new BlockRequest<uint32_t>(block));
             }
         }
 
@@ -167,7 +167,7 @@ public:
                 //sendTile
                 std::cout << "new tile! " << std::endl;
                 std::vector<std::shared_ptr<Tile<uint32_t>>> block{ grids.at(level).at(NORTH), grids.at(level).at(NORTH_EAST), data, grids.at(level).at(EAST)};
-                this->addResult(new TileRequest<uint32_t>(block));
+                this->addResult(new BlockRequest<uint32_t>(block));
             }
         }
 
@@ -180,7 +180,7 @@ public:
                 //sendTile
                 std::cout << "new tile! " << std::endl;
                 std::vector<std::shared_ptr<Tile<uint32_t>>> block{ grids.at(level).at(NORTH_WEST), grids.at(level).at(NORTH), grids.at(level).at(WEST), data};
-                this->addResult(new TileRequest<uint32_t>(block));
+                this->addResult(new BlockRequest<uint32_t>(block));
             }
         }
 

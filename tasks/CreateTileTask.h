@@ -7,17 +7,17 @@
 
 #include <htgs/api/ITask.hpp>
 #include <FastImage/api/FastImage.h>
-#include "../data/TileRequest.h"
+#include "data/BlockRequest.h"
 #include "../data/FakeTile.h"
 #include "../rules/MatrixMemoryRule.h"
 
-class CreateTileTask : public htgs::ITask<TileRequest<uint32_t>, Tile<uint32_t> > {
+class CreateTileTask : public htgs::ITask<BlockRequest<uint32_t>, Tile<uint32_t> > {
 
 
 public:
     CreateTileTask() {}
 
-    void executeTask(std::shared_ptr<TileRequest<uint32_t>> data) override {
+    void executeTask(std::shared_ptr<BlockRequest<uint32_t>> data) override {
         auto block = data->getBlock();
 
         std::cout << "Create Tile Task - " << *data.get() << std::endl;
@@ -59,7 +59,7 @@ public:
     }
 
 
-    htgs::ITask<TileRequest<uint32_t>, Tile<uint32_t> > *copy() override {
+    htgs::ITask<BlockRequest<uint32_t>, Tile<uint32_t> > *copy() override {
         return new CreateTileTask();
     }
 

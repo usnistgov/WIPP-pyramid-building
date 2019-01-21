@@ -27,8 +27,9 @@
 /**
  * @class MistStitchedImageReader MistStitchedImageReader.h
  * @brief Parse the MIST stitching vector representing overlapping FOVs.
- * @details A pyramid is composed at level 0 of tiles carved from a set of overlapping FOVs.
- * The structure is stored in a grid structure : (row,col) -> vector of partial FOVs
+ * @details
+ * The pyramid base level is composed of tiles carved from a set of overlapping FOVs.
+ * For a given pyramid tile size, we can generate a grid structure : (row,col) -> vector of partial overlapping FOVs.
  */
 class MistStitchedImageReader {
 
@@ -37,6 +38,7 @@ private:
     uint32_t pyramidTileSize;
     std::string imageDirectoryPath;
     std::string stitchingVectorPath;
+
     std::map<std::pair<uint32_t,uint32_t> , std::vector<PartialFov*>> grid;
 
     uint32_t fovWidth = 0;
@@ -131,9 +133,8 @@ public:
 
             //compute overlap between an FOV and each pyramid tile.
 
-            //TODO inverse traversal for consistency
-            for(uint32_t i = startCol; i <= endCol ; i++) {
-                for(uint32_t j = startRow; j <= endRow ; j++) {
+            for(uint32_t j = startRow; j <= endRow ; j++) {
+                for(uint32_t i = startCol; i <= endCol ; i++) {
                     cv::Rect tile = cv::Rect(i * tileSize, j * tileSize, tileSize, tileSize); //tile global coordinates
 
                     //global coordinates
@@ -218,6 +219,14 @@ public:
 
     uint32_t getGridMaxCol() const {
         return gridMaxCol;
+    }
+
+    const std::string &getImageDirectoryPath() const {
+        return imageDirectoryPath;
+    }
+
+    uint32_t getPyramidTileSize() const {
+        return pyramidTileSize;
     }
 
 };

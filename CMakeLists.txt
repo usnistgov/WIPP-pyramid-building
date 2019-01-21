@@ -16,11 +16,11 @@ message("OpenCV Version: ${OpenCV_VERSION}")
 
 add_definitions(-DPROFILE)
 
-set(SOURCES Helper.cpp Helper.h rules/WriteTileRule.h data/TileRequest.h tasks/WriteTileTask.h rules/PyramidRule.h tasks/CreateTileTask.h data/FakeTile.h utils/MatrixAllocator.h rules/MatrixMemoryRule.h utils/FakeTileAllocator.h data/Tile.h data/BlockType.cpp data/BlockType.h data/PartialFov.h utils/MistStitchedImageReader.h testLibtiff.cpp)
+set(SOURCES Helper.cpp Helper.h rules/WriteTileRule.h data/BlockRequest.h tasks/WriteTileTask.h rules/PyramidRule.h tasks/CreateTileTask.h data/FakeTile.h utils/MatrixAllocator.h rules/MatrixMemoryRule.h utils/FakeTileAllocator.h data/Tile.h data/BlockType.cpp data/BlockType.h data/PartialFov.h utils/MistStitchedImageReader.h testLibtiff.cpp data/TileRequest.h)
 
 include_directories(".")
 
 add_executable(pyramidBuilding main.cpp ${SOURCES})
-add_executable(stitching stitchingVectorParsing.cpp ${SOURCES})
-add_executable(libtiff testLibtiff.cpp utils/SingleTiledTiffWriter.h utils/BaseTileGenerator.h tasks/BaseTileTask.h)
-add_executable(pyramidBuilding2 building.cpp ${SOURCES})
+add_executable(stitching stitchingVectorParsing.cpp ${SOURCES} data/TileRequest.h)
+add_executable(libtiff testLibtiff.cpp utils/SingleTiledTiffWriter.h utils/BaseTileGenerator.h tasks/BaseTileTask.h data/TileRequest.h tasks/OutputTask.h)
+add_executable(pyramidBuilding2 building.cpp ${SOURCES} data/TileRequest.h)

@@ -14,18 +14,37 @@
 #include "../Helper.h"
 #include <FastImage/api/FastImage.h>
 #include <FastImage/TileLoaders/GrayscaleTiffTileLoader.h>
+#include "MistStitchedImageReader.h"
 
+/**
+ * @class BaseTileGenerator BaseTileGenerator.h
+ * @brief Generate pyramid base level tile.
+ * @details
+ * The pyramid base level is composed of tiles carved from a set of overlapping FOVs.
+ * For a given pyramid tile size, we can generate a grid structure : (row,col) -> vector of partial overlapping FOVs.
+ * We can then used this information to generate each tile.
+ */
 class BaseTileGenerator {
-
 
 public:
 
-    BaseTileGenerator(uint32_t tileWidth, uint32_t tileHeight, uint32_t pyramidTileSize) : tileWidth(tileWidth),
-                                                                                           tileHeight(tileHeight),
-                                                                                           pyramidTileSize(
-                                                                                                   pyramidTileSize) {}
+    /**
+     * The pyramid base level tile generator needs information on the general structure of the full FOVs.
+     * @param reader the MistStitchedImageReader that contains information on partial FOV overlaps.
+     */
+    BaseTileGenerator(MistStitchedImageReader *reader): grid(reader->getGrid()), directory(reader->getImageDirectoryPath()), tileWidth(
+            reader->getFovTileWidth()), tileHeight(reader->getFovTileHeight()), pyramidTileSize(reader->getPyramidTileSize()) {}
 
-    uint32_t* generateTile(std::pair<uint32_t, uint32_t> coordinates, std::vector<PartialFov *> fovs, std::string directory){
+    /**
+     * Generate a pyramid base level tile at a specific coordinates.
+     * @param index (row,col) of the tile to generate.
+     * @return
+     */
+    uint32_t* generateTile(std::pair<uint32_t, uint32_t> index){
+
+        auto it = grid.find(index);
+        assert(it != grid.end());
+        std::vector<PartialFov *> fovs = it->second;
 
         uint32_t* tile = new uint32_t[ pyramidTileSize * pyramidTileSize ];  //the pyramid tile we will be filling from partial FOVs.
 
@@ -148,9 +167,13 @@ public:
 
 private:
 
+    std::map<std::pair<uint32_t, uint32_t>, std::vector<PartialFov *>> grid;
+    std::string directory;
     uint32_t tileWidth;
     uint32_t tileHeight;
     uint32_t pyramidTileSize;
+
+
 
 };
 
