@@ -9,96 +9,77 @@
 #include "FastImage/api/FastImage.h"
 #include "../data/Tile.h"
 #include <tiffio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <utils/SingleTiledTiffWriter.h>
 
 class WriteTileTask : public htgs::ITask< Tile<uint32_t>, Tile<uint32_t> > {
 
 public:
 
-    /// \brief Create the write task
-    /// \param numThreads Number of writer in parallel
-    /// \param pathOut Output file path
-    /// \param imageWidth Image width
-    /// \param imageHeight Image height
-    /// \param tileWidth Tile width
-    /// \param tileHeight Tile height
-    WriteTileTask(const char *pathOut, uint32_t imageWidth, uint32_t imageHeight, uint32_t tileWidth,
-              uint32_t tileHeight) :
-            htgs::ITask< Tile<uint32_t>, Tile<uint32_t> >(1), _pathOut(pathOut), _imageWidth(imageWidth),
-            _imageHeight(imageHeight), _tileWidth(tileWidth), _tileHeight(tileHeight) {}
+    WriteTileTask(const std::string &_pathOut, uint32_t pyramidTileSize) : _pathOut(_pathOut),
+                                                                           pyramidTileSize(pyramidTileSize) {
 
-    /// \brief Task initializer
-    void initialize() override {
-        // Initialize the tiff
-        _tif = TIFFOpen(_pathOut, "w");
-        if (_tif != nullptr) {
-            TIFFSetField(_tif, TIFFTAG_IMAGEWIDTH, _imageWidth);
-            TIFFSetField(_tif, TIFFTAG_IMAGELENGTH, _imageHeight);
-            TIFFSetField(_tif, TIFFTAG_TILELENGTH, _tileHeight);
-            TIFFSetField(_tif, TIFFTAG_TILEWIDTH, _tileWidth);
-            TIFFSetField(_tif, TIFFTAG_BITSPERSAMPLE, 32);
-            TIFFSetField(_tif, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
-            TIFFSetField(_tif, TIFFTAG_ROWSPERSTRIP, 1);
-            TIFFSetField(_tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-            TIFFSetField(_tif, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
-            TIFFSetField(_tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
-            TIFFSetField(_tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
-        } else {
-            std::cerr << "The File " << _pathOut << " can't be opened." << std::endl;
-            exit(1);
+
+        auto dir = opendir(_pathOut.c_str());
+
+        if(dir == nullptr){
+            const int dir_err = mkdir(_pathOut.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+            if (-1 == dir_err)
+            {
+                printf("Error creating directory!n");
+                exit(1);
+            }
         }
     }
 
     void executeTask(std::shared_ptr<Tile<uint32_t>> data) override {
 
+        std::string level = std::to_string(data->getLevel());
 
-        //   std::cout << "write tile : " << data->get()->getRow() << "," << data->get()->getCol() << std::endl;
-        // find out how to call the destructr    ~data();
-      //  printf( "ref count for tile : %d %d %d :: %d \n", data->getRow() , data->getCol() , data->getLevel() , data.use_count());
+        auto dirPath = (_pathOut + "/" + std::to_string(data->getLevel()));
 
-      //cannot write at any level. Generate level 0 tiff then use vips?
-     //   TIFFWriteTile(_tif, data->getData(), data->getRow(), data->getCol(), data->getLevel(), 0);
+        std::cout << dirPath << std::endl;
 
-        if(data->getLevel() == 0){
-   //         TIFFWriteTile(_tif, data->getData(), data->getRow(), data->getCol(), data->getLevel(), 0);
-            if(data != nullptr) {
-                data->getOrigin()->releaseMemory();
-                std::ostringstream oss;
-                oss << "count of tile release : " << ++count;
-                std::cout << oss.str() << std::endl;
+        auto dir = opendir(dirPath.c_str());
+
+        if(dir == nullptr){
+            const int dir_err = mkdir(dirPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+            if (-1 == dir_err)
+            {
+                printf("Error creating directory!n");
+                exit(1);
             }
         }
+
+        //write as a tif output
+        auto outputFilename = "img_r" + std::to_string(data->getRow()) + "_c" + std::to_string(data->getCol()) + ".tif";
+
+        auto fullImagePath = _pathOut + "/" + level + "/"  + outputFilename;
+
+        auto w = new SingleTiledTiffWriter(fullImagePath, pyramidTileSize);
+        w->write(data->getData());
+
         addResult(data);
     }
 
     /// \brief Close the tiff file
     void shutdown() override {
-        TIFFClose(_tif);
     }
 
     /// \brief Get the writer name
     /// \return Writer name
     std::string getName() override { return "WriteTask"; }
 
-    /// \brief Copy  the writing task
-    /// \return A new writing task copy of the first
-    WriteTileTask *copy() override {
-        return new WriteTileTask(_pathOut, _imageWidth, _imageHeight, _tileWidth, _tileHeight);
+    ITask<Tile<uint32_t>, Tile<uint32_t>> *copy() override {
+        return new WriteTileTask(_pathOut, pyramidTileSize);
     }
 
-    uint32_t count;
-
 private:
-    TIFF
-            *_tif;        ///< Tiff file to write tile into
 
-    const char
-            *_pathOut;    ///< Tiff file path
-
-    uint32_t
-            _imageWidth,  ///< Image width
-            _imageHeight, ///< image height
-            _tileWidth,   ///< Tile width
-            _tileHeight;  ///< Tile Height
+    std::string _pathOut;
+    uint32_t pyramidTileSize;
 
 };
 

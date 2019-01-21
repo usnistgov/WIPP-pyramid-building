@@ -25,20 +25,21 @@ public:
         row = t->getRow() / 2;
         col = t->getCol() / 2;
         level = t->getLevel();
-        blockType = initBlockType();
+
+        switch (block.size()) {
+            case 1:
+                blockType = BlockType::Single;
+            case 2:
+                blockType = BlockType::Horizontal;
+            case 3:
+                blockType = BlockType::Vertical;
+            case 4:
+                blockType = BlockType::Full;
+        }
     }
 
     BlockType initBlockType() {
-        switch (block.size()) {
-            case 1:
-                return BlockType::Single;
-            case 2:
-                return BlockType::Horizontal;
-            case 3:
-                return BlockType::Vertical;
-            case 4:
-                return BlockType::Full;
-        }
+
     }
 
     const std::vector<std::shared_ptr<Tile<Type>>> &getBlock() const {

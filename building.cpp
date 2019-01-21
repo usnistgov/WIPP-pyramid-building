@@ -91,7 +91,7 @@ int main() {
 
     auto createTileTask = new CreateTileTask();
 
-    auto outputTask = new OutputTask();
+    auto writeTask = new WriteTileTask("output", 256);
 
     graph->setGraphConsumerTask(baseTileTask);
 
@@ -101,10 +101,10 @@ int main() {
 
     //outgoing edges
     graph->addRuleEdge(bookeeper, pyramidRule, createTileTask); //caching tiles and creating a tile at higher level;
-    graph->addRuleEdge(bookeeper, writeRule, outputTask); //exiting the graph;
+    graph->addRuleEdge(bookeeper, writeRule, writeTask); //exiting the graph;
 
     //output task
-    graph->addGraphProducerTask(outputTask);
+    graph->addGraphProducerTask(writeTask);
 
 //    auto matAlloc = new FakeTileAllocator();
 //    graph->addMemoryManagerEdge("PYRAMID_TILE", createTileTask, matAlloc, 4, htgs::MMType::Static);
@@ -159,8 +159,6 @@ int main() {
 
 
     graph->finishedProducingData();
-
-    //writeTile(2 * j, 2 * i,tile, pyramidTileSize);
 
     while(!graph->isOutputTerminated()){
         auto r = graph->consumeData();
