@@ -68,10 +68,6 @@ int main() {
     //Will that be of any use?
     //assert(pyramidTileSize % tileWidth == 0);
 
-    //generating the lowest level of the pyramid represented by a grid of pyramid tile.
-    //TODO instead of simply iterating through the grid entries, we could traverse blocks to speed up pyramid generation.
-    //TODO Make this an HTGS task and decouple from the TIFF write operation (this could be a PNG Write as well)
-    //TODO wrap the tile represented as a raw array into a Tile object and send it through the graph.
 
 
     uint32_t numTileRow = reader->getGridMaxRow();
@@ -106,6 +102,12 @@ int main() {
 
 
 
+    //HTGS Graph
+    //Create tileRequest
+    //Task1 : (TileRequest, Tile) base level tile generation : generate individual pyramid tiles
+    //Task2 : (Tile) Bookeeper : receive the pyramid tile and cache it. Generate request for higher level when it can.
+    //Task3 : (Block, Tile) CreateDownscaledTile : create tile at higher level of the pyramid.
+    //Task 4 : write the Tile;
 
 
     uint32_t numberBlockHeight,numberBlockWidth = 0;
@@ -113,9 +115,9 @@ int main() {
     numberBlockHeight = ceil((double)numTileRow/2);
     numberBlockWidth = ceil((double)numTileCol/2);
 
-    //generate a pyramid tile
     auto generator = new BaseTileGenerator(tileWidth, tileHeight, pyramidTileSize);
 
+    //we traverse the grid in blocks to minimize memory footprint of the pyramid generation.
     for(uint32_t j = 0; j < numberBlockHeight; j++){
         for(uint32_t i = 0; i < numberBlockWidth; i++){
 

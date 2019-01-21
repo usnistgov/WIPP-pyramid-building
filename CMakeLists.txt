@@ -22,5 +22,5 @@ include_directories(".")
 
 add_executable(pyramidBuilding main.cpp ${SOURCES})
 add_executable(stitching stitchingVectorParsing.cpp ${SOURCES})
-add_executable(libtiff testLibtiff.cpp utils/SingleTiledTiffWriter.h utils/BaseTileGenerator.h)
+add_executable(libtiff testLibtiff.cpp utils/SingleTiledTiffWriter.h utils/BaseTileGenerator.h tasks/BaseTileTask.h)
 add_executable(pyramidBuilding2 building.cpp ${SOURCES})
