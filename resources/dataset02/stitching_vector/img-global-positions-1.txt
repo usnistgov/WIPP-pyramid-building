@@ -1,4 +1,4 @@
 file: hello-r0-c0-tiled.tif; corr: 1.0000000000; position: (0, 0); grid: (0, 0);
-file: hello-r0-c1-tiled.tif; corr: 1.0000000000; position: (36, 0); grid: (1, 0);
-file: hello-r1-c0-tiled.tif; corr: 1.0000000000; position: (0, 36); grid: (0, 1);
-file: hello-r1-c1-tiled.tif; corr: 1.0000000000; position: (0, 52); grid: (1, 1);
+file: hello-r0-c1-tiled.tif; corr: 1.0000000000; position: (32, 0); grid: (1, 0);
+file: hello-r1-c0-tiled.tif; corr: 1.0000000000; position: (0, 32); grid: (0, 1);
+file: hello-r1-c1-tiled.tif; corr: 1.0000000000; position: (32, 32); grid: (1, 1);

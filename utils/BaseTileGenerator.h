@@ -43,7 +43,16 @@ public:
     uint32_t* generateTile(std::pair<uint32_t, uint32_t> index){
 
         auto it = grid.find(index);
-        assert(it != grid.end());
+
+        //Dealing with corner case.
+        //It should never happen with real data, but we might have missing tiles or have so much overlap between FOVs that
+        //some gap appears in the image. If this is the case, we generate an empty tile.
+        if(it == grid.end()){
+            uint32_t* tile = new uint32_t[ pyramidTileSize * pyramidTileSize ];  //the pyramid tile we will be filling from partial FOVs.
+            memset( tile, 0, pyramidTileSize * pyramidTileSize*sizeof(uint32_t) );
+            return tile;
+        }
+
         std::vector<PartialFov *> fovs = it->second;
 
         uint32_t* tile = new uint32_t[ pyramidTileSize * pyramidTileSize ];  //the pyramid tile we will be filling from partial FOVs.

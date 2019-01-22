@@ -21,18 +21,18 @@
  */
 
 int main() {
-    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/stitching_vector/img-global-positions-1.txt";
-    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/tiled-images/";
+//    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/stitching_vector/img-global-positions-1.txt";
+//    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/tiled-images/";
 
-//    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset02/stitching_vector/img-global-positions-1.txt";
-//    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset02/images/";
+    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset02/stitching_vector/img-global-positions-1.txt";
+    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset02/images/";
 
 //    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset01/stitching_vector/img-global-positions-1.txt";
 //    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset01/images/";
 
     //pyramid
-    uint32_t pyramidTileSize = 256;
-//    uint32_t pyramidTileSize = 32;
+//    uint32_t pyramidTileSize = 256;
+   uint32_t pyramidTileSize = 32;
 
     auto reader = new MistStitchedImageReader(directory, vector, pyramidTileSize);
     auto grid = reader->getGrid();
@@ -56,8 +56,8 @@ int main() {
     for ( auto it = grid.begin(); it != grid.end(); ++it ) {
 
         //generate a pyramid tile
-        auto generator = new BaseTileGenerator(tileWidth, tileHeight, pyramidTileSize);
-        uint32_t* tile = generator->generateTile(it->first, it->second, directory);
+        auto generator = new BaseTileGenerator(reader);
+        uint32_t* tile = generator->generateTile(it->first);
 
         //write as a tif output
         auto outputFilename = "img_r" + std::to_string(it->first.second) + "_c" + std::to_string(it->first.first) + ".tif";
