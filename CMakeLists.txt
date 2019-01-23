@@ -24,7 +24,7 @@ add_subdirectory(src)
 add_subdirectory(test)
 
 set(ALL_SRCS CACHE INTERNAL "sources" FORCE)
-set(SOURCES src/utils/Helper.cpp)
+set(SOURCES src/utils/Helper.cpp src/data/BlockType.cpp)
 
 add_executable(pyramidBuilding main.cpp ${ALL_SRCS} ${SOURCES})
 add_executable(stitching testStitchingVectorParser.cpp ${ALL_SRCS} ${SOURCES})
