@@ -12,7 +12,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
-#include <utils/SingleTiledTiffWriter.h>
+#include <opencv2/core/mat.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include "../utils/SingleTiledTiffWriter.h"
 
 class WriteTileTask : public htgs::ITask< Tile<uint32_t>, Tile<uint32_t> > {
 
@@ -58,8 +60,13 @@ public:
 
         auto fullImagePath = _pathOut + "/" + level + "/"  + outputFilename;
 
-        auto w = new SingleTiledTiffWriter(fullImagePath, pyramidTileSize);
-        w->write(data->getData());
+        cv::Mat image(32, 32, CV_32SC1, data->getData());
+        cv::Mat tmp(32, 32, CV_8UC1);
+        image.convertTo(tmp, CV_8UC1);
+        cv::imwrite(fullImagePath + ".png", image);
+
+//        auto w = new SingleTiledTiffWriter(fullImagePath, pyramidTileSize);
+//        w->write(data->getData());
 
         addResult(data);
     }

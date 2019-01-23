@@ -6,9 +6,9 @@
 #define PYRAMIDBUILDING_BASETILETASK_H
 
 #include <htgs/api/ITask.hpp>
-#include <data/BlockRequest.h>
-#include <data/TileRequest.h>
-#include <utils/BaseTileGenerator.h>
+#include "../data/BlockRequest.h"
+#include "../data/TileRequest.h"
+#include "../utils/BaseTileGenerator.h"
 
 class BaseTileTask : public htgs::ITask<TileRequest , Tile<uint32_t>> {
 

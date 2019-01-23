@@ -1,14 +1,14 @@
 #include <iostream>
 #include <FastImage/api/FastImage.h>
 #include <FastImage/TileLoaders/GrayscaleTiffTileLoader.h>
-#include "Helper.h"
-#include "rules/WriteTileRule.h"
-#include "tasks/WriteTileTask.h"
-#include "rules/PyramidRule.h"
-#include "tasks/CreateTileTask.h"
-#include "utils/MatrixAllocator.h"
-#include "utils/FakeTileAllocator.h"
-#include "data/Tile.h"
+#include "src/utils/Helper.h"
+#include "src/rules/WriteTileRule.h"
+#include "src/tasks/WriteTileTask.h"
+#include "src/rules/PyramidRule.h"
+#include "src/tasks/CreateTileTask.h"
+#include "src/utils/MatrixAllocator.h"
+#include "src/utils/FakeTileAllocator.h"
+#include "src/data/Tile.h"
 #include <htgs/log/TaskGraphSignalHandler.hpp>
 
 int main() {

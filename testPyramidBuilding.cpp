@@ -1,16 +1,16 @@
 #include <iostream>
 #include <FastImage/api/FastImage.h>
 #include <FastImage/TileLoaders/GrayscaleTiffTileLoader.h>
-#include "Helper.h"
-#include "rules/WriteTileRule.h"
-#include "tasks/WriteTileTask.h"
-#include "rules/PyramidRule.h"
-#include "tasks/CreateTileTask.h"
-#include "tasks/BaseTileTask.h"
-#include "tasks/OutputTask.h"
-#include "utils/MatrixAllocator.h"
-#include "utils/FakeTileAllocator.h"
-#include "data/Tile.h"
+#include "src/utils/Helper.h"
+#include "src/rules/WriteTileRule.h"
+#include "src/tasks/WriteTileTask.h"
+#include "src/rules/PyramidRule.h"
+#include "src/tasks/CreateTileTask.h"
+#include "src/tasks/BaseTileTask.h"
+#include "src/tasks/OutputTask.h"
+#include "src/utils/MatrixAllocator.h"
+#include "src/utils/FakeTileAllocator.h"
+#include "src/data/Tile.h"
 #include <htgs/log/TaskGraphSignalHandler.hpp>
 #define uint64 uint64_hack_
 #define int64 int64_hack_
@@ -18,10 +18,10 @@
 #undef uint64
 #undef int64
 #include <assert.h>
-#include <data/TileRequest.h>
-#include "utils/SingleTiledTiffWriter.h"
-#include "utils/MistStitchedImageReader.h"
-#include "utils/BaseTileGenerator.h"
+#include "src/data/TileRequest.h"
+#include "src/utils/SingleTiledTiffWriter.h"
+#include "src/utils/StitchingVectorParser.h"
+#include "src/utils/BaseTileGenerator.h"
 
 
 uint32_t* generateTile(uint32_t i, uint32_t j, std::map<std::pair<uint32_t, uint32_t>, std::vector<PartialFov *>> &grid, BaseTileGenerator *generator, std::string directory) {
@@ -57,7 +57,7 @@ int main() {
 //    uint32_t pyramidTileSize = 256;
     uint32_t pyramidTileSize = 32;
 
-    auto reader = new MistStitchedImageReader(directory, vector, pyramidTileSize);
+    auto reader = new StitchingVectorParser(directory, vector, pyramidTileSize);
 
     auto grid = reader->getGrid();
 

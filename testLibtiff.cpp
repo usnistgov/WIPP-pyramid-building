@@ -8,7 +8,7 @@
 #include <tiffio.h>
 
 
-int mainLibTiff()
+int main()
 {
     std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/tiled-images/";
     auto filename = "img_r001_c001.ome.tif";
@@ -29,4 +29,6 @@ int mainLibTiff()
         _TIFFfree(buf);
         TIFFClose(tif);
     }
+
+    return 0;
 }

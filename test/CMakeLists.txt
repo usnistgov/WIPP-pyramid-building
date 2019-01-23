@@ -1,0 +1,1 @@
+set(ALL_SRCS ${ALL_SRCS} CACHE INTERNAL "sources")

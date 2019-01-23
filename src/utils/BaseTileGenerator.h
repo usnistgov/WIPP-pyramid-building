@@ -11,10 +11,10 @@
 #include <assert.h>
 #include "SingleTiledTiffWriter.h"
 #include "../data/PartialFov.h"
-#include "../Helper.h"
+#include "Helper.h"
 #include <FastImage/api/FastImage.h>
 #include <FastImage/TileLoaders/GrayscaleTiffTileLoader.h>
-#include "MistStitchedImageReader.h"
+#include "StitchingVectorParser.h"
 
 /**
  * @class BaseTileGenerator BaseTileGenerator.h
@@ -32,7 +32,7 @@ public:
      * The pyramid base level tile generator needs information on the general structure of the full FOVs.
      * @param reader the MistStitchedImageReader that contains information on partial FOV overlaps.
      */
-    BaseTileGenerator(MistStitchedImageReader *reader): grid(reader->getGrid()), directory(reader->getImageDirectoryPath()), tileWidth(
+    BaseTileGenerator(StitchingVectorParser *reader): grid(reader->getGrid()), directory(reader->getImageDirectoryPath()), tileWidth(
             reader->getFovTileWidth()), tileHeight(reader->getFovTileHeight()), pyramidTileSize(reader->getPyramidTileSize()) {}
 
     /**

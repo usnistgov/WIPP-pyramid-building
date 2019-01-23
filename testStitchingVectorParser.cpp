@@ -2,15 +2,17 @@
 // Created by Gerardin, Antoine D. (Assoc) on 1/2/19.
 //
 
-#include "utils/MistStitchedImageReader.h"
-#include "utils/BaseTileGenerator.h"
+#include "src/utils/StitchingVectorParser.h"
+#include "src/utils/BaseTileGenerator.h"
 #define uint64 uint64_hack_
 #define int64 int64_hack_
 #include <tiffio.h>
 #undef uint64
 #undef int64
 #include <assert.h>
-#include "utils/SingleTiledTiffWriter.h"
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
+#include "src/utils/SingleTiledTiffWriter.h"
 
 /**
  * This algorithm generates the lowest level of the pyramid.
@@ -21,28 +23,28 @@
  */
 
 int main() {
-//    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/stitching_vector/img-global-positions-1.txt";
-//    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/tiled-images/";
+    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/stitching_vector/img-global-positions-1.txt";
+    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/tiled-images/";
 
-    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset02/stitching_vector/img-global-positions-1.txt";
-    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset02/images/";
+//    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset02/stitching_vector/img-global-positions-1.txt";
+//    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset02/images/";
 
 //    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset01/stitching_vector/img-global-positions-1.txt";
 //    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset01/images/";
 
     //pyramid
-//    uint32_t pyramidTileSize = 256;
-   uint32_t pyramidTileSize = 32;
+    uint32_t pyramidTileSize = 256;
+ //  uint32_t pyramidTileSize = 32;
 
-    auto reader = new MistStitchedImageReader(directory, vector, pyramidTileSize);
+    auto reader = new StitchingVectorParser(directory, vector, pyramidTileSize);
     auto grid = reader->getGrid();
 
     //TODO CHECK we assume that all FOV have the same tiling scheme.
     auto tileWidth = reader->getFovTileWidth();
     auto tileHeight = reader->getFovTileHeight();
 
-    //TODO CHECK we assume all tiles are square. This is not necessary but it is safe to assume for the first tests.
-    assert(tileWidth == tileHeight);
+    //TODO CHECK we tested only for square tiles. This is not necessarily the case. The algorithm normally support any tile shape.
+    //assert(tileWidth == tileHeight);
 
     //TODO CHECK we could assume for now that pyramid tile size is a multiple of the underlying FOV tile size.
     //Will that be of any use?
@@ -53,11 +55,15 @@ int main() {
     //TODO Make this an HTGS task and decouple from the TIFF write operation (this could be a PNG Write as well)
     //TODO wrap the tile represented as a raw array into a Tile object and send it through the graph.
 
+    std::vector<uint32_t*> tiles;
+
     for ( auto it = grid.begin(); it != grid.end(); ++it ) {
 
         //generate a pyramid tile
         auto generator = new BaseTileGenerator(reader);
         uint32_t* tile = generator->generateTile(it->first);
+
+        tiles.push_back(tile);
 
         //write as a tif output
         auto outputFilename = "img_r" + std::to_string(it->first.second) + "_c" + std::to_string(it->first.first) + ".tif";
@@ -66,6 +72,4 @@ int main() {
         w->write(tile);
 
     } //DONE generating the lowest level of the pyramid
-
-
 }

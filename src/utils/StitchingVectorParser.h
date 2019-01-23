@@ -31,7 +31,7 @@
  * The pyramid base level is composed of tiles carved from a set of overlapping FOVs.
  * For a given pyramid tile size, we can generate a grid structure : (row,col) -> vector of partial overlapping FOVs.
  */
-class MistStitchedImageReader {
+class StitchingVectorParser {
 
 
 private:
@@ -64,7 +64,7 @@ public:
      * @param stitchingVectorPath  where to locate the corresponding stitching vector.
      * @param pyramidTileSize size of pyramid tile.
      */
-    MistStitchedImageReader(const std::string &imageDirectoryPath,
+    StitchingVectorParser(const std::string &imageDirectoryPath,
                             const std::string &stitchingVectorPath, uint32_t pyramidTileSize) :
                                                                       imageDirectoryPath(imageDirectoryPath),
                                                                       stitchingVectorPath(stitchingVectorPath),

@@ -9,7 +9,7 @@
 #include <math.h>
 #include <array>
 #include "../data/Tile.h"
-#include "data/BlockRequest.h"
+#include "../data/BlockRequest.h"
 
 class PyramidRule : public htgs::IRule<Tile<uint32_t>, BlockRequest<uint32_t>> {
 
