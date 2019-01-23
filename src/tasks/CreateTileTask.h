@@ -69,7 +69,7 @@ public:
         cv::imwrite("createTileTask.png", image);
 
         auto b = block[0];
-        tile = new Tile<uint32_t>(b->getRow(),b->getCol(),b->getLevel()+1,b->getData());
+        tile = new Tile<uint32_t>(row,col,b->getLevel()+1,b->getData());
         this->addResult(tile);
     }
 
@@ -93,8 +93,10 @@ private:
 
                 std::cout <<  "t : " << std::to_string(index) << std::endl;
 
-                data[index] = (d[j * pyramidTileSize + i] + d[j * pyramidTileSize + i + 1] +
-                                                d[(j + 1) * pyramidTileSize + i] + d[(j + 1) * pyramidTileSize + i + 1]) / 4;
+                data[index] = d[j * pyramidTileSize + i];
+
+//                data[index] = (d[j * pyramidTileSize + i] + d[j * pyramidTileSize + i + 1] +
+//                                                d[(j + 1) * pyramidTileSize + i] + d[(j + 1) * pyramidTileSize + i + 1]) / 4;
             }
         }
     }
