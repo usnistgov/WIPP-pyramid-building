@@ -35,32 +35,41 @@ public:
         Tile<uint32_t> *tile = nullptr;
         htgs::m_data_t<fi::View<uint32_t>> t ;
 
+        uint32_t pyramidTileSize = 32;
+        uint32_t* newTileData = new uint32_t[ 2 * pyramidTileSize * 2 * pyramidTileSize ];  //the pyramid tile we will be filling from partial FOVs.
+
+        //TODO CHECK. MIGHT NOT BE NECESSARY. Set all values to 0
+        memset( newTileData, 0, 4 * pyramidTileSize * pyramidTileSize*sizeof(uint32_t) );
+
         switch (block.size()){
+            //regular block
+            case 4:
+                generateDownsampledTile(newTileData, 0,0, block[0]->getData(),pyramidTileSize);
+                generateDownsampledTile(newTileData, 0,1, block[1]->getData(),pyramidTileSize);
+                generateDownsampledTile(newTileData, 1,0, block[2]->getData(),pyramidTileSize);
+                generateDownsampledTile(newTileData, 1,1, block[3]->getData(),pyramidTileSize);
+                break;
             //bottom right single block
-            case 1:
-                //downsample and send new tile
-                tile = new Tile<uint32_t>(row,col,level+1, block[0]->getData());
+            case 3:
+                generateDownsampledTile(newTileData, 0,0, block[0]->getData(),pyramidTileSize);
+                generateDownsampledTile(newTileData, 1,0, block[2]->getData(),pyramidTileSize);
                 break;
                 //bottom horizontal block
             case 2:
-                //blend resize and downsample and send new tile
-                level = block[0]->getLevel();
-                tile = new Tile<uint32_t>(row,col,level+1, block[0]->getData());
+                generateDownsampledTile(newTileData, 0,0, block[0]->getData(),pyramidTileSize);
+                generateDownsampledTile(newTileData, 0,1, block[1]->getData(),pyramidTileSize);
                 break;
                 //right vertical block
-            case 3:
-                //blend resize and downsample and send new tile
-                level = block[0]->getLevel();
-                tile = new Tile<uint32_t>(row,col,level+1, block[0]->getData());
-                break;
-                //regular block
-            case 4:
-                //blend resize and downsample and send new tile
-                level = block[0]->getLevel();
-                tile = new Tile<uint32_t>(row,col,level+1, block[0]->getData());
+            case 1:
+                generateDownsampledTile(newTileData, 0,0, block[0]->getData(),pyramidTileSize);
                 break;
         }
 
+        cv::Mat image(2 * pyramidTileSize, 2 * pyramidTileSize, CV_32SC1, newTileData);
+        cv::imwrite("createTileTask.png", image);
+
+        auto b = block[0];
+        tile = new Tile<uint32_t>(b->getRow(),b->getCol(),b->getLevel()+1,b->getData());
         this->addResult(tile);
     }
 
@@ -74,9 +83,13 @@ public:
 
 private:
     void generateDownsampledTile(uint32_t* data, uint32_t row, uint32_t col, uint32_t* d, uint32_t pyramidTileSize) {
-        for (int j = 0; j < pyramidTileSize; j += 2) {
-            for (int i = 0; i < pyramidTileSize; i += 2) {
-                uint32_t index = ((row +j) * pyramidTileSize + (col * pyramidTileSize + i)) / 2;
+
+        for (int j = 0; j < pyramidTileSize; j ++) {
+            for (int i = 0; i < pyramidTileSize; i ++) {
+                uint32_t indexRowOffset = row * ( 2 * pyramidTileSize * pyramidTileSize);
+                uint32_t indexColOffset = col * pyramidTileSize;
+
+                uint32_t index = indexRowOffset + (j * 2 * pyramidTileSize)  + indexColOffset + i;
 
                 std::cout <<  "t : " << std::to_string(index) << std::endl;
 
