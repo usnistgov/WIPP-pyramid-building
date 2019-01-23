@@ -36,32 +36,38 @@ public:
         htgs::m_data_t<fi::View<uint32_t>> t ;
 
         uint32_t pyramidTileSize = 32;
-        uint32_t* newTileData = new uint32_t[ 2 * pyramidTileSize * 2 * pyramidTileSize ];  //the pyramid tile we will be filling from partial FOVs.
+        uint32_t* newTileData = nullptr;
 
-        //TODO CHECK. MIGHT NOT BE NECESSARY. Set all values to 0
-        memset( newTileData, 0, 4 * pyramidTileSize * pyramidTileSize*sizeof(uint32_t) );
 
         switch (block.size()){
             //regular block
             case 4:
-                generateDownsampledTile(newTileData, 0,0, block[0]->getData(),pyramidTileSize);
-                generateDownsampledTile(newTileData, 0,1, block[1]->getData(),pyramidTileSize);
-                generateDownsampledTile(newTileData, 1,0, block[2]->getData(),pyramidTileSize);
-                generateDownsampledTile(newTileData, 1,1, block[3]->getData(),pyramidTileSize);
+                newTileData = new uint32_t[ 2 * pyramidTileSize * 2 * pyramidTileSize ];
+                memset( newTileData, 0, 4 * pyramidTileSize * pyramidTileSize*sizeof(uint32_t) );
+                generateDownsampledTile(newTileData, 0,0, block[0]->getData(),pyramidTileSize, 2,2);
+                generateDownsampledTile(newTileData, 0,1, block[1]->getData(),pyramidTileSize, 2,2);
+                generateDownsampledTile(newTileData, 1,0, block[2]->getData(),pyramidTileSize, 2,2);
+                generateDownsampledTile(newTileData, 1,1, block[3]->getData(),pyramidTileSize, 2,2);
                 break;
             //bottom right single block
             case 3:
-                generateDownsampledTile(newTileData, 0,0, block[0]->getData(),pyramidTileSize);
-                generateDownsampledTile(newTileData, 1,0, block[2]->getData(),pyramidTileSize);
+                newTileData = new uint32_t[ 2 * pyramidTileSize * pyramidTileSize ];
+                memset( newTileData, 0, 2 * pyramidTileSize * pyramidTileSize*sizeof(uint32_t) );
+                generateDownsampledTile(newTileData, 0,0, block[0]->getData(),pyramidTileSize, 2, 1);
+                generateDownsampledTile(newTileData, 1,0, block[2]->getData(),pyramidTileSize, 2, 1);
                 break;
                 //bottom horizontal block
             case 2:
-                generateDownsampledTile(newTileData, 0,0, block[0]->getData(),pyramidTileSize);
-                generateDownsampledTile(newTileData, 0,1, block[1]->getData(),pyramidTileSize);
+                newTileData = new uint32_t[ 2 * pyramidTileSize * pyramidTileSize ];
+                memset( newTileData, 0, 2 * pyramidTileSize * pyramidTileSize*sizeof(uint32_t) );
+                generateDownsampledTile(newTileData, 0,0, block[0]->getData(),pyramidTileSize, 1,2);
+                generateDownsampledTile(newTileData, 0,1, block[1]->getData(),pyramidTileSize, 1,2);
                 break;
                 //right vertical block
             case 1:
-                generateDownsampledTile(newTileData, 0,0, block[0]->getData(),pyramidTileSize);
+                newTileData = new uint32_t[ pyramidTileSize * pyramidTileSize ];
+                memset( newTileData, 0, pyramidTileSize * pyramidTileSize*sizeof(uint32_t) );
+                generateDownsampledTile(newTileData, 0,0, block[0]->getData(),pyramidTileSize, 1, 1);
                 break;
         }
 
@@ -96,14 +102,14 @@ public:
     }
 
 private:
-    void generateDownsampledTile(uint32_t* data, uint32_t row, uint32_t col, uint32_t* d, uint32_t pyramidTileSize) {
+    void generateDownsampledTile(uint32_t* data, uint32_t row, uint32_t col, uint32_t* d, uint32_t pyramidTileSize, uint32_t nbRows, uint32_t nbCols) {
 
         for (int j = 0; j < pyramidTileSize; j ++) {
             for (int i = 0; i < pyramidTileSize; i ++) {
-                uint32_t indexRowOffset = row * ( 2 * pyramidTileSize * pyramidTileSize);
-                uint32_t indexColOffset = col * pyramidTileSize;
+                uint32_t indexRowOffset = row * ( nbCols * pyramidTileSize * pyramidTileSize);
+                uint32_t indexColOffset = (nbCols == 2) ? col * pyramidTileSize : 0;
 
-                uint32_t index = indexRowOffset + (j * 2 * pyramidTileSize)  + indexColOffset + i;
+                uint32_t index = indexRowOffset + (j * nbCols * pyramidTileSize)  + indexColOffset + i;
 
                 std::cout <<  "t : " << std::to_string(index) << std::endl;
 
