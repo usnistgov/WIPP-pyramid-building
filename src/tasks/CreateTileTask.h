@@ -68,8 +68,22 @@ public:
         cv::Mat image(2 * pyramidTileSize, 2 * pyramidTileSize, CV_32SC1, newTileData);
         cv::imwrite("createTileTask.png", image);
 
+        uint32_t* downsampleData = new uint32_t[ pyramidTileSize * pyramidTileSize ];
+
+        for(uint32_t j= 0 ; j < pyramidTileSize ; j++) {
+            for(uint32_t i= 0 ; i < pyramidTileSize ; i++){
+                auto index = j * pyramidTileSize + i;
+                downsampleData[index] = (newTileData[2 * j * 2 * pyramidTileSize + 2 * i] + newTileData[2 * j * 2 * pyramidTileSize + 2 *i + 1] +
+                        newTileData[2 * (j+1) * 2 * pyramidTileSize + 2 * i] + newTileData[2 * (j+1) * 2 * pyramidTileSize + 2 *i + 1] ) / 4;
+            }
+        }
+
+        cv::Mat image2(pyramidTileSize, pyramidTileSize, CV_32SC1, downsampleData);
+        cv::imwrite("downsampleCreateTileTask.png", image2);
+
+
         auto b = block[0];
-        tile = new Tile<uint32_t>(row,col,b->getLevel()+1,b->getData());
+        tile = new Tile<uint32_t>(row,col,b->getLevel()+1,downsampleData);
         this->addResult(tile);
     }
 
@@ -95,8 +109,6 @@ private:
 
                 data[index] = d[j * pyramidTileSize + i];
 
-//                data[index] = (d[j * pyramidTileSize + i] + d[j * pyramidTileSize + i + 1] +
-//                                                d[(j + 1) * pyramidTileSize + i] + d[(j + 1) * pyramidTileSize + i + 1]) / 4;
             }
         }
     }
