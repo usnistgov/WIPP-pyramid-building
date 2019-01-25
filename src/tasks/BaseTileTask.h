@@ -20,9 +20,9 @@ public:
         uint32_t i = data.get()->getRow();
         uint32_t j= data.get()->getCol();
         std::pair<uint32_t,uint32_t> index= std::make_pair(i,j);
+
         auto t = generator->generateTile(index);
-        auto tile = new Tile<uint32_t>(i,j,0,t);
-        this->addResult(tile);
+        this->addResult(t);
     }
 
     ITask<TileRequest, Tile<uint32_t>> *copy() override {

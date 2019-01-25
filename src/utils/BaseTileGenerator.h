@@ -15,7 +15,7 @@
 #include <FastImage/api/FastImage.h>
 #include <FastImage/TileLoaders/GrayscaleTiffTileLoader.h>
 #include "StitchingVectorParser.h"
-
+#include "../data/Tile.h"
 /**
  * @class BaseTileGenerator BaseTileGenerator.h
  * @brief Generate pyramid base level tile.
@@ -42,10 +42,17 @@ public:
      * @param index (row,col) of the tile to generate.
      * @return
      */
-    uint32_t* generateTile(std::pair<uint32_t, uint32_t> index){
+    Tile<uint32_t>* generateTile(std::pair<uint32_t, uint32_t> index){
 
-        uint32_t pyramidTileWidth = (index.second != maxGridCol) ? pyramidTileSize : fullFovWidth % maxGridCol;
-        uint32_t pyramidTileHeight = (index.first != maxGridRow) ? pyramidTileSize : fullFovHeight % maxGridRow;
+        //TODO CHECK if we wanted exact dimensions for the pyramid tile at level 0.
+       // uint32_t pyramidTileWidth = (index.second != maxGridCol) ? pyramidTileSize : fullFovWidth % maxGridCol;
+       // uint32_t pyramidTileHeight = (index.first != maxGridRow) ? pyramidTileSize : fullFovHeight % maxGridRow;
+        uint32_t pyramidTileWidth = pyramidTileSize;
+        uint32_t pyramidTileHeight = pyramidTileSize;
+
+        uint32_t* tile = new uint32_t[ pyramidTileWidth * pyramidTileHeight ];  //the pyramid tile we will be filling from partial FOVs.
+        //TODO CHECK. MIGHT NOT BE NECESSARY. Set all values to 0
+        memset( tile, 0, pyramidTileWidth * pyramidTileHeight*sizeof(uint32_t) );
 
         auto it = grid.find(index);
 
@@ -53,18 +60,10 @@ public:
         //It should never happen with real data, but we might have missing tiles or have so much overlap between FOVs that
         //some gap appears in the image. If this is the case, we generate an empty tile.
         if(it == grid.end()){
-            //TODO we need to make sure we dont go beyond fullFOV width and height
-            uint32_t* tile = new uint32_t[ pyramidTileSize * pyramidTileSize ];  //the pyramid tile we will be filling from partial FOVs.
-            memset( tile, 0, pyramidTileSize * pyramidTileSize*sizeof(uint32_t) );
-            return tile;
+            return new Tile<uint32_t>(0, index.first,index.second, pyramidTileWidth, pyramidTileHeight, tile);
         }
 
         std::vector<PartialFov *> fovs = it->second;
-
-        uint32_t* tile = new uint32_t[ pyramidTileSize * pyramidTileSize ];  //the pyramid tile we will be filling from partial FOVs.
-
-        //TODO CHECK. MIGHT NOT BE NECESSARY. Set all values to 0
-        memset( tile, 0, pyramidTileSize * pyramidTileSize*sizeof(uint32_t) );
 
         //iterating over each partial FOV.
         for(auto it2 = fovs.begin(); it2 != fovs.end(); ++it2) {
@@ -177,7 +176,7 @@ public:
 
         } //DONE generating the pyramid tile
 
-        return tile;
+        return new Tile<uint32_t>(0, index.first,index.second, pyramidTileWidth, pyramidTileHeight, tile);
     }
 
 private:

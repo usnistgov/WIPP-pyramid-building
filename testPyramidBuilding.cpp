@@ -24,11 +24,11 @@
 #include "src/utils/BaseTileGenerator.h"
 
 
-uint32_t* generateTile(uint32_t i, uint32_t j, std::map<std::pair<uint32_t, uint32_t>, std::vector<PartialFov *>> &grid, BaseTileGenerator *generator, std::string directory) {
+Tile<uint32_t>* generateTile(uint32_t i, uint32_t j, std::map<std::pair<uint32_t, uint32_t>, std::vector<PartialFov *>> &grid, BaseTileGenerator *generator, std::string directory) {
     std::pair<uint32_t,uint32_t> index= std::make_pair(i,j);
     auto it = grid.find(index);
     assert(it != grid.end());
-    uint32_t* tile = generator->generateTile(index);
+    Tile<uint32_t>* tile = generator->generateTile(index);
     return tile;
 }
 

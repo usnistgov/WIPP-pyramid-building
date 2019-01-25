@@ -49,21 +49,21 @@ public:
                 generateDownsampledTile(newTileData, 1,0, block[2]->getData(),pyramidTileSize, 2,2);
                 generateDownsampledTile(newTileData, 1,1, block[3]->getData(),pyramidTileSize, 2,2);
                 break;
-            //bottom right single block
+            //right vertical block
             case 3:
                 newTileData = new uint32_t[ 2 * pyramidTileSize * pyramidTileSize ];
                 memset( newTileData, 0, 2 * pyramidTileSize * pyramidTileSize*sizeof(uint32_t) );
                 generateDownsampledTile(newTileData, 0,0, block[0]->getData(),pyramidTileSize, 2, 1);
                 generateDownsampledTile(newTileData, 1,0, block[2]->getData(),pyramidTileSize, 2, 1);
                 break;
-                //bottom horizontal block
+            //bottom horizontal block
             case 2:
                 newTileData = new uint32_t[ 2 * pyramidTileSize * pyramidTileSize ];
                 memset( newTileData, 0, 2 * pyramidTileSize * pyramidTileSize*sizeof(uint32_t) );
                 generateDownsampledTile(newTileData, 0,0, block[0]->getData(),pyramidTileSize, 1,2);
                 generateDownsampledTile(newTileData, 0,1, block[1]->getData(),pyramidTileSize, 1,2);
                 break;
-                //right vertical block
+            //bottom right single block
             case 1:
                 newTileData = new uint32_t[ pyramidTileSize * pyramidTileSize ];
                 memset( newTileData, 0, pyramidTileSize * pyramidTileSize*sizeof(uint32_t) );
@@ -89,7 +89,7 @@ public:
 
 
         auto b = block[0];
-        tile = new Tile<uint32_t>(row,col,b->getLevel()+1,downsampleData);
+        tile = new Tile<uint32_t>(b->getLevel()+1, row, col, pyramidTileSize, pyramidTileSize, downsampleData);
         this->addResult(tile);
     }
 
