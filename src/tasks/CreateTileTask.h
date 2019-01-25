@@ -20,6 +20,8 @@
 class CreateTileTask : public htgs::ITask<BlockRequest<uint32_t>, Tile<uint32_t> > {
 
 
+
+
 public:
     CreateTileTask() {}
 
@@ -99,8 +101,8 @@ public:
         tile = new Tile<uint32_t>(level, row, col, downsampleWidth, downsampleHeight, downsampleData);
 
         //TODO REMOVE FOR DEBUG
-//        cv::Mat image(2 * pyramidTileSize, 2 * pyramidTileSize, CV_32SC1, newTileData);
-//        cv::imwrite("createTileTask.png", image);
+        cv::Mat image(width, height, CV_32SC1, newTileData);
+        cv::imwrite("createTileTask" + std::to_string(++counter) + ".png", image);
 
 
         this->addResult(tile);
@@ -144,18 +146,44 @@ private:
 
         for(auto j= 0 ; j < downsampleHeight; j++) {
             for(auto i= 0 ; i < downsampleWidth; i++){
-                auto index = j * width + i;
-                downsampleData[index] = (newTileData[2 * j * 2 * width + 2 * i] + newTileData[2 * j * 2 * width + 2 *i + 1] +
-                                         newTileData[2 * (j+1) * 2 * width + 2 * i] + newTileData[2 * (j+1) * 2 * width + 2 *i + 1] ) / 4;
+                uint32_t index = j * downsampleWidth + i;
+                downsampleData[index] = (newTileData[2 * j * width + 2 * i] + newTileData[2 * j * width + 2 *i + 1] +
+                                         newTileData[2 * (j+1) * width + 2 * i] + newTileData[2 * (j+1) * width + 2 *i + 1] ) / 4;
             }
         }
 
+        cv::Mat  mat = cv::Mat(downsampleHeight, downsampleWidth, CV_32SC1 , downsampleData);
+        cv::imwrite("test" + std::to_string(++counter) + ".png", mat);
+
+
+//        double factor = 0.5;
+//        cv::Mat  mat = cv::Mat(height, width, CV_32SC1 , newTileData);
+//        int newcols = round(mat.cols*factor);
+//        int newrows = round(mat.rows*factor);
+//        cv::Mat newmat =cv::Mat(newcols, newrows, mat.type());
+//
+//        for (int i=0;i<mat.cols;i++){
+//            for (int j=0;j<mat.cols;j++){
+//                newmat<CV_32SC1> (round(i*factor), round(j*factor)) = mat<CV_32SC1>(i, j);
+//            }
+//        }
+
+//        cv::imwrite("test" + std::to_string(++counter) + ".png", newmat);
+
+
+
+//        for (auto i = 0; i < newmat.rows * newmat.cols; i+=newmat.elemSize()) {
+//            downsampleData[i] = *(newmat.data + i);
+//        }
 //        cv::Mat image2(pyramidTileSize, pyramidTileSize, CV_32SC1, downsampleData);
 //        cv::imwrite("downsampleCreateTileTask.png", image2);
 
         return downsampleData;
 
     }
+
+
+    uint32_t counter = 0;
 
 };
 
