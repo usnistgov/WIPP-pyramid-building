@@ -60,8 +60,8 @@ public:
 
         auto fullImagePath = _pathOut + "/" + level + "/"  + outputFilename;
 
-        cv::Mat image(32, 32, CV_32SC1, data->getData());
-        cv::Mat tmp(32, 32, CV_8UC1);
+        cv::Mat image(data->get_height(), data->get_width(), CV_32SC1, data->getData());
+        cv::Mat tmp(data->get_height(), data->get_width(), CV_8UC1);
         image.convertTo(tmp, CV_8UC1);
         cv::imwrite(fullImagePath + ".png", image);
 

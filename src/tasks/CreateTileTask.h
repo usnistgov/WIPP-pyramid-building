@@ -50,10 +50,10 @@ public:
 
                 newTileData = new uint32_t[ width * height ];
                 memset( newTileData, 0, width * height * sizeof(uint32_t) );
-                copyTileBlock(newTileData, 0, 0, block[0]->getData(), width, height, 2, 2);
-                copyTileBlock(newTileData, 0, 1, block[1]->getData(), width, height, 2, 2);
-                copyTileBlock(newTileData, 1, 0, block[2]->getData(), width, height, 2, 2);
-                copyTileBlock(newTileData, 1, 1, block[3]->getData(), width, height, 2, 2);
+                copyTileBlock(newTileData, block[0].get(), width, height, 0, 0);
+                copyTileBlock(newTileData, block[1].get(), width, height, block[0]->get_width(), 0);
+                copyTileBlock(newTileData, block[2].get(), width, height, 0, block[0]->get_height());
+                copyTileBlock(newTileData, block[3].get(), width, height, block[0]->get_width(), block[0]->get_height());
                 downsampleData = generateDownsampleData(newTileData, width, height);
                 break;
             //right vertical block
@@ -63,8 +63,8 @@ public:
 
                 newTileData = new uint32_t[ width * height ];
                 memset( newTileData, 0, width * height * sizeof(uint32_t) );
-                copyTileBlock(newTileData, 0, 0, block[0]->getData(), width, height, 2, 1);
-                copyTileBlock(newTileData, 1, 0, block[2]->getData(), width, height, 2, 1);
+                copyTileBlock(newTileData, block[0].get(), width, height, 0, 0);
+                copyTileBlock(newTileData, block[0].get(), width, height, block[0]->get_width(), 0);
                 downsampleData = generateDownsampleData(newTileData, width, height);
                 break;
             //bottom horizontal block
@@ -75,8 +75,8 @@ public:
 
                 newTileData = new uint32_t[ width * height ];
                 memset( newTileData, 0, width * height * sizeof(uint32_t) );
-                copyTileBlock(newTileData, 0, 0, block[0]->getData(), width, height, 1, 2);
-                copyTileBlock(newTileData, 0, 1, block[1]->getData(), width, height, 1, 2);
+                copyTileBlock(newTileData, block[0].get(), width, height, 0, 0);
+                copyTileBlock(newTileData, block[0].get(), width, height, 0, block[0]->get_height());
                 downsampleData = generateDownsampleData(newTileData, width, height);
                 break;
             //bottom right single block
@@ -87,7 +87,7 @@ public:
 
                 newTileData = new uint32_t[ width * height ];
                 memset( newTileData, 0, width * height * sizeof(uint32_t) );
-                copyTileBlock(newTileData, 0, 0, block[0]->getData(), width, height, 1, 1);
+                copyTileBlock(newTileData, block[0].get(), width, height, 0, 0);
                 downsampleData = generateDownsampleData(newTileData, width, height);
                 break;
         }
@@ -115,19 +115,20 @@ public:
     }
 
 private:
-    void copyTileBlock(uint32_t *data, uint32_t row, uint32_t col, uint32_t *d, uint32_t width, uint32_t height,
-                       uint32_t nbRows, uint32_t nbCols) {
+    void copyTileBlock(uint32_t *data, Tile<uint32_t>* block, uint32_t fullWidth, uint32_t fullHeight, uint32_t colOffset, uint32_t rowOffset) {
 
-        for (int j = 0; j < height; j ++) {
-            for (int i = 0; i < width; i ++) {
-                uint32_t indexRowOffset = row * ( nbCols * width * height);
-                uint32_t indexColOffset = (nbCols == 2) ? col * width : 0;
+        for (int j = 0; j < block->get_height(); j ++) {
+            for (int i = 0; i < block->get_width(); i ++) {
+//                uint32_t indexRowOffset = row * ( nbCols * width * height);
+//                uint32_t indexColOffset = (nbCols == 2) ? col * width : 0;
+//
+//                uint32_t index = indexRowOffset + (j * nbCols * width)  + indexColOffset + i;
 
-                uint32_t index = indexRowOffset + (j * nbCols * width)  + indexColOffset + i;
+                uint32_t index = fullWidth * ( j + rowOffset) + colOffset + i;
 
                 std::cout <<  "t : " << std::to_string(index) << std::endl;
 
-                data[index] = d[j * width + i];
+                data[index] = block->getData()[j * block->get_width() + i];
 
             }
         }
