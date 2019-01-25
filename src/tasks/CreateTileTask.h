@@ -28,68 +28,81 @@ public:
 
         std::cout << "Create Tile Task - " << *data.get() << std::endl;
 
-        uint32_t level = block[0]->getLevel();
+        uint32_t level = block[0]->getLevel() + 1;
         uint32_t row = floor(block[0]->getRow() / 2);
         uint32_t col = floor(block[0]->getCol() /2);
 
         Tile<uint32_t> *tile = nullptr;
         htgs::m_data_t<fi::View<uint32_t>> t ;
 
-        uint32_t pyramidTileSize = 32;
         uint32_t* newTileData = nullptr;
+        uint32_t* downsampleData = nullptr;
+
+        uint32_t width,height;
 
 
         switch (block.size()){
             //regular block
             case 4:
-                newTileData = new uint32_t[ 2 * pyramidTileSize * 2 * pyramidTileSize ];
-                memset( newTileData, 0, 4 * pyramidTileSize * pyramidTileSize*sizeof(uint32_t) );
-                generateDownsampledTile(newTileData, 0,0, block[0]->getData(),pyramidTileSize, 2,2);
-                generateDownsampledTile(newTileData, 0,1, block[1]->getData(),pyramidTileSize, 2,2);
-                generateDownsampledTile(newTileData, 1,0, block[2]->getData(),pyramidTileSize, 2,2);
-                generateDownsampledTile(newTileData, 1,1, block[3]->getData(),pyramidTileSize, 2,2);
+
+                width = block[0]->get_width() + block[1]->get_width();
+                height = block[0]->get_height() + block[2]->get_height();
+
+                newTileData = new uint32_t[ width * height ];
+                memset( newTileData, 0, width * height * sizeof(uint32_t) );
+                copyTileBlock(newTileData, 0, 0, block[0]->getData(), width, height, 2, 2);
+                copyTileBlock(newTileData, 0, 1, block[1]->getData(), width, height, 2, 2);
+                copyTileBlock(newTileData, 1, 0, block[2]->getData(), width, height, 2, 2);
+                copyTileBlock(newTileData, 1, 1, block[3]->getData(), width, height, 2, 2);
+                downsampleData = generateDownsampleData(newTileData, width, height);
                 break;
             //right vertical block
             case 3:
-                newTileData = new uint32_t[ 2 * pyramidTileSize * pyramidTileSize ];
-                memset( newTileData, 0, 2 * pyramidTileSize * pyramidTileSize*sizeof(uint32_t) );
-                generateDownsampledTile(newTileData, 0,0, block[0]->getData(),pyramidTileSize, 2, 1);
-                generateDownsampledTile(newTileData, 1,0, block[2]->getData(),pyramidTileSize, 2, 1);
+                width = block[0]->get_width();
+                height = block[0]->get_height() + block[2]->get_height();
+
+                newTileData = new uint32_t[ width * height ];
+                memset( newTileData, 0, width * height * sizeof(uint32_t) );
+                copyTileBlock(newTileData, 0, 0, block[0]->getData(), width, height, 2, 1);
+                copyTileBlock(newTileData, 1, 0, block[2]->getData(), width, height, 2, 1);
+                downsampleData = generateDownsampleData(newTileData, width, height);
                 break;
             //bottom horizontal block
             case 2:
-                newTileData = new uint32_t[ 2 * pyramidTileSize * pyramidTileSize ];
-                memset( newTileData, 0, 2 * pyramidTileSize * pyramidTileSize*sizeof(uint32_t) );
-                generateDownsampledTile(newTileData, 0,0, block[0]->getData(),pyramidTileSize, 1,2);
-                generateDownsampledTile(newTileData, 0,1, block[1]->getData(),pyramidTileSize, 1,2);
+
+                width = block[0]->get_width() + block[1]->get_width();
+                height = block[0]->get_height();
+
+                newTileData = new uint32_t[ width * height ];
+                memset( newTileData, 0, width * height * sizeof(uint32_t) );
+                copyTileBlock(newTileData, 0, 0, block[0]->getData(), width, height, 1, 2);
+                copyTileBlock(newTileData, 0, 1, block[1]->getData(), width, height, 1, 2);
+                downsampleData = generateDownsampleData(newTileData, width, height);
                 break;
             //bottom right single block
             case 1:
-                newTileData = new uint32_t[ pyramidTileSize * pyramidTileSize ];
-                memset( newTileData, 0, pyramidTileSize * pyramidTileSize*sizeof(uint32_t) );
-                generateDownsampledTile(newTileData, 0,0, block[0]->getData(),pyramidTileSize, 1, 1);
+
+                width = block[0]->get_width();
+                height = block[0]->get_height();
+
+                newTileData = new uint32_t[ width * height ];
+                memset( newTileData, 0, width * height * sizeof(uint32_t) );
+                copyTileBlock(newTileData, 0, 0, block[0]->getData(), width, height, 1, 1);
+                downsampleData = generateDownsampleData(newTileData, width, height);
                 break;
         }
 
-        cv::Mat image(2 * pyramidTileSize, 2 * pyramidTileSize, CV_32SC1, newTileData);
-        cv::imwrite("createTileTask.png", image);
+        //TODO check this kind of conversion throughout
+        auto downsampleWidth = ceil( (double)width / 2);
+        auto downsampleHeight = ceil( (double)height / 2);
 
-        uint32_t* downsampleData = new uint32_t[ pyramidTileSize * pyramidTileSize ];
+        tile = new Tile<uint32_t>(level, row, col, downsampleWidth, downsampleHeight, downsampleData);
 
-        for(uint32_t j= 0 ; j < pyramidTileSize ; j++) {
-            for(uint32_t i= 0 ; i < pyramidTileSize ; i++){
-                auto index = j * pyramidTileSize + i;
-                downsampleData[index] = (newTileData[2 * j * 2 * pyramidTileSize + 2 * i] + newTileData[2 * j * 2 * pyramidTileSize + 2 *i + 1] +
-                        newTileData[2 * (j+1) * 2 * pyramidTileSize + 2 * i] + newTileData[2 * (j+1) * 2 * pyramidTileSize + 2 *i + 1] ) / 4;
-            }
-        }
-
-        cv::Mat image2(pyramidTileSize, pyramidTileSize, CV_32SC1, downsampleData);
-        cv::imwrite("downsampleCreateTileTask.png", image2);
+        //TODO REMOVE FOR DEBUG
+//        cv::Mat image(2 * pyramidTileSize, 2 * pyramidTileSize, CV_32SC1, newTileData);
+//        cv::imwrite("createTileTask.png", image);
 
 
-        auto b = block[0];
-        tile = new Tile<uint32_t>(b->getLevel()+1, row, col, pyramidTileSize, pyramidTileSize, downsampleData);
         this->addResult(tile);
     }
 
@@ -102,21 +115,45 @@ public:
     }
 
 private:
-    void generateDownsampledTile(uint32_t* data, uint32_t row, uint32_t col, uint32_t* d, uint32_t pyramidTileSize, uint32_t nbRows, uint32_t nbCols) {
+    void copyTileBlock(uint32_t *data, uint32_t row, uint32_t col, uint32_t *d, uint32_t width, uint32_t height,
+                       uint32_t nbRows, uint32_t nbCols) {
 
-        for (int j = 0; j < pyramidTileSize; j ++) {
-            for (int i = 0; i < pyramidTileSize; i ++) {
-                uint32_t indexRowOffset = row * ( nbCols * pyramidTileSize * pyramidTileSize);
-                uint32_t indexColOffset = (nbCols == 2) ? col * pyramidTileSize : 0;
+        for (int j = 0; j < height; j ++) {
+            for (int i = 0; i < width; i ++) {
+                uint32_t indexRowOffset = row * ( nbCols * width * height);
+                uint32_t indexColOffset = (nbCols == 2) ? col * width : 0;
 
-                uint32_t index = indexRowOffset + (j * nbCols * pyramidTileSize)  + indexColOffset + i;
+                uint32_t index = indexRowOffset + (j * nbCols * width)  + indexColOffset + i;
 
                 std::cout <<  "t : " << std::to_string(index) << std::endl;
 
-                data[index] = d[j * pyramidTileSize + i];
+                data[index] = d[j * width + i];
 
             }
         }
+    }
+
+    uint32_t* generateDownsampleData(uint32_t *newTileData, uint32_t width, uint32_t height) {
+
+        //TODO check this kind of conversion throughout
+        auto downsampleWidth = ceil( (double)width / 2);
+        auto downsampleHeight = ceil( (double)height / 2);
+
+        uint32_t* downsampleData = new uint32_t[ width * height ];
+
+        for(auto j= 0 ; j < downsampleHeight; j++) {
+            for(auto i= 0 ; i < downsampleWidth; i++){
+                auto index = j * width + i;
+                downsampleData[index] = (newTileData[2 * j * 2 * width + 2 * i] + newTileData[2 * j * 2 * width + 2 *i + 1] +
+                                         newTileData[2 * (j+1) * 2 * width + 2 * i] + newTileData[2 * (j+1) * 2 * width + 2 *i + 1] ) / 4;
+            }
+        }
+
+//        cv::Mat image2(pyramidTileSize, pyramidTileSize, CV_32SC1, downsampleData);
+//        cv::imwrite("downsampleCreateTileTask.png", image2);
+
+        return downsampleData;
+
     }
 
 };
