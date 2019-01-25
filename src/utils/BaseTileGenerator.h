@@ -33,7 +33,9 @@ public:
      * @param reader the MistStitchedImageReader that contains information on partial FOV overlaps.
      */
     BaseTileGenerator(StitchingVectorParser *reader): grid(reader->getGrid()), directory(reader->getImageDirectoryPath()), tileWidth(
-            reader->getFovTileWidth()), tileHeight(reader->getFovTileHeight()), pyramidTileSize(reader->getPyramidTileSize()) {}
+            reader->getFovTileWidth()), tileHeight(reader->getFovTileHeight()), pyramidTileSize(reader->getPyramidTileSize()),
+                    fullFovWidth(reader->getFovTileWidth()), fullFovHeight(reader->getFovTileHeight()),
+                    maxGridCol(reader->getGridMaxCol()), maxGridRow(reader->getGridMaxRow()) {}
 
     /**
      * Generate a pyramid base level tile at a specific coordinates.
@@ -42,12 +44,16 @@ public:
      */
     uint32_t* generateTile(std::pair<uint32_t, uint32_t> index){
 
+        uint32_t pyramidTileWidth = (index.second != maxGridCol) ? pyramidTileSize : fullFovWidth % maxGridCol;
+        uint32_t pyramidTileHeight = (index.first != maxGridRow) ? pyramidTileSize : fullFovHeight % maxGridRow;
+
         auto it = grid.find(index);
 
         //Dealing with corner case.
         //It should never happen with real data, but we might have missing tiles or have so much overlap between FOVs that
         //some gap appears in the image. If this is the case, we generate an empty tile.
         if(it == grid.end()){
+            //TODO we need to make sure we dont go beyond fullFOV width and height
             uint32_t* tile = new uint32_t[ pyramidTileSize * pyramidTileSize ];  //the pyramid tile we will be filling from partial FOVs.
             memset( tile, 0, pyramidTileSize * pyramidTileSize*sizeof(uint32_t) );
             return tile;
@@ -181,7 +187,10 @@ private:
     uint32_t tileWidth;
     uint32_t tileHeight;
     uint32_t pyramidTileSize;
-
+    uint32_t fullFovWidth;
+    uint32_t fullFovHeight;
+    uint32_t maxGridRow;
+    uint32_t maxGridCol;
 
 
 };

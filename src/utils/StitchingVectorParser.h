@@ -213,6 +213,14 @@ public:
         return fovTileHeight;
     }
 
+    uint32_t getFullFovWidth() const {
+        return gridMaxCol * fovWidth;
+    }
+
+    uint32_t getFullFovHeight() const {
+        return gridMaxRow * fovHeight;
+    }
+
     uint32_t getGridMaxRow() const {
         return gridMaxRow;
     }
@@ -220,6 +228,7 @@ public:
     uint32_t getGridMaxCol() const {
         return gridMaxCol;
     }
+
 
     const std::string &getImageDirectoryPath() const {
         return imageDirectoryPath;

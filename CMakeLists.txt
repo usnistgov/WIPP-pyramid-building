@@ -26,10 +26,10 @@ add_subdirectory(test)
 set(ALL_SRCS CACHE INTERNAL "sources" FORCE)
 set(SOURCES src/utils/Helper.cpp src/data/BlockType.cpp)
 
-add_executable(pyramidBuilding main.cpp ${ALL_SRCS} ${SOURCES})
+add_executable(old main.cpp ${ALL_SRCS} ${SOURCES})
 add_executable(stitching testStitchingVectorParser.cpp ${ALL_SRCS} ${SOURCES})
 add_executable(libtiff testLibtiff.cpp ${ALL_SRCS} ${SOURCES})
-add_executable(pyramidBuilding2 testPyramidBuilding.cpp ${ALL_SRCS} ${SOURCES})
+add_executable(pyramidBuilding testPyramidBuilding.cpp ${ALL_SRCS} ${SOURCES})
 add_executable(dowmsampling testDownSamplingOpenCV.cpp ${ALL_SRCS} ${SOURCES} )
 
 
