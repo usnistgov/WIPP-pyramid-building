@@ -152,7 +152,7 @@ public:
                                 //into the the tileOverlap coordinates.
                                 auto index1D = yInTile * pyramidTileSize + xInTile;
 
-                                assert( 0 <= index1D && index1D < 256 * 256);
+                                assert( 0 <= index1D && index1D < pyramidTileSize * pyramidTileSize);
 
                                 //        std::cout << index1D << ": " << val << std::endl;
 

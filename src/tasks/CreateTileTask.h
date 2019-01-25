@@ -128,7 +128,7 @@ private:
 
                 uint32_t index = fullWidth * ( j + rowOffset) + colOffset + i;
 
-                std::cout <<  "t : " << std::to_string(index) << std::endl;
+    //            std::cout <<  "t : " << std::to_string(index) << std::endl;
 
                 data[index] = block->getData()[j * block->get_width() + i];
 
