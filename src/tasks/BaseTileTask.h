@@ -14,7 +14,7 @@ class BaseTileTask : public htgs::ITask<TileRequest , Tile<uint32_t>> {
 
 public:
 
-    BaseTileTask(BaseTileGenerator *generator) : generator(generator) {}
+    BaseTileTask(size_t numThreads, BaseTileGenerator *generator) : htgs::ITask<TileRequest , Tile<uint32_t>>(numThreads), generator(generator) {}
 
     void executeTask(std::shared_ptr<TileRequest> data) override {
         uint32_t i = data.get()->getRow();
@@ -26,7 +26,7 @@ public:
     }
 
     ITask<TileRequest, Tile<uint32_t>> *copy() override {
-        return new BaseTileTask(generator);
+        return new BaseTileTask(this->getNumThreads(), generator);
     }
 
     std::string getName() override {

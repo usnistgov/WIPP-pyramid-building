@@ -20,10 +20,9 @@ class WriteTileTask : public htgs::ITask< Tile<uint32_t>, Tile<uint32_t> > {
 
 public:
 
-    WriteTileTask(const std::string &_pathOut, uint32_t pyramidTileSize) : _pathOut(_pathOut),
-                                                                           pyramidTileSize(pyramidTileSize) {
 
-
+    WriteTileTask(size_t numThreads, const std::string &_pathOut, uint32_t pyramidTileSize) :
+    htgs::ITask<Tile<uint32_t>, Tile<uint32_t>>(numThreads), _pathOut(_pathOut), pyramidTileSize(pyramidTileSize) {
         auto dir = opendir(_pathOut.c_str());
 
         if(dir == nullptr){
@@ -35,6 +34,10 @@ public:
             }
         }
     }
+
+    //TODO check why compiler rejects that
+//    WriteTileTask(const std::string &_pathOut, uint32_t pyramidTileSize) :
+//            WriteTileTask(1, &_pathOut, pyramidTileSize) {}
 
     void executeTask(std::shared_ptr<Tile<uint32_t>> data) override {
 
@@ -80,7 +83,7 @@ public:
     std::string getName() override { return "WriteTask"; }
 
     ITask<Tile<uint32_t>, Tile<uint32_t>> *copy() override {
-        return new WriteTileTask(_pathOut, pyramidTileSize);
+        return new WriteTileTask(this->getNumThreads(), _pathOut, pyramidTileSize);
     }
 
 private:

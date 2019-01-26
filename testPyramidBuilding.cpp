@@ -44,8 +44,15 @@ void writeTile(uint32_t row, uint32_t col, uint32_t* tile, uint32 pyramidTileSiz
 
 int main() {
 
-    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/stitching_vector/img-global-positions-1.txt";
-    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/tiled-images/";
+    // Run the example surrounding with a chrono
+    auto begin = std::chrono::high_resolution_clock::now();
+
+    std::string vector = "/Users/gerardin/Documents/projects/pyramidio/pyramidio/src/test/resources/dataset2/stitching_vector/tiled-pc/img-global-positions-1.txt";
+    std::string directory = "/Users/gerardin/Documents/projects/pyramidio/pyramidio/src/test/resources/dataset2/images/tiled-pc/";
+
+
+//    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/stitching_vector/img-global-positions-1.txt";
+//    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/tiled-images/";
 
 //    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset02/stitching_vector/img-global-positions-1.txt";
 //    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset02/images/";
@@ -54,7 +61,7 @@ int main() {
 //    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset01/images/";
 
     //pyramid
-    uint32_t pyramidTileSize = 256;
+    uint32_t pyramidTileSize = 512;
 //    uint32_t pyramidTileSize = 32;
 
     auto reader = new StitchingVectorParser(directory, vector, pyramidTileSize);
@@ -81,7 +88,7 @@ int main() {
     auto graph = new htgs::TaskGraphConf<TileRequest, Tile<uint32_t> >();
 
     BaseTileGenerator* generator = new BaseTileGenerator(reader);
-    auto baseTileTask = new BaseTileTask(generator);
+    auto baseTileTask = new BaseTileTask(10, generator);
 
     auto bookeeper = new htgs::Bookkeeper<Tile<uint32_t>>();
 
@@ -89,9 +96,9 @@ int main() {
 
     auto pyramidRule = new PyramidRule(numTileCol,numTileRow);
 
-    auto createTileTask = new CreateTileTask();
+    auto createTileTask = new CreateTileTask(10);
 
-    auto writeTask = new WriteTileTask("output", pyramidTileSize);
+    auto writeTask = new WriteTileTask(10, "output", pyramidTileSize);
 
     graph->setGraphConsumerTask(baseTileTask);
 
@@ -172,6 +179,10 @@ int main() {
     runtime->waitForRuntime();
 
     delete runtime;
+
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << "Execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
+              << " mS" << std::endl;
 
 }
 

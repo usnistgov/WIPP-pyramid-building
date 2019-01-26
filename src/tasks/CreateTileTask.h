@@ -23,7 +23,8 @@ class CreateTileTask : public htgs::ITask<BlockRequest<uint32_t>, Tile<uint32_t>
 
 
 public:
-    CreateTileTask() {}
+
+    CreateTileTask(size_t numThreads) : ITask(numThreads) {}
 
     void executeTask(std::shared_ptr<BlockRequest<uint32_t>> data) override {
         auto block = data->getBlock();
@@ -102,11 +103,11 @@ public:
 
 
         //TODO REMOVE FOR DEBUG
-        cv::Mat image(height, width, CV_32SC1, newTileData);
-        cv::imwrite("createTileTaskLargeFOV" + std::to_string(counter) + "orig.png", image);
-        cv::Mat tmp(height, width, CV_16U);
-        image.convertTo(tmp, CV_16U);
-        cv::imwrite("createTileTaskLargeFOV" + std::to_string(counter) + ".png", tmp);
+//        cv::Mat image(height, width, CV_32SC1, newTileData);
+//        cv::imwrite("createTileTaskLargeFOV" + std::to_string(counter) + "orig.png", image);
+//        cv::Mat tmp(height, width, CV_16U);
+//        image.convertTo(tmp, CV_16U);
+//        cv::imwrite("createTileTaskLargeFOV" + std::to_string(counter) + ".png", tmp);
 
         this->addResult(tile);
 
@@ -118,7 +119,7 @@ public:
     }
 
     htgs::ITask<BlockRequest<uint32_t>, Tile<uint32_t> > *copy() override {
-        return new CreateTileTask();
+        return new CreateTileTask(this->getNumThreads());
     }
 
 private:
@@ -164,33 +165,12 @@ private:
 
         cv::Mat  mat = cv::Mat(downsampleHeight, downsampleWidth, CV_32SC1 , downsampleData);
 
-        cv::imwrite("createTileTaskDownsample" + std::to_string(counter) + "orig.png", mat);
-        cv::Mat tmp(downsampleHeight, downsampleWidth, CV_16U);
-        mat.convertTo(tmp, CV_16U, 1,0);
-        cv::imwrite("createTileTaskDownsample" + std::to_string(counter) + ".png", tmp);
+        //TODO REMOVE FOR DEBUG
+//        cv::imwrite("createTileTaskDownsample" + std::to_string(counter) + "orig.png", mat);
+//        cv::Mat tmp(downsampleHeight, downsampleWidth, CV_16U);
+//        mat.convertTo(tmp, CV_16U, 1,0);
+//        cv::imwrite("createTileTaskDownsample" + std::to_string(counter) + ".png", tmp);
 
-
-//        double factor = 0.5;
-//        cv::Mat  mat = cv::Mat(height, width, CV_32SC1 , newTileData);
-//        int newcols = round(mat.cols*factor);
-//        int newrows = round(mat.rows*factor);
-//        cv::Mat newmat =cv::Mat(newcols, newrows, mat.type());
-//
-//        for (int i=0;i<mat.cols;i++){
-//            for (int j=0;j<mat.cols;j++){
-//                newmat<CV_32SC1> (round(i*factor), round(j*factor)) = mat<CV_32SC1>(i, j);
-//            }
-//        }
-
-//        cv::imwrite("test" + std::to_string(++counter) + ".png", newmat);
-
-
-
-//        for (auto i = 0; i < newmat.rows * newmat.cols; i+=newmat.elemSize()) {
-//            downsampleData[i] = *(newmat.data + i);
-//        }
-//        cv::Mat image2(pyramidTileSize, pyramidTileSize, CV_32SC1, downsampleData);
-//        cv::imwrite("downsampleCreateTileTask.png", image2);
 
         return downsampleData;
 
