@@ -7,7 +7,6 @@
 #include "src/rules/PyramidRule.h"
 #include "src/tasks/CreateTileTask.h"
 #include "src/utils/MatrixAllocator.h"
-#include "src/utils/FakeTileAllocator.h"
 #include "src/data/Tile.h"
 #include <htgs/log/TaskGraphSignalHandler.hpp>
 

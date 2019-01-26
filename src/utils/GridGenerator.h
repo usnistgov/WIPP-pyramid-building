@@ -23,7 +23,9 @@
 #include "../data/PartialFov.h"
 #include <assert.h>
 
-//TODO CHECK we expect all FOVs to have the same size and the same tile size.
+//TODO CHECK Following the previous Java implementation, we expect all FOVs to have the same size and the same tile size.
+//Lifiting this assumption would mean we would need to open each file to get each FOV size.
+//The best would then be to modified the stitching vector to contain this information already.
 /**
  * @class MistStitchedImageReader MistStitchedImageReader.h
  * @brief Parse the MIST stitching vector representing overlapping FOVs.
@@ -31,8 +33,7 @@
  * The pyramid base level is composed of tiles carved from a set of overlapping FOVs.
  * For a given pyramid tile size, we can generate a grid structure : (row,col) -> vector of partial overlapping FOVs.
  */
-class StitchingVectorParser {
-
+class GridGenerator {
 
 private:
     uint32_t pyramidTileSize;
@@ -55,7 +56,7 @@ private:
 
 public:
 
-    //TODO test that directory and vector and not mixed up.
+    //TODO test that directory and vector are not mixed up.
     //TODO CHECK we cast fovGlobalX and fovGlobalY into signed 32bits integer. Enough?
     //TODO CHECK we cast most values to 32bits integers.
     /**
@@ -64,7 +65,7 @@ public:
      * @param stitchingVectorPath  where to locate the corresponding stitching vector.
      * @param pyramidTileSize size of pyramid tile.
      */
-    StitchingVectorParser(const std::string &imageDirectoryPath,
+    GridGenerator(const std::string &imageDirectoryPath,
                             const std::string &stitchingVectorPath, uint32_t pyramidTileSize) :
                                                                       imageDirectoryPath(imageDirectoryPath),
                                                                       stitchingVectorPath(stitchingVectorPath),
@@ -72,7 +73,6 @@ public:
         //inputs
         std::ifstream infile(stitchingVectorPath);
         uint32_t tileSize = pyramidTileSize;
-
 
         //full image dim
         uint32_t imageWidth = 0;

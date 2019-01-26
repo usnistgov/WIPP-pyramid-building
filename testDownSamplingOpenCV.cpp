@@ -2,7 +2,7 @@
 // Created by Gerardin, Antoine D. (Assoc) on 1/23/19.
 //
 
-#include "src/utils/StitchingVectorParser.h"
+#include "src/utils/GridGenerator.h"
 #include "src/utils/BaseTileGenerator.h"
 #define uint64 uint64_hack_
 #define int64 int64_hack_
@@ -35,7 +35,7 @@ int main() {
         uint32_t pyramidTileSize = 256;
         //  uint32_t pyramidTileSize = 32;
 
-        auto reader = new StitchingVectorParser(directory, vector, pyramidTileSize);
+        auto reader = new GridGenerator(directory, vector, pyramidTileSize);
         auto grid = reader->getGrid();
 
         //TODO CHECK we assume that all FOV have the same tiling scheme.

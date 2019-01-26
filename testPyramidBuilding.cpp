@@ -9,7 +9,6 @@
 #include "src/tasks/BaseTileTask.h"
 #include "src/tasks/OutputTask.h"
 #include "src/utils/MatrixAllocator.h"
-#include "src/utils/FakeTileAllocator.h"
 #include "src/data/Tile.h"
 #include <htgs/log/TaskGraphSignalHandler.hpp>
 #define uint64 uint64_hack_
@@ -20,8 +19,10 @@
 #include <assert.h>
 #include "src/data/TileRequest.h"
 #include "src/utils/SingleTiledTiffWriter.h"
-#include "src/utils/StitchingVectorParser.h"
+#include "src/utils/GridGenerator.h"
 #include "src/utils/BaseTileGenerator.h"
+
+#define DEBUG(x) do { std::cerr << x << std::endl; } while (0)
 
 
 Tile<uint32_t>* generateTile(uint32_t i, uint32_t j, std::map<std::pair<uint32_t, uint32_t>, std::vector<PartialFov *>> &grid, BaseTileGenerator *generator, std::string directory) {
@@ -47,12 +48,12 @@ int main() {
     // Run the example surrounding with a chrono
     auto begin = std::chrono::high_resolution_clock::now();
 
-    std::string vector = "/Users/gerardin/Documents/projects/pyramidio/pyramidio/src/test/resources/dataset2/stitching_vector/tiled-pc/img-global-positions-1.txt";
-    std::string directory = "/Users/gerardin/Documents/projects/pyramidio/pyramidio/src/test/resources/dataset2/images/tiled-pc/";
+//    std::string vector = "/Users/gerardin/Documents/projects/pyramidio/pyramidio/src/test/resources/dataset2/stitching_vector/tiled-pc/img-global-positions-1.txt";
+//    std::string directory = "/Users/gerardin/Documents/projects/pyramidio/pyramidio/src/test/resources/dataset2/images/tiled-pc/";
 
 
-//    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/stitching_vector/img-global-positions-1.txt";
-//    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/tiled-images/";
+    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/stitching_vector/img-global-positions-1.txt";
+    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/tiled-images/";
 
 //    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset02/stitching_vector/img-global-positions-1.txt";
 //    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset02/images/";
@@ -61,16 +62,16 @@ int main() {
 //    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset01/images/";
 
     //pyramid
-    uint32_t pyramidTileSize = 512;
-//    uint32_t pyramidTileSize = 32;
+    uint32_t pyramidTileSize = 256;
+//   uint32_t pyramidTileSize = 32;
 
-    auto reader = new StitchingVectorParser(directory, vector, pyramidTileSize);
+    auto gridGenerator = new GridGenerator(directory, vector, pyramidTileSize);
 
-    auto grid = reader->getGrid();
+    auto grid = gridGenerator->getGrid();
 
     //TODO CHECK we assume that all FOV have the same tiling scheme.
-    auto tileWidth = reader->getFovTileWidth();
-    auto tileHeight = reader->getFovTileHeight();
+    auto tileWidth = gridGenerator->getFovTileWidth();
+    auto tileHeight = gridGenerator->getFovTileHeight();
 
     //TODO CHECK we assume all tiles are square. This is not necessary but it is safe to assume for the first tests.
     assert(tileWidth == tileHeight);
@@ -80,14 +81,12 @@ int main() {
     //assert(pyramidTileSize % tileWidth == 0);
 
 
-    uint32_t numTileRow = reader->getGridMaxRow() + 1;
-    uint32_t numTileCol = reader->getGridMaxCol() + 1;
-
-    std::cout << "numTileRow : " << numTileRow << ", numTileCol : " << numTileCol << std::endl;
+    uint32_t numTileRow = gridGenerator->getGridMaxRow() + 1;
+    uint32_t numTileCol = gridGenerator->getGridMaxCol() + 1;
 
     auto graph = new htgs::TaskGraphConf<TileRequest, Tile<uint32_t> >();
 
-    BaseTileGenerator* generator = new BaseTileGenerator(reader);
+    BaseTileGenerator* generator = new BaseTileGenerator(gridGenerator);
     auto baseTileTask = new BaseTileTask(10, generator);
 
     auto bookeeper = new htgs::Bookkeeper<Tile<uint32_t>>();
@@ -179,6 +178,8 @@ int main() {
     runtime->waitForRuntime();
 
     delete runtime;
+    delete gridGenerator;
+    delete generator;
 
     auto end = std::chrono::high_resolution_clock::now();
     std::cout << "Execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()

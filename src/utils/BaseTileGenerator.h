@@ -14,8 +14,11 @@
 #include "Helper.h"
 #include <FastImage/api/FastImage.h>
 #include <FastImage/TileLoaders/GrayscaleTiffTileLoader.h>
-#include "StitchingVectorParser.h"
+#include "GridGenerator.h"
 #include "../data/Tile.h"
+
+#define DEBUG(x) do { std::cerr << x << std::endl; } while (0)
+
 /**
  * @class BaseTileGenerator BaseTileGenerator.h
  * @brief Generate pyramid base level tile.
@@ -32,7 +35,7 @@ public:
      * The pyramid base level tile generator needs information on the general structure of the full FOVs.
      * @param reader the MistStitchedImageReader that contains information on partial FOV overlaps.
      */
-    BaseTileGenerator(StitchingVectorParser *reader): grid(reader->getGrid()), directory(reader->getImageDirectoryPath()), tileWidth(
+    BaseTileGenerator(GridGenerator *reader): grid(reader->getGrid()), directory(reader->getImageDirectoryPath()), tileWidth(
             reader->getFovTileWidth()), tileHeight(reader->getFovTileHeight()), pyramidTileSize(reader->getPyramidTileSize()),
                     fullFovWidth(reader->getFovTileWidth()), fullFovHeight(reader->getFovTileHeight()),
                     maxGridCol(reader->getGridMaxCol()), maxGridRow(reader->getGridMaxRow()) {}
@@ -44,7 +47,7 @@ public:
      */
     Tile<uint32_t>* generateTile(std::pair<uint32_t, uint32_t> index){
 
-        //TODO CHECK if we wanted exact dimensions for the pyramid tile at level 0.
+        //TODO CHECK if we wanted exact dimensions for the pyramid tile at level 0. Some later calculations might need to be adapted.
        // uint32_t pyramidTileWidth = (index.second != maxGridCol) ? pyramidTileSize : fullFovWidth % maxGridCol;
        // uint32_t pyramidTileHeight = (index.first != maxGridRow) ? pyramidTileSize : fullFovHeight % maxGridRow;
         uint32_t pyramidTileWidth = pyramidTileSize;
@@ -60,6 +63,7 @@ public:
         //It should never happen with real data, but we might have missing tiles or have so much overlap between FOVs that
         //some gap appears in the image. If this is the case, we generate an empty tile.
         if(it == grid.end()){
+            DEBUG("A gap was found in the grid of tiles at (" + std::to_string(index.first) + "," + std::to_string(index.second) + "). Generating a empty tile.");
             return new Tile<uint32_t>(0, index.first,index.second, pyramidTileWidth, pyramidTileHeight, tile);
         }
 
@@ -74,7 +78,7 @@ public:
             auto extension = Helper::getExtension(filename);
 
             if(extension != "tiff" && extension != "tif") {
-                std::cout << "File Format not recognized !" << std::endl;
+                std::cerr << "File Format not recognized !" << std::endl;
                 exit(1);
             }
 
@@ -181,15 +185,15 @@ public:
 
 private:
 
-    std::map<std::pair<uint32_t, uint32_t>, std::vector<PartialFov *>> grid;
-    std::string directory;
-    uint32_t tileWidth;
-    uint32_t tileHeight;
-    uint32_t pyramidTileSize;
-    uint32_t fullFovWidth;
-    uint32_t fullFovHeight;
-    uint32_t maxGridRow;
-    uint32_t maxGridCol;
+    const std::map<std::pair<uint32_t, uint32_t>, std::vector<PartialFov *>> grid;
+    const std::string directory;
+    const uint32_t tileWidth;
+    const uint32_t tileHeight;
+    const uint32_t pyramidTileSize;
+    const uint32_t fullFovWidth;
+    const uint32_t fullFovHeight;
+    const uint32_t maxGridRow;
+    const uint32_t maxGridCol;
 
 
 };
