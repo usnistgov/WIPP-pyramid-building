@@ -66,7 +66,7 @@ public:
                 newTileData = new uint32_t[ width * height ];
                 memset( newTileData, 0, width * height * sizeof(uint32_t) );
                 copyTileBlock(newTileData, block[0].get(), width, height, 0, 0);
-                copyTileBlock(newTileData, block[0].get(), width, height, block[0]->get_width(), 0);
+                copyTileBlock(newTileData, block[2].get(), width, height, 0, block[0]->get_height());
                 downsampleData = generateDownsampleData(newTileData, width, height);
                 break;
             //bottom horizontal block
@@ -78,7 +78,7 @@ public:
                 newTileData = new uint32_t[ width * height ];
                 memset( newTileData, 0, width * height * sizeof(uint32_t) );
                 copyTileBlock(newTileData, block[0].get(), width, height, 0, 0);
-                copyTileBlock(newTileData, block[0].get(), width, height, 0, block[0]->get_height());
+                copyTileBlock(newTileData, block[1].get(), width, height, block[0]->get_width(), 0);
                 downsampleData = generateDownsampleData(newTileData, width, height);
                 break;
             //bottom right single block
@@ -100,12 +100,17 @@ public:
 
         tile = new Tile<uint32_t>(level, row, col, downsampleWidth, downsampleHeight, downsampleData);
 
-        //TODO REMOVE FOR DEBUG
-        cv::Mat image(width, height, CV_32SC1, newTileData);
-        cv::imwrite("createTileTask" + std::to_string(++counter) + ".png", image);
 
+        //TODO REMOVE FOR DEBUG
+        cv::Mat image(height, width, CV_32SC1, newTileData);
+        cv::imwrite("createTileTaskLargeFOV" + std::to_string(counter) + "orig.png", image);
+        cv::Mat tmp(height, width, CV_16U);
+        image.convertTo(tmp, CV_16U);
+        cv::imwrite("createTileTaskLargeFOV" + std::to_string(counter) + ".png", tmp);
 
         this->addResult(tile);
+
+        counter++;
     }
 
     std::string getName() override {
@@ -144,16 +149,25 @@ private:
 
         uint32_t* downsampleData = new uint32_t[ width * height ];
 
-        for(auto j= 0 ; j < downsampleHeight; j++) {
-            for(auto i= 0 ; i < downsampleWidth; i++){
+        for(auto j= 0 ; j < downsampleHeight - 1; j++) {
+            for(auto i= 0 ; i < downsampleWidth - 1; i++){
                 uint32_t index = j * downsampleWidth + i;
                 downsampleData[index] = (newTileData[2 * j * width + 2 * i] + newTileData[2 * j * width + 2 *i + 1] +
                                          newTileData[2 * (j+1) * width + 2 * i] + newTileData[2 * (j+1) * width + 2 *i + 1] ) / 4;
             }
         }
 
+        for(auto i= 0 ; i < downsampleWidth - 1; i++) {
+            uint32_t index = (downsampleHeight - 1) * downsampleWidth + i;
+            downsampleData[index] = (newTileData[(height - 1) * width + 2 * i] + newTileData[(height -1) * width + 2 * i + 1]) / 2;
+        }
+
         cv::Mat  mat = cv::Mat(downsampleHeight, downsampleWidth, CV_32SC1 , downsampleData);
-        cv::imwrite("test" + std::to_string(++counter) + ".png", mat);
+
+        cv::imwrite("createTileTaskDownsample" + std::to_string(counter) + "orig.png", mat);
+        cv::Mat tmp(downsampleHeight, downsampleWidth, CV_16U);
+        mat.convertTo(tmp, CV_16U, 1,0);
+        cv::imwrite("createTileTaskDownsample" + std::to_string(counter) + ".png", tmp);
 
 
 //        double factor = 0.5;

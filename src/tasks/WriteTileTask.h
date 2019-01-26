@@ -61,9 +61,9 @@ public:
         auto fullImagePath = _pathOut + "/" + level + "/"  + outputFilename;
 
         cv::Mat image(data->get_height(), data->get_width(), CV_32SC1, data->getData());
-        cv::Mat tmp(data->get_height(), data->get_width(), CV_8UC1);
-        image.convertTo(tmp, CV_8UC1);
-        cv::imwrite(fullImagePath + ".png", image);
+        cv::Mat tmp(data->get_height(), data->get_width(), CV_16U);
+        image.convertTo(tmp, CV_16U, 1,0);
+        cv::imwrite(fullImagePath + ".png", tmp);
 
 //        auto w = new SingleTiledTiffWriter(fullImagePath, pyramidTileSize);
 //        w->write(data->getData());
