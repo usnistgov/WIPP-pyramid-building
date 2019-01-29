@@ -97,7 +97,7 @@ int main() {
 
     auto createTileTask = new CreateTileTask(10);
 
-    auto writeTask = new WriteTileTask(10, "output", pyramidTileSize);
+    auto writeTask = new WriteTileTask(24, "output", pyramidTileSize);
 
     graph->setGraphConsumerTask(baseTileTask);
 
@@ -118,7 +118,7 @@ int main() {
     htgs::TaskGraphRuntime *runtime = new htgs::TaskGraphRuntime(graph);
 
     htgs::TaskGraphSignalHandler::registerTaskGraph(graph);
-    htgs::TaskGraphSignalHandler::registerSignal(SIGTERM   );
+    htgs::TaskGraphSignalHandler::registerSignal(SIGTERM);
 
     runtime->executeRuntime();
 

@@ -55,13 +55,13 @@ int main() {
     //TODO Make this an HTGS task and decouple from the TIFF write operation (this could be a PNG Write as well)
     //TODO wrap the tile represented as a raw array into a Tile object and send it through the graph.
 
-    std::vector<uint32_t*> tiles;
+    std::vector<Tile<uint32_t>*> tiles;
 
     for ( auto it = grid.begin(); it != grid.end(); ++it ) {
 
         //generate a pyramid tile
         auto generator = new BaseTileGenerator(reader);
-        uint32_t* tile = generator->generateTile(it->first);
+        Tile<uint32_t>* tile = generator->generateTile(it->first);
 
         tiles.push_back(tile);
 
@@ -69,7 +69,7 @@ int main() {
         auto outputFilename = "img_r" + std::to_string(it->first.second) + "_c" + std::to_string(it->first.first) + ".tif";
         auto outputdir = "output_";
         auto w = new SingleTiledTiffWriter(outputdir + outputFilename, pyramidTileSize);
-        w->write(tile);
+        w->write(tile->getData());
 
     } //DONE generating the lowest level of the pyramid
 }

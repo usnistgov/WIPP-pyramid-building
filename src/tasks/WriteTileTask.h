@@ -29,15 +29,18 @@ public:
             const int dir_err = mkdir(_pathOut.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
             if (-1 == dir_err)
             {
-                printf("Error creating directory!n");
+                printf("Error creating output directory!n");
                 exit(1);
             }
         }
+
+        delete dir;
     }
 
     //TODO check why compiler rejects that
 //    WriteTileTask(const std::string &_pathOut, uint32_t pyramidTileSize) :
 //            WriteTileTask(1, &_pathOut, pyramidTileSize) {}
+
 
     void executeTask(std::shared_ptr<Tile<uint32_t>> data) override {
 
@@ -45,18 +48,17 @@ public:
 
         auto dirPath = (_pathOut + "/" + std::to_string(data->getLevel()));
 
-        std::cout << dirPath << std::endl;
-
+        //  Create directory if it does not exists
         auto dir = opendir(dirPath.c_str());
-
         if(dir == nullptr){
             const int dir_err = mkdir(dirPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
             if (-1 == dir_err)
             {
-                printf("Error creating directory!n");
+                printf("Error creating output directory for level") + std::to_string(level) + ("!n");
                 exit(1);
             }
         }
+        delete dir;
 
         //write as a tif output
         auto outputFilename = "img_r" + std::to_string(data->getRow()) + "_c" + std::to_string(data->getCol()) + ".tif";
@@ -68,8 +70,8 @@ public:
         image.convertTo(tmp, CV_16U, 1,0);
         cv::imwrite(fullImagePath + ".png", tmp);
 
-//        auto w = new SingleTiledTiffWriter(fullImagePath, pyramidTileSize);
-//        w->write(data->getData());
+        auto w = new SingleTiledTiffWriter(fullImagePath, pyramidTileSize);
+        w->write(data->getData());
 
         addResult(data);
     }

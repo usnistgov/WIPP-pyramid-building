@@ -6,6 +6,7 @@
 #define PYRAMIDBUILDING_HELPER_H
 
 #include <iostream>
+#include <algorithm>
 
 class Helper {
 

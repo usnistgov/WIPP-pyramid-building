@@ -1,8 +1,9 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.10)
 project(pyramidBuilding)
 
 set(CMAKE_CXX_STANDARD 14)
 
+set(TIFF_INCLUDE_DIR /usr/lib)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules")
 #TODO FIX opencv is not installed in a standard directory
@@ -13,7 +14,7 @@ include_directories(${HTGS_INCLUDE_DIR})
 include_directories(${FastImage_INCLUDE_DIR})
 link_libraries(${FastImage_LIBRARIES})
 
-find_package(OpenCV REQUIRED)
+find_package(OpenCV 3 REQUIRED)
 link_libraries(${OpenCV_LIBRARIES})
 message("OpenCV Version: ${OpenCV_VERSION}")
 
@@ -26,11 +27,11 @@ add_subdirectory(test)
 set(ALL_SRCS CACHE INTERNAL "sources" FORCE)
 set(SOURCES src/utils/Helper.cpp src/data/BlockType.cpp)
 
-add_executable(old main.cpp ${ALL_SRCS} ${SOURCES})
+#add_executable(old main.cpp ${ALL_SRCS} ${SOURCES})
 add_executable(stitching testStitchingVectorParser.cpp ${ALL_SRCS} ${SOURCES})
 add_executable(libtiff testLibtiff.cpp ${ALL_SRCS} ${SOURCES})
 add_executable(pyramidBuilding testPyramidBuilding.cpp ${ALL_SRCS} ${SOURCES})
-add_executable(dowmsampling testDownSamplingOpenCV.cpp ${ALL_SRCS} ${SOURCES} )
+#add_executable(dowmsampling testDownSamplingOpenCV.cpp ${ALL_SRCS} ${SOURCES} )
 
 
 
