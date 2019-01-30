@@ -11,21 +11,22 @@
 #include "../data/Tile.h"
 #include "../data/BlockRequest.h"
 
-class PyramidRule : public htgs::IRule<Tile<uint32_t>, BlockRequest<uint32_t>> {
+template <class T>
+class PyramidRule : public htgs::IRule<Tile<T>, BlockRequest<T>> {
 
 public:
-    PyramidRule(uint32_t numTileCol, uint32_t numTileRow) :  numTileCol(numTileCol), numTileRow(numTileRow) {
+    PyramidRule(size_t numTileCol, size_t numTileRow) :  numTileCol(numTileCol), numTileRow(numTileRow) {
 
         //calculate pyramid depth
         auto maxDim = std::max(numTileCol,numTileRow);
         numLevel = ceil(log2(maxDim)) + 1;
 
         //calculate number of tiles for each level
-        double levelCol, levelRow;
+        size_t levelCol, levelRow;
         levelCol = numTileCol;
         levelRow = numTileRow;
-        for(uint32_t l=0; l<numLevel; l++){
-            std::array<uint32_t,2> gridSize = { (uint32_t)levelCol, (uint32_t)levelRow };
+        for(auto l=0; l<numLevel; l++){
+            std::array<size_t,2> gridSize = { (size_t)levelCol, (size_t)levelRow };
             levelGridSizes.push_back(gridSize);
             levelCol = ceil(levelCol/2);
             levelRow = ceil(levelRow /2);
@@ -47,7 +48,7 @@ public:
         return "Pyramid Rule - Cache";
     }
 
-    void applyRule(std::shared_ptr<Tile<uint32_t>> data, size_t pipelineId) override {
+    void applyRule(std::shared_ptr<Tile<T>> data, size_t pipelineId) override {
 
         auto col = data->getCol();
         auto row = data->getRow();
@@ -102,8 +103,8 @@ public:
         if(col >= gridCol -1 && row >= gridRow -1 && col % 2 ==0 && row % 2 ==0) {
             std::cout << "corner case : block size 1 " << std::endl;
             //sendTile
-            std::vector<std::shared_ptr<Tile<uint32_t>>> block{data};
-            this->addResult(new BlockRequest<uint32_t>(block));
+            std::vector<std::shared_ptr<Tile<T>>> block{data};
+            this->addResult(new BlockRequest<T>(block));
             return;
         }
 
@@ -111,13 +112,13 @@ public:
             std::cout << "corner case : column block size 2 " << std::endl;
             if(row % 2 == 0 && grids.at(level).at(SOUTH).get() != nullptr) {
                 //send 2 tiles
-                std::vector<std::shared_ptr<Tile<uint32_t>>> block{ data, nullptr, grids.at(level).at(SOUTH) };
-                this->addResult(new BlockRequest<uint32_t>(block));
+                std::vector<std::shared_ptr<Tile<T>>> block{ data, nullptr, grids.at(level).at(SOUTH) };
+                this->addResult(new BlockRequest<T>(block));
             }
             else if (row % 2 != 0 && grids.at(level).at(NORTH).get() != nullptr) {
                 //send 2 tiles
-                std::vector<std::shared_ptr<Tile<uint32_t>>> block{ grids.at(level).at(NORTH), nullptr, data };
-                this->addResult(new BlockRequest<uint32_t>(block));
+                std::vector<std::shared_ptr<Tile<T>>> block{ grids.at(level).at(NORTH), nullptr, data };
+                this->addResult(new BlockRequest<T>(block));
             }
             return;
         }
@@ -126,13 +127,13 @@ public:
             std::cout << "corner case : row block size 2 " << std::endl;
             if(col % 2 == 0 && grids.at(level).at(EAST).get() != nullptr) {
                 //send 2 tiles
-                std::vector<std::shared_ptr<Tile<uint32_t>>> block{ data, grids.at(level).at(EAST) };
-                this->addResult(new BlockRequest<uint32_t>(block));
+                std::vector<std::shared_ptr<Tile<T>>> block{ data, grids.at(level).at(EAST) };
+                this->addResult(new BlockRequest<T>(block));
             }
             else if (col % 2 != 0 && grids.at(level).at(WEST).get() != nullptr ) {
                 //send 2 tiles
-                std::vector<std::shared_ptr<Tile<uint32_t>>> block{ grids.at(level).at(WEST), data };
-                this->addResult(new BlockRequest<uint32_t>(block));
+                std::vector<std::shared_ptr<Tile<T>>> block{ grids.at(level).at(WEST), data };
+                this->addResult(new BlockRequest<T>(block));
             }
             return;
         }
@@ -145,8 +146,8 @@ public:
                 grids.at(level).at(SOUTH_EAST).get() != nullptr){
                 //sendTile
                 std::cout << "new tile! " << std::endl;
-                std::vector<std::shared_ptr<Tile<uint32_t>>> block{ data, grids.at(level).at(EAST), grids.at(level).at(SOUTH), grids.at(level).at(SOUTH_EAST)};
-                this->addResult(new BlockRequest<uint32_t>(block));
+                std::vector<std::shared_ptr<Tile<T>>> block{ data, grids.at(level).at(EAST), grids.at(level).at(SOUTH), grids.at(level).at(SOUTH_EAST)};
+                this->addResult(new BlockRequest<T>(block));
             };
         }
 
@@ -158,8 +159,8 @@ public:
                 grids.at(level).at(SOUTH_WEST).get() != nullptr){
                 //sendTile
                 std::cout << "new tile! " << std::endl;
-                std::vector<std::shared_ptr<Tile<uint32_t>>> block{ grids.at(level).at(WEST), data, grids.at(level).at(SOUTH_WEST), grids.at(level).at(SOUTH)};
-                this->addResult(new BlockRequest<uint32_t>(block));
+                std::vector<std::shared_ptr<Tile<T>>> block{ grids.at(level).at(WEST), data, grids.at(level).at(SOUTH_WEST), grids.at(level).at(SOUTH)};
+                this->addResult(new BlockRequest<T>(block));
             }
         }
 
@@ -171,8 +172,8 @@ public:
                 grids.at(level).at(EAST).get() != nullptr){
                 //sendTile
                 std::cout << "new tile! " << std::endl;
-                std::vector<std::shared_ptr<Tile<uint32_t>>> block{ grids.at(level).at(NORTH), grids.at(level).at(NORTH_EAST), data, grids.at(level).at(EAST)};
-                this->addResult(new BlockRequest<uint32_t>(block));
+                std::vector<std::shared_ptr<Tile<T>>> block{ grids.at(level).at(NORTH), grids.at(level).at(NORTH_EAST), data, grids.at(level).at(EAST)};
+                this->addResult(new BlockRequest<T>(block));
             }
         }
 
@@ -184,8 +185,8 @@ public:
                 grids.at(level).at(WEST).get() != nullptr){
                 //sendTile
                 std::cout << "new tile! " << std::endl;
-                std::vector<std::shared_ptr<Tile<uint32_t>>> block{ grids.at(level).at(NORTH_WEST), grids.at(level).at(NORTH), grids.at(level).at(WEST), data};
-                this->addResult(new BlockRequest<uint32_t>(block));
+                std::vector<std::shared_ptr<Tile<T>>> block{ grids.at(level).at(NORTH_WEST), grids.at(level).at(NORTH), grids.at(level).at(WEST), data};
+                this->addResult(new BlockRequest<T>(block));
             }
         }
 
@@ -224,8 +225,8 @@ public:
 
 
 private:
-
-    void removeFromCache(std::vector<std::shared_ptr<Tile<uint32_t>>> l, size_t index){
+    //TODO TEST THAT
+    void removeFromCache(std::vector<std::shared_ptr<Tile<T>>> l, size_t index){
         if ((index >= 0 && index < l.size()) && (l[index] != NULL)){
             auto tile = l[index].get();
             if(tile->getLevel() == 0){
@@ -235,11 +236,11 @@ private:
         }
     }
 
-    uint32_t numTileCol;
-    uint32_t numTileRow;
-    uint32_t numLevel;
-    std::vector<std::array<uint32_t,2>> levelGridSizes;
-    std::vector<std::vector<std::shared_ptr<Tile<uint32_t>>>> grids;
+    size_t numTileCol;
+    size_t numTileRow;
+    size_t numLevel;
+    std::vector<std::array<size_t,2>> levelGridSizes;
+    std::vector<std::vector<std::shared_ptr<Tile<T>>>> grids;
 
     bool done = false;
 

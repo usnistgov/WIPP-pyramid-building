@@ -36,21 +36,21 @@
 class GridGenerator {
 
 private:
-    uint32_t pyramidTileSize;
+    size_t pyramidTileSize;
     std::string imageDirectoryPath;
     std::string stitchingVectorPath;
 
-    std::map<std::pair<uint32_t,uint32_t> , std::vector<PartialFov*>> grid;
+    std::map<std::pair<size_t,size_t> , std::vector<PartialFov*>> grid;
 
-    uint32_t fovWidth = 0;
-    uint32_t fovHeight = 0;
-    uint32_t fovTileWidth = 0;
-    uint32_t fovTileHeight = 0;
+    size_t fovWidth = 0;
+    size_t fovHeight = 0;
+    size_t fovTileWidth = 0;
+    size_t fovTileHeight = 0;
 
-    uint32_t gridMaxRow = 0;
-    uint32_t gridMaxCol = 0;
+    size_t gridMaxRow = 0;
+    size_t gridMaxCol = 0;
 
-    uint32_t gridSize;
+    size_t gridSize;
 
 
 
@@ -66,22 +66,22 @@ public:
      * @param pyramidTileSize size of pyramid tile.
      */
     GridGenerator(const std::string &imageDirectoryPath,
-                            const std::string &stitchingVectorPath, uint32_t pyramidTileSize) :
+                            const std::string &stitchingVectorPath, size_t pyramidTileSize) :
                                                                       imageDirectoryPath(imageDirectoryPath),
                                                                       stitchingVectorPath(stitchingVectorPath),
                                                                       pyramidTileSize(pyramidTileSize) {
         //inputs
         //TODO CHECK THAT THE FILE EXISTS (otherwise it will silently break)
         std::ifstream infile(stitchingVectorPath);
-        uint32_t tileSize = pyramidTileSize;
+        size_t tileSize = pyramidTileSize;
 
         //full image dim
-        uint32_t imageWidth = 0;
-        uint32_t imageHeight = 0;
+        size_t imageWidth = 0;
+        size_t imageHeight = 0;
 
         //partial images (fovs)
-        int32_t fovGlobalX = 0;
-        int32_t fovGlobalY = 0;
+        size_t fovGlobalX = 0;
+        size_t fovGlobalY = 0;
 
         //parse stitching vector
         std::string line;
@@ -102,6 +102,7 @@ public:
                         std::regex rgx("\\(([0-9]+), ([0-9]+)\\)");
                         std::smatch matches;
                         if(std::regex_search(val, matches, rgx)) {
+                            //TODO CHECK CONVERSION
                             fovGlobalX = std::stoi(matches[1].str());
                             fovGlobalY = std::stoi(matches[2].str());
                         } else {
@@ -128,16 +129,17 @@ public:
             cv::Rect fov = cv::Rect(fovGlobalX, fovGlobalY, fovWidth, fovHeight);
 
             //Find out across how many pyramid tiles span the current FOV
-            uint32_t startCol, startRow, endCol, endRow = 0;
+            size_t startCol, startRow, endCol, endRow = 0;
             startCol = fovGlobalX / tileSize;
             startRow =  fovGlobalY / tileSize;
+            //TODO CHECK INDEXES
             endCol =  (fovGlobalX + fovWidth - 1) / tileSize;
             endRow = (fovGlobalY + fovHeight - 1) / tileSize;
 
             //compute overlap between an FOV and each pyramid tile.
 
-            for(uint32_t j = startRow; j <= endRow ; j++) {
-                for(uint32_t i = startCol; i <= endCol ; i++) {
+            for(auto j = startRow; j <= endRow ; j++) {
+                for(auto i = startCol; i <= endCol ; i++) {
                     cv::Rect tile = cv::Rect(i * tileSize, j * tileSize, tileSize, tileSize); //tile global coordinates
 
                     //global coordinates
@@ -145,10 +147,10 @@ public:
 
                     assert(intersection.width != 0 || intersection.height != 0);
 
-                    int32_t relativeX = 0;
-                    int32_t relativeY = 0;
-                    int32_t fovRelativeX = 0;
-                    int32_t fovRelativeY = 0;
+                    size_t relativeX = 0;
+                    size_t relativeY = 0;
+                    size_t fovRelativeX = 0;
+                    size_t fovRelativeY = 0;
 
                     //coordinates relative to the tile origin
                     relativeX = intersection.x - i*tileSize;
@@ -194,39 +196,39 @@ public:
     }
 
 
-    const std::map<std::pair<uint32_t, uint32_t>, std::vector<PartialFov *>> &getGrid() const {
+    const std::map<std::pair<size_t, size_t>, std::vector<PartialFov *>> &getGrid() const {
         return grid;
     }
 
-    uint32_t getFovWidth() const {
+    size_t getFovWidth() const {
         return fovWidth;
     }
 
-    uint32_t getFovHeight() const {
+    size_t getFovHeight() const {
         return fovHeight;
     }
 
-    uint32_t getFovTileWidth() const {
+    size_t getFovTileWidth() const {
         return fovTileWidth;
     }
 
-    uint32_t getFovTileHeight() const {
+    size_t getFovTileHeight() const {
         return fovTileHeight;
     }
 
-    uint32_t getFullFovWidth() const {
+    size_t getFullFovWidth() const {
         return gridMaxCol * fovWidth;
     }
 
-    uint32_t getFullFovHeight() const {
+    size_t getFullFovHeight() const {
         return gridMaxRow * fovHeight;
     }
 
-    uint32_t getGridMaxRow() const {
+    size_t getGridMaxRow() const {
         return gridMaxRow;
     }
 
-    uint32_t getGridMaxCol() const {
+    size_t getGridMaxCol() const {
         return gridMaxCol;
     }
 
@@ -235,7 +237,7 @@ public:
         return imageDirectoryPath;
     }
 
-    uint32_t getPyramidTileSize() const {
+    size_t getPyramidTileSize() const {
         return pyramidTileSize;
     }
 

@@ -27,6 +27,7 @@
  * For a given pyramid tile size, we can generate a grid structure : (row,col) -> vector of partial overlapping FOVs.
  * We can then used this information to generate each tile.
  */
+template <class T>
 class BaseTileGenerator {
 
 public:
@@ -45,17 +46,15 @@ public:
      * @param index (row,col) of the tile to generate.
      * @return
      */
-    Tile<uint32_t>* generateTile(std::pair<uint32_t, uint32_t> index){
-
+    Tile<T>* generateTile(std::pair<size_t, size_t> index){
+        //TODO CHECK we generate square tile of fixed size
         //TODO CHECK if we wanted exact dimensions for the pyramid tile at level 0. Some later calculations might need to be adapted.
        // uint32_t pyramidTileWidth = (index.second != maxGridCol) ? pyramidTileSize : fullFovWidth % maxGridCol;
        // uint32_t pyramidTileHeight = (index.first != maxGridRow) ? pyramidTileSize : fullFovHeight % maxGridRow;
-        uint32_t pyramidTileWidth = pyramidTileSize;
-        uint32_t pyramidTileHeight = pyramidTileSize;
+        size_t pyramidTileWidth = pyramidTileSize;
+        size_t pyramidTileHeight = pyramidTileSize;
 
-        uint32_t* tile = new uint32_t[ pyramidTileWidth * pyramidTileHeight ];  //the pyramid tile we will be filling from partial FOVs.
-        //TODO CHECK. MIGHT NOT BE NECESSARY. Set all values to 0
-        memset( tile, 0, pyramidTileWidth * pyramidTileHeight*sizeof(uint32_t) );
+        T* tile = new T[ pyramidTileWidth * pyramidTileHeight ];  //the pyramid tile we will be filling from partial FOVs.
 
         auto it = grid.find(index);
 
@@ -64,7 +63,7 @@ public:
         //some gap appears in the image. If this is the case, we generate an empty tile.
         if(it == grid.end()){
             DEBUG("A gap was found in the grid of tiles at (" + std::to_string(index.first) + "," + std::to_string(index.second) + "). Generating a empty tile.");
-            return new Tile<uint32_t>(0, index.first,index.second, pyramidTileWidth, pyramidTileHeight, tile);
+            return new Tile<T>(0, index.first,index.second, pyramidTileWidth, pyramidTileHeight, tile);
         }
 
         std::vector<PartialFov *> fovs = it->second;
@@ -85,7 +84,7 @@ public:
                 auto overlapFov = fov->getFovCoordOverlap();
 
                 //coordinates in the grid of FOV tiles to load
-                uint32_t startRow, startCol, endRow, endCol;
+                size_t startRow, startCol, endRow, endCol;
                 startCol = overlapFov.x /  tileWidth;
                 startRow = overlapFov.y / tileHeight;
                 endCol = ( overlapFov.x + overlapFov.width - 1 ) / tileWidth;
@@ -94,21 +93,21 @@ public:
                 //nb of tiles to load - we load all tiles in parallel
                 auto nbOfTileToLoad = (endCol - startCol + 1) * (endRow - startRow + 1);
 
-                fi::ATileLoader<uint32_t> *tileLoader = new fi::GrayscaleTiffTileLoader<uint32_t>(directory + filename, nbOfTileToLoad);
+                fi::ATileLoader<T> *tileLoader = new fi::GrayscaleTiffTileLoader<T>(directory + filename, nbOfTileToLoad);
 
-                auto *fi = new fi::FastImage<uint32_t>(tileLoader, 0);
+                auto *fi = new fi::FastImage<T>(tileLoader, 0);
                 fi->getFastImageOptions()->setNumberOfViewParallel(nbOfTileToLoad);
                 fi->configureAndRun();
 
                 //request all tiles for this partial FOV
-                for(uint32_t i=startRow; i <= endRow; i++ ){
-                    for (uint32_t j=startCol; j <= endCol; ++j){
+                for(auto i=startRow; i <= endRow; i++ ){
+                    for (auto j=startCol; j <= endCol; ++j){
                         fi->requestTile(i,j,false,0);
                     }
                 }
                 fi->finishedRequestingTiles();
 
-                uint32_t xOriginGlobal, yOriginGlobal, xOrigin,yOrigin,width,height;
+                size_t xOriginGlobal, yOriginGlobal, xOrigin,yOrigin,width,height;
 
                 //processing each tile
                 while(fi->isGraphProcessingTiles()) {
@@ -119,12 +118,12 @@ public:
 
                         auto view = pview->get();
                         //tile origin in FOV global coordinates
-                        uint32_t tileOriginX = view->getGlobalXOffset();
-                        uint32_t tileOriginY = view->getGlobalYOffset();
+                        size_t tileOriginX = view->getGlobalXOffset();
+                        size_t tileOriginY = view->getGlobalYOffset();
 
                         //start index in FOV global coordinates (top left corner of the rectangle to copy)
-                        xOriginGlobal = std::max<uint32_t>(tileOriginX, overlapFov.x);
-                        yOriginGlobal = std::max<uint32_t>(tileOriginY, overlapFov.y);
+                        xOriginGlobal = std::max<size_t>(tileOriginX, overlapFov.x);
+                        yOriginGlobal = std::max<size_t>(tileOriginY, overlapFov.y);
 
                         //start index in local coordinates (top left corner of the ROI rectangle in the current FOV tile)
                         xOrigin = xOriginGlobal - tileOriginX;
@@ -139,8 +138,8 @@ public:
                         auto endY = std::min(height, tileHeight);
 
                         //get all pixels for this ROI
-                        for(uint32_t j = yOrigin; j < endY ; j++){
-                            for(uint32_t i = xOrigin; i < endX ; i++){
+                        for(auto j = yOrigin; j < endY ; j++){
+                            for(auto i = xOrigin; i < endX ; i++){
                                 auto val = view->getPixel(j,i);
                                 //FOVOverlap coordinates (those are not the global coordinates, but relative to the partial FOV)
                                 auto xInFOVOverlap = tileOriginX + i - overlapFov.x;
@@ -180,20 +179,20 @@ public:
 
         } //DONE generating the pyramid tile
 
-        return new Tile<uint32_t>(0, index.first,index.second, pyramidTileWidth, pyramidTileHeight, tile);
+        return new Tile<T>(0, index.first,index.second, pyramidTileWidth, pyramidTileHeight, tile);
     }
 
 private:
 
-    const std::map<std::pair<uint32_t, uint32_t>, std::vector<PartialFov *>> grid;
+    const std::map<std::pair<size_t, size_t>, std::vector<PartialFov *>> grid;
     const std::string directory;
-    const uint32_t tileWidth;
-    const uint32_t tileHeight;
-    const uint32_t pyramidTileSize;
-    const uint32_t fullFovWidth;
-    const uint32_t fullFovHeight;
-    const uint32_t maxGridRow;
-    const uint32_t maxGridCol;
+    const size_t tileWidth;
+    const size_t tileHeight;
+    const size_t pyramidTileSize;
+    const size_t fullFovWidth;
+    const size_t fullFovHeight;
+    const size_t maxGridRow;
+    const size_t maxGridCol;
 
 
 };

@@ -10,23 +10,22 @@
 #include "../data/TileRequest.h"
 #include "../utils/BaseTileGenerator.h"
 
-
-class BaseTileTask : public htgs::ITask<TileRequest , Tile<uint32_t>> {
+template <class T>
+class BaseTileTask : public htgs::ITask<TileRequest , Tile<T>> {
 
 public:
 
-    BaseTileTask(size_t numThreads, BaseTileGenerator *generator) : htgs::ITask<TileRequest , Tile<uint32_t>>(numThreads), generator(generator) {}
+    BaseTileTask(size_t numThreads, BaseTileGenerator<T> *generator) : htgs::ITask<TileRequest , Tile<T>>(numThreads), generator(generator) {}
 
     void executeTask(std::shared_ptr<TileRequest> data) override {
-        uint32_t i = data.get()->getRow();
-        uint32_t j= data.get()->getCol();
-        std::pair<uint32_t,uint32_t> index= std::make_pair(i,j);
-
+        size_t i = data.get()->getRow();
+        size_t j= data.get()->getCol();
+        std::pair<size_t,size_t> index= std::make_pair(i,j);
         auto t = generator->generateTile(index);
         this->addResult(t);
     }
 
-    ITask<TileRequest, Tile<uint32_t>> *copy() override {
+    ITask<TileRequest, Tile<T>> *copy() override {
         return new BaseTileTask(this->getNumThreads(), generator);
     }
 
@@ -36,7 +35,7 @@ public:
 
 private:
 
-    BaseTileGenerator* generator;
+    BaseTileGenerator<T>* generator;
 
 
 

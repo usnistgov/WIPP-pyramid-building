@@ -24,7 +24,7 @@
 #define DEBUG(x) do { std::cerr << x << std::endl; } while (0)
 
 
-Tile<uint32_t>* generateTile(uint32_t i, uint32_t j, std::map<std::pair<uint32_t, uint32_t>, std::vector<PartialFov *>> &grid, BaseTileGenerator *generator, std::string directory) {
+Tile<uint32_t>* generateTile(uint32_t i, uint32_t j, std::map<std::pair<uint32_t, uint32_t>, std::vector<PartialFov *>> &grid, BaseTileGenerator<uint32_t> *generator, std::string directory) {
     std::pair<uint32_t,uint32_t> index= std::make_pair(i,j);
     auto it = grid.find(index);
     assert(it != grid.end());
@@ -85,14 +85,14 @@ int main() {
 
     auto graph = new htgs::TaskGraphConf<TileRequest, Tile<uint32_t> >();
 
-    BaseTileGenerator* generator = new BaseTileGenerator(gridGenerator);
-    auto baseTileTask = new BaseTileTask(1, generator);
+    BaseTileGenerator<uint32_t >* generator = new BaseTileGenerator<uint32_t>(gridGenerator);
+    auto baseTileTask = new BaseTileTask<uint32_t>(1, generator);
 
     auto bookeeper = new htgs::Bookkeeper<Tile<uint32_t>>();
 
     auto writeRule = new WriteTileRule();
 
-    auto pyramidRule = new PyramidRule(numTileCol,numTileRow);
+    auto pyramidRule = new PyramidRule<uint32_t>(numTileCol,numTileRow);
 
     auto createTileTask = new CreateTileTask<uint32_t>(1);
 
@@ -114,7 +114,7 @@ int main() {
 //    auto matAlloc = new FakeTileAllocator();
 //    graph->addMemoryManagerEdge("PYRAMID_TILE", createTileTask, matAlloc, 4, htgs::MMType::Static);
 
-    htgs::TaskGraphRuntime *runtime = new htgs::TaskGraphRuntime(graph);
+    auto *runtime = new htgs::TaskGraphRuntime(graph);
 
     htgs::TaskGraphSignalHandler::registerTaskGraph(graph);
     htgs::TaskGraphSignalHandler::registerSignal(SIGTERM);
