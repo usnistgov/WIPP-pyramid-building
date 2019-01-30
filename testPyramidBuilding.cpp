@@ -87,7 +87,7 @@ int main() {
     auto graph = new htgs::TaskGraphConf<TileRequest, Tile<uint32_t>>();
 
     BaseTileGenerator<uint32_t >* generator = new BaseTileGenerator<uint32_t>(gridGenerator);
-    auto baseTileTask = new BaseTileTask<uint32_t>(10, generator);
+    auto baseTileTask = new BaseTileTask<uint32_t>(20, generator);
 
     auto bookkeeper = new htgs::Bookkeeper<Tile<uint32_t>>();
 
@@ -95,9 +95,9 @@ int main() {
 
     auto pyramidRule = new PyramidRule<uint32_t>(numTileCol,numTileRow);
 
-    auto createTileTask = new CreateTileTask<uint32_t>(10);
+    auto createTileTask = new CreateTileTask<uint32_t>(20);
 
-    auto writeTask = new Write16UPngTileTask<uint32_t>(10, "output");
+    auto writeTask = new Write16UPngTileTask<uint32_t>(20, "output");
 
     graph->setGraphConsumerTask(baseTileTask);
 

@@ -60,17 +60,27 @@ public:
             auto gridCol = levelGridSizes[level-1][0];
             auto gridRow = levelGridSizes[level-1][1];
 
-            uint32_t i1 = 2 * row * gridCol + 2 * col;
-            uint32_t i2 = 2 * row * gridCol + 2 * col + 1;
-            uint32_t i3 = (2 * row + 1) * gridCol + 2 * col;
-            uint32_t i4 = (2 * row + 1) * gridCol + 2 * col + 1;
+            auto l = this->pyramidCache.at(level - 1);
+
+            for(std::shared_ptr<Tile<T>>& value: data->getOrigin()) {
+                if(value!= nullptr) { //second value can be null for vertical block.
+                    removeFromCache(l, value->getRow() * gridCol + value->getCol());
+                    value.reset(); //delete from the origin vector so it can be reclaimed.
+                }
+            }
+
+
+//            uint32_t i1 = 2 * row * gridCol + 2 * col;
+//            uint32_t i2 = 2 * row * gridCol + 2 * col + 1;
+//            uint32_t i3 = (2 * row + 1) * gridCol + 2 * col;
+//            uint32_t i4 = (2 * row + 1) * gridCol + 2 * col + 1;
 
             //TODO managing vector structure and reference in function calls.
-            auto l = this->pyramidCache.at(level - 1);
-            removeFromCache(l, i1);
-            removeFromCache(l, i2);
-            removeFromCache(l, i3);
-            removeFromCache(l, i4);
+//            auto l = this->pyramidCache.at(level - 1);
+//            removeFromCache(l, i1);
+//            removeFromCache(l, i2);
+//            removeFromCache(l, i3);
+//            removeFromCache(l, i4);
         }
 
         if(level == this->numLevel -1){

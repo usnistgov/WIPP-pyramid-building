@@ -42,7 +42,7 @@ public:
 
     }
 
-    const std::vector<std::shared_ptr<Tile<T>>> &getBlock() const {
+    std::vector<std::shared_ptr<Tile<T>>> &getBlock() {
         return block;
     }
 

@@ -35,7 +35,6 @@ public:
 
         addResult(data);
 
-        //TODO FIX now we can really release the tile?
     }
 
     /// \brief Close the tiff file

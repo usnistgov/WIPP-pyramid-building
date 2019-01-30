@@ -92,7 +92,8 @@ public:
         auto downsampleWidth = ceil( (size_t)width / 2);
         auto downsampleHeight = ceil( (size_t)height / 2);
 
-        tile = new Tile<T>(level, row, col, downsampleWidth, downsampleHeight, downsampleData);
+        std::vector<std::shared_ptr<Tile<T>>> & origin = data->getBlock();
+        tile = new Tile<T>(level, row, col, downsampleWidth, downsampleHeight, downsampleData, origin);
 
 
         //TODO REMOVE FOR DEBUG

@@ -10,21 +10,17 @@
 #include <FastImage/api/View.h>
 #include <htgs/api/MemoryData.hpp>
 
-template <class UserType>
+template <class T>
 class Tile : public htgs::IData {
 
 public :
 
+    Tile(size_t _level, size_t _row, size_t _col, size_t _width, size_t _height, T *_data) : _level(_level), _row(_row), _col(_col), _width(_width),
+                                                        _height(_height), _data(_data) {}
 
-    Tile(size_t _level, size_t _row, size_t _col, size_t _width, size_t _height, UserType *_data) : _level(_level), _row(_row), _col(_col), _width(_width),
-                                                        _height(_height), _data(_data), _origin(nullptr) {}
 
-    // unpack a Fast Image View and keep track of the original for reclaiming memory at destruction.
-    Tile(htgs::m_data_t<fi::View<UserType>> view) :  Tile(view->get()->getRow(), view->get()->getCol(),
-            view->get()->getPyramidLevel(), view->get()->getViewWidth(), view->get()->getViewHeight() ,view->get()->getData())  {
-
-        _origin = view;
-    }
+    Tile(size_t _level, size_t _row, size_t _col, size_t _width, size_t _height, T *_data, std::vector<std::shared_ptr<Tile<T>>> &origin) : _level(_level), _row(_row), _col(_col), _width(_width),
+                                                                                                    _height(_height), _data(_data), _origin(origin) {}
 
     size_t getLevel() const {
         return _level;
@@ -46,14 +42,13 @@ public :
         return _height;
     }
 
-    UserType *getData() const {
+    T *getData() const {
         return _data;
     }
 
-    //TODO remove
-//    const htgs::m_data_t<fi::View<UserType>> &getOrigin() const {
-//        return _origin;
-//    }
+    std::vector<std::shared_ptr<Tile<T>>> &getOrigin() {
+        return _origin;
+    }
 
     ~Tile(){
         delete[] _data;
@@ -68,8 +63,8 @@ private :
     size_t _col;
     size_t _width;
     size_t _height;
-    UserType *_data;
-    htgs::m_data_t<fi::View<UserType>> _origin;
+    T *_data;
+    std::vector<std::shared_ptr<Tile<T>>> _origin = {};
 
 
 };

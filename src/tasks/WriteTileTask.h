@@ -30,8 +30,9 @@ public:
                 exit(1);
             }
         }
-
-        closedir(dir);
+        else {
+            closedir(dir);
+        }
     }
 
     virtual void executeTask(std::shared_ptr<Tile<T>> data) override {
@@ -50,7 +51,9 @@ public:
                 exit(1);
             }
         }
-        closedir(dir);
+        else {
+            closedir(dir);
+        }
     }
 
     /// \brief Close the tiff file
