@@ -50,8 +50,14 @@ public :
         return _data;
     }
 
-    const htgs::m_data_t<fi::View<UserType>> &getOrigin() const {
-        return _origin;
+    //TODO remove
+//    const htgs::m_data_t<fi::View<UserType>> &getOrigin() const {
+//        return _origin;
+//    }
+
+    ~Tile(){
+        delete _data;
+        _data = nullptr;
     }
 
 

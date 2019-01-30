@@ -20,7 +20,7 @@ public:
 
         //calculate pyramid depth
         auto maxDim = std::max(numTileCol,numTileRow);
-        numLevel = ceil(log2(maxDim)) + 1;
+        numLevel = static_cast<size_t>(ceil(log2(maxDim)) + 1);
 
         //calculate number of tiles for each level
         size_t levelCol, levelRow;
@@ -29,8 +29,8 @@ public:
         for(auto l=0; l<numLevel; l++){
             std::array<size_t,2> gridSize = { (size_t)levelCol, (size_t)levelRow };
             levelGridSizes.push_back(gridSize);
-            levelCol = ceil((double)levelCol/2);
-            levelRow = ceil((double)levelRow /2);
+            levelCol = static_cast<size_t>(ceil((float)levelCol/2));
+            levelRow = static_cast<size_t>(ceil((float)levelRow /2));
         }
 
         //dimension the tile cache for each level of the pyramid
@@ -67,10 +67,10 @@ public:
 
             //TODO managing vector structure and reference in function calls.
             auto l = this->pyramidCache.at(level - 1);
-//            removeFromCache(l, i1);
-//            removeFromCache(l, i2);
-//            removeFromCache(l, i3);
-//            removeFromCache(l, i4);
+            removeFromCache(l, i1);
+            removeFromCache(l, i2);
+            removeFromCache(l, i3);
+            removeFromCache(l, i4);
         }
 
         if(level == this->numLevel -1){
@@ -218,12 +218,9 @@ public:
 
 
 public:
-    //TODO FIX remove the tile from the vector.
-    // TODO Release the original Tile too (Memory rule?)
     void removeFromCache(std::vector<std::shared_ptr<Tile<T>>> &level, size_t index){
         assert(level.at(index) != nullptr);
-        auto tile = level[index].get();
-        level.erase(level.begin() + index);
+        level[index].reset();
     }
 
     size_t numTileCol;

@@ -87,27 +87,27 @@ int main() {
     auto graph = new htgs::TaskGraphConf<TileRequest, Tile<uint32_t>>();
 
     BaseTileGenerator<uint32_t >* generator = new BaseTileGenerator<uint32_t>(gridGenerator);
-    auto baseTileTask = new BaseTileTask<uint32_t>(1, generator);
+    auto baseTileTask = new BaseTileTask<uint32_t>(10, generator);
 
-    auto bookeeper = new htgs::Bookkeeper<Tile<uint32_t>>();
+    auto bookkeeper = new htgs::Bookkeeper<Tile<uint32_t>>();
 
     auto writeRule = new WriteTileRule<uint32_t>();
 
     auto pyramidRule = new PyramidRule<uint32_t>(numTileCol,numTileRow);
 
-    auto createTileTask = new CreateTileTask<uint32_t>(1);
+    auto createTileTask = new CreateTileTask<uint32_t>(10);
 
-    auto writeTask = new Write16UPngTileTask<uint32_t>(1, "output");
+    auto writeTask = new Write16UPngTileTask<uint32_t>(10, "output");
 
     graph->setGraphConsumerTask(baseTileTask);
 
     //incoming edges from the bookeeper
-    graph->addEdge(baseTileTask, bookeeper); //pyramid base level tile
-    graph->addEdge(createTileTask,bookeeper); //pyramid higher level tile
+    graph->addEdge(baseTileTask, bookkeeper); //pyramid base level tile
+    graph->addEdge(createTileTask,bookkeeper); //pyramid higher level tile
 
     //outgoing edges
-    graph->addRuleEdge(bookeeper, pyramidRule, createTileTask); //caching tiles and creating a tile at higher level;
-    graph->addRuleEdge(bookeeper, writeRule, writeTask); //exiting the graph;
+    graph->addRuleEdge(bookkeeper, pyramidRule, createTileTask); //caching tiles and creating a tile at higher level;
+    graph->addRuleEdge(bookkeeper, writeRule, writeTask); //exiting the graph;
 
     //output task
     graph->addGraphProducerTask(writeTask);
