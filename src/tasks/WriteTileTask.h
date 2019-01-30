@@ -1,30 +1,27 @@
 //
-// Created by Gerardin, Antoine D. (Assoc) on 12/19/18.
+// Created by Gerardin, Antoine D. (Assoc) on 1/29/19.
 //
 
-#ifndef PYRAMIDBUILDING_WRITETILETASK_H
-#define PYRAMIDBUILDING_WRITETILETASK_H
+#ifndef PYRAMIDBUILDING_WRITETASK_H
+#define PYRAMIDBUILDING_WRITETASK_H
+
 
 #include <htgs/api/ITask.hpp>
-#include "FastImage/api/FastImage.h"
+#include <dirent.h>
 #include "../data/Tile.h"
-#include <tiffio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <dirent.h>
-#include <opencv2/core/mat.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include "../utils/SingleTiledTiffWriter.h"
 
-class WriteTileTask : public htgs::ITask< Tile<uint32_t>, Tile<uint32_t> > {
+//TODO Subclassing is probably not quite necessary
+template <class T>
+class WriteTileTask  : public htgs::ITask< Tile<T>, Tile<T> > {
+
 
 public:
 
+    WriteTileTask(size_t numThreads, const std::string &_pathOut) : htgs::ITask<Tile<T>, Tile<T>>(numThreads), _pathOut(_pathOut) {
 
-    WriteTileTask(size_t numThreads, const std::string &_pathOut, uint32_t pyramidTileSize) :
-    htgs::ITask<Tile<uint32_t>, Tile<uint32_t>>(numThreads), _pathOut(_pathOut), pyramidTileSize(pyramidTileSize) {
         auto dir = opendir(_pathOut.c_str());
-
         if(dir == nullptr){
             const int dir_err = mkdir(_pathOut.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
             if (-1 == dir_err)
@@ -37,16 +34,11 @@ public:
         delete dir;
     }
 
-    //TODO check why compiler rejects that
-//    WriteTileTask(const std::string &_pathOut, uint32_t pyramidTileSize) :
-//            WriteTileTask(1, &_pathOut, pyramidTileSize) {}
-
-
-    void executeTask(std::shared_ptr<Tile<uint32_t>> data) override {
+    void executeTask(std::shared_ptr<Tile<T>> data) override {
 
         std::string level = std::to_string(data->getLevel());
 
-        auto dirPath = (_pathOut + "/" + std::to_string(data->getLevel()));
+        auto dirPath = (this->_pathOut + "/" + std::to_string(data->getLevel()));
 
         //  Create directory if it does not exists
         auto dir = opendir(dirPath.c_str());
@@ -54,26 +46,11 @@ public:
             const int dir_err = mkdir(dirPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
             if (-1 == dir_err)
             {
-                printf("Error creating output directory for level") + std::to_string(level) + ("!n");
+                std::cout << "Error creating output directory for level" << level  << "!n";
                 exit(1);
             }
         }
         delete dir;
-
-        //write as a tif output
-        auto outputFilename = "img_r" + std::to_string(data->getRow()) + "_c" + std::to_string(data->getCol()) + ".tif";
-
-        auto fullImagePath = _pathOut + "/" + level + "/"  + outputFilename;
-
-        cv::Mat image(data->get_height(), data->get_width(), CV_32SC1, data->getData());
-        cv::Mat tmp(data->get_height(), data->get_width(), CV_16U);
-        image.convertTo(tmp, CV_16U, 1,0);
-        cv::imwrite(fullImagePath + ".png", tmp);
-
-        auto w = new SingleTiledTiffWriter(fullImagePath, pyramidTileSize);
-        w->write(data->getData());
-
-        addResult(data);
     }
 
     /// \brief Close the tiff file
@@ -82,17 +59,16 @@ public:
 
     /// \brief Get the writer name
     /// \return Writer name
-    std::string getName() override { return "WriteTask"; }
+    std::string getName() override { return "WriteTileTask"; }
 
-    ITask<Tile<uint32_t>, Tile<uint32_t>> *copy() override {
-        return new WriteTileTask(this->getNumThreads(), _pathOut, pyramidTileSize);
-    }
 
-private:
+protected:
 
-    std::string _pathOut;
-    uint32_t pyramidTileSize;
+    const std::string _pathOut;
+
+
 
 };
 
-#endif //PYRAMIDBUILDING_WRITETILETASK_H
+
+#endif //PYRAMIDBUILDING_WRITETASK_H

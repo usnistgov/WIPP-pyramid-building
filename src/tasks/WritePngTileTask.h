@@ -1,0 +1,63 @@
+//
+// Created by Gerardin, Antoine D. (Assoc) on 12/19/18.
+//
+
+#ifndef PYRAMIDBUILDING_WRITETILETASK_H
+#define PYRAMIDBUILDING_WRITETILETASK_H
+
+#include <htgs/api/ITask.hpp>
+#include "FastImage/api/FastImage.h"
+#include "../data/Tile.h"
+#include <tiffio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <opencv2/core/mat.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include "../utils/SingleTiledTiffWriter.h"
+#include "WriteTileTask.h"
+
+template <class T>
+class WritePngTileTask : public WriteTileTask<T> {
+
+public:
+
+
+    WritePngTileTask(size_t numThreads, const std::string &_pathOut) :  WriteTileTask<T>(numThreads, _pathOut) {}
+
+    //TODO check why compiler rejects that
+  //  WritePngTileTask(const std::string &_pathOut) : WritePngTileTask(1, &_pathOut) {}
+
+
+    void executeTask(std::shared_ptr<Tile<T>> data) override {
+
+        WriteTileTask<T>::executeTask(data);
+
+        std::string level = std::to_string(data->getLevel());
+        auto outputFilename = "img_r" + std::to_string(data->getRow()) + "_c" + std::to_string(data->getCol()) + ".png";
+        auto fullImagePath = this->_pathOut + "/" + level + "/"  + outputFilename;
+
+        //TODO CHECK how this can vary with the template
+        cv::Mat image(data->get_height(), data->get_width(), CV_32SC1, data->getData());
+        cv::Mat tmp(data->get_height(), data->get_width(), CV_16U);
+        image.convertTo(tmp, CV_16U, 1,0);
+        cv::imwrite(fullImagePath, tmp);
+
+        this->addResult(data);
+    }
+
+    /// \brief Close the tiff file
+    void shutdown() override {
+    }
+
+    /// \brief Get the writer name
+    /// \return Writer name
+    std::string getName() override { return "PngTileWriteTask"; }
+
+    ITask<Tile<T>, Tile<T>> *copy() override {
+        return new WritePngTileTask(this->getNumThreads(), this->_pathOut);
+    }
+
+};
+
+#endif //PYRAMIDBUILDING_WRITETILETASK_H

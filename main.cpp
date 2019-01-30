@@ -3,7 +3,7 @@
 #include <FastImage/TileLoaders/GrayscaleTiffTileLoader.h>
 #include "src/utils/Helper.h"
 #include "src/rules/WriteTileRule.h"
-#include "src/tasks/WriteTileTask.h"
+#include "src/tasks/WritePngTileTask.h"
 #include "src/rules/PyramidRule.h"
 #include "src/tasks/CreateTileTask.h"
 #include "src/utils/MatrixAllocator.h"

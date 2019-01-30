@@ -24,15 +24,15 @@ public:
      * @param filePath the path where to write the image
      * @param size the size of the image.
      */
-    SingleTiledTiffWriter(std::string filePath, uint32_t size= 1024) : size(size) {
+    SingleTiledTiffWriter(std::string filePath, size_t width= 1024, size_t height= 1024, size_t bitsPerSample= 32) {
             auto output = filePath.c_str();
             tif = TIFFOpen(output, "w");
             if(tif!= nullptr) {
-                    TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, size);
-                    TIFFSetField(tif, TIFFTAG_IMAGELENGTH, size);
-                    TIFFSetField(tif, TIFFTAG_TILELENGTH, size);
-                    TIFFSetField(tif, TIFFTAG_TILEWIDTH, size);
-                    TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, 32);
+                    TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, width);
+                    TIFFSetField(tif, TIFFTAG_IMAGELENGTH, height);
+                    TIFFSetField(tif, TIFFTAG_TILELENGTH, width);
+                    TIFFSetField(tif, TIFFTAG_TILEWIDTH, height);
+                    TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, bitsPerSample);
                     TIFFSetField(tif, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
                     TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, 1);
                     TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
@@ -46,9 +46,9 @@ public:
             }
     };
 
-        ~SingleTiledTiffWriter() {
-                TIFFClose(tif);
-        }
+    ~SingleTiledTiffWriter() {
+            TIFFClose(tif);
+    }
 
     void write(uint32_t* tile) {
         TIFFWriteTile(tif, tile, 0, 0, 0, 0);
@@ -58,7 +58,6 @@ public:
 
 private:
     TIFF* tif;
-    uint32_t size;
 
 
 };

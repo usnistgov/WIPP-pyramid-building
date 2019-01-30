@@ -3,7 +3,7 @@
 #include <FastImage/TileLoaders/GrayscaleTiffTileLoader.h>
 #include "src/utils/Helper.h"
 #include "src/rules/WriteTileRule.h"
-#include "src/tasks/WriteTileTask.h"
+#include "src/tasks/WritePngTileTask.h"
 #include "src/rules/PyramidRule.h"
 #include "src/tasks/CreateTileTask.h"
 #include "src/tasks/BaseTileTask.h"
@@ -97,7 +97,7 @@ int main() {
 
     auto createTileTask = new CreateTileTask(10);
 
-    auto writeTask = new WriteTileTask(24, "output", pyramidTileSize);
+    auto writeTask = new WritePngTileTask<uint32_t>(24, "output");
 
     graph->setGraphConsumerTask(baseTileTask);
 
