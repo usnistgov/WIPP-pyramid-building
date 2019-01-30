@@ -7,7 +7,6 @@
 #include "src/rules/PyramidRule.h"
 #include "src/tasks/CreateTileTask.h"
 #include "src/tasks/BaseTileTask.h"
-#include "src/tasks/OutputTask.h"
 #include "src/utils/MatrixAllocator.h"
 #include "src/data/Tile.h"
 #include <htgs/log/TaskGraphSignalHandler.hpp>
@@ -52,17 +51,17 @@ int main() {
 //    std::string directory = "/Users/gerardin/Documents/projects/pyramidio/pyramidio/src/test/resources/dataset2/images/tiled-pc/";
 
 
-    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/stitching_vector/img-global-positions-1.txt";
-    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset1/tiled-images/";
+    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset1/stitching_vector/img-global-positions-1.txt";
+    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset1/tiled-images/";
 
-//    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset02/stitching_vector/img-global-positions-1.txt";
-//    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset02/images/";
+//    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset02/stitching_vector/img-global-positions-1.txt";
+//    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset02/images/";
 
-//    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset01/stitching_vector/img-global-positions-1.txt";
-//    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuilding/resources/dataset01/images/";
+//    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset01/stitching_vector/img-global-positions-1.txt";
+//    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset01/images/";
 
     //pyramid
-    uint32_t pyramidTileSize = 256;
+    size_t pyramidTileSize = 256;
 //   uint32_t pyramidTileSize = 32;
 
     auto gridGenerator = new GridGenerator(directory, vector, pyramidTileSize);
@@ -81,13 +80,13 @@ int main() {
     //assert(pyramidTileSize % tileWidth == 0);
 
 
-    uint32_t numTileRow = gridGenerator->getGridMaxRow() + 1;
-    uint32_t numTileCol = gridGenerator->getGridMaxCol() + 1;
+    size_t numTileRow = gridGenerator->getGridMaxRow() + 1;
+    size_t numTileCol = gridGenerator->getGridMaxCol() + 1;
 
     auto graph = new htgs::TaskGraphConf<TileRequest, Tile<uint32_t> >();
 
     BaseTileGenerator* generator = new BaseTileGenerator(gridGenerator);
-    auto baseTileTask = new BaseTileTask(10, generator);
+    auto baseTileTask = new BaseTileTask(1, generator);
 
     auto bookeeper = new htgs::Bookkeeper<Tile<uint32_t>>();
 
@@ -95,9 +94,9 @@ int main() {
 
     auto pyramidRule = new PyramidRule(numTileCol,numTileRow);
 
-    auto createTileTask = new CreateTileTask(10);
+    auto createTileTask = new CreateTileTask<uint32_t>(1);
 
-    auto writeTask = new WritePngTileTask<uint32_t>(24, "output");
+    auto writeTask = new WritePngTileTask<uint32_t>(1, "output");
 
     graph->setGraphConsumerTask(baseTileTask);
 
@@ -130,14 +129,15 @@ int main() {
     //Task 4 : write the Tile;
 
 
-    uint32_t numberBlockHeight,numberBlockWidth = 0;
+    size_t numberBlockHeight,numberBlockWidth = 0;
 
-    numberBlockHeight = ceil((double)numTileRow/2);
-    numberBlockWidth = ceil((double)numTileCol/2);
+    //TODO Check usage of size_t
+    numberBlockHeight = ceil((size_t)numTileRow/2);
+    numberBlockWidth = ceil((size_t)numTileCol/2);
 
     //we traverse the grid in blocks to minimize memory footprint of the pyramid generation.
-    for(uint32_t j = 0; j < numberBlockHeight; j++){
-        for(uint32_t i = 0; i < numberBlockWidth; i++){
+    for(auto j = 0; j < numberBlockHeight; j++){
+        for(auto i = 0; i < numberBlockWidth; i++){
             if(2*i < numTileCol && 2*j < numTileRow) {
                 std::cout << 2*j << "," << 2*i << std::endl;
                 auto tileRequest = new TileRequest(2 * j, 2 * i);

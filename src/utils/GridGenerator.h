@@ -71,6 +71,7 @@ public:
                                                                       stitchingVectorPath(stitchingVectorPath),
                                                                       pyramidTileSize(pyramidTileSize) {
         //inputs
+        //TODO CHECK THAT THE FILE EXISTS (otherwise it will silently break)
         std::ifstream infile(stitchingVectorPath);
         uint32_t tileSize = pyramidTileSize;
 

@@ -10,6 +10,7 @@
 #include "../data/TileRequest.h"
 #include "../utils/BaseTileGenerator.h"
 
+
 class BaseTileTask : public htgs::ITask<TileRequest , Tile<uint32_t>> {
 
 public:
