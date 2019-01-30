@@ -20,7 +20,6 @@ message("OpenCV Version: ${OpenCV_VERSION}")
 
 add_definitions(-DPROFILE)
 
-
 add_subdirectory(src)
 add_subdirectory(test)
 

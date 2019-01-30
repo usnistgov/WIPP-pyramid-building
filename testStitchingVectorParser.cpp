@@ -60,7 +60,7 @@ int main() {
     for ( auto it = grid.begin(); it != grid.end(); ++it ) {
 
         //generate a pyramid tile
-        auto generator = new BaseTileGenerator(reader);
+        auto generator = new BaseTileGenerator<uint32_t>(reader);
         Tile<uint32_t>* tile = generator->generateTile(it->first);
 
         tiles.push_back(tile);

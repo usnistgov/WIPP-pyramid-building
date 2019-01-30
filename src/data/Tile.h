@@ -56,7 +56,7 @@ public :
 //    }
 
     ~Tile(){
-        delete _data;
+        delete[] _data;
         _data = nullptr;
     }
 

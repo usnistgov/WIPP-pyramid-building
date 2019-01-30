@@ -38,10 +38,15 @@ public:
         auto fullImagePath = this->_pathOut + "/" + level + "/"  + outputFilename;
 
         //TODO CHECK how this can vary with the template
-        cv::Mat image(data->get_height(), data->get_width(), CV_32SC1, data->getData());
-        cv::Mat tmp(data->get_height(), data->get_width(), CV_16U);
-        image.convertTo(tmp, CV_16U, 1,0);
-        cv::imwrite(fullImagePath, tmp);
+        cv::Mat *image = new cv::Mat(data->get_height(), data->get_width(), CV_32SC1, data->getData());
+        cv::Mat *tmp = new cv::Mat(data->get_height(), data->get_width(), CV_16U);
+        image->convertTo(*tmp, CV_16U, 1,0);
+        cv::imwrite(fullImagePath, *tmp);
+
+        tmp->release();
+        image->release();
+        delete image;
+        delete tmp;
 
         this->addResult(data);
     }

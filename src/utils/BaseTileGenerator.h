@@ -54,7 +54,7 @@ public:
         size_t pyramidTileWidth = pyramidTileSize;
         size_t pyramidTileHeight = pyramidTileSize;
 
-        T* tile = new T[ pyramidTileWidth * pyramidTileHeight ];  //the pyramid tile we will be filling from partial FOVs.
+        T* tile = new T[ pyramidTileWidth * pyramidTileHeight ]();  //the pyramid tile we will be filling from partial FOVs.
 
         auto it = grid.find(index);
 
