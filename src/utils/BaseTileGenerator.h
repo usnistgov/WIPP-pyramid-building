@@ -102,6 +102,7 @@ public:
                 //request all tiles for this partial FOV
                 for(auto i=startRow; i <= endRow; i++ ){
                     for (auto j=startCol; j <= endCol; ++j){
+                        //TODO CHECK if we should keep using size_t. Here FAST IMAGE uses uint32.
                         fi->requestTile(i,j,false,0);
                     }
                 }

@@ -8,6 +8,7 @@
 #include <FastImage/api/FastImage.h>
 #include <math.h>
 #include <array>
+#include <assert.h>
 #include "../data/Tile.h"
 #include "../data/BlockRequest.h"
 
@@ -55,29 +56,24 @@ public:
         auto level = data->getLevel();
 
 
+        if(level > 0) {
+            auto l = grids[level - 1];
+            auto gridCol = levelGridSizes[level-1][0];
+            auto gridRow = levelGridSizes[level-1][1];
 
-//        if(level > 0) {
-//            auto l = grids[level - 1];
-//            auto gridCol = levelGridSizes[level-1][0];
-//            auto gridRow = levelGridSizes[level-1][1];
-//
-//            size_t i1 = 2 *row * gridCol + 2 * col;
-//            size_t i2 = 2* row * gridCol + 2 * col + 1;
-//            size_t i3 = (2 *row + 1) * gridCol + 2 * col;
-//            size_t i4 = (2 * row + 1) * gridCol + 2 * col + 1;
-//            removeFromCache(l, i1);
-//            removeFromCache(l, i2);
-//            removeFromCache(l, i3);
-//            removeFromCache(l, i4);
-//        }
+            uint32_t i1 = 2 * row * gridCol + 2 * col;
+            uint32_t i2 = 2 * row * gridCol + 2 * col + 1;
+            uint32_t i3 = (2 * row + 1) * gridCol + 2 * col;
+            uint32_t i4 = (2 * row + 1) * gridCol + 2 * col + 1;
+            removeFromCache(l, i1);
+            removeFromCache(l, i2);
+            removeFromCache(l, i3);
+            removeFromCache(l, i4);
+        }
 
         if(level == this->numLevel -1){
-      //      this->shutdownRule(pipelineId);
-      //      this->addResult(nullptr);
             done = true;
             return;
-
-       //         return;
         }
 
         std::ostringstream oss;
@@ -227,13 +223,9 @@ public:
 private:
     //TODO TEST THAT
     void removeFromCache(std::vector<std::shared_ptr<Tile<T>>> l, size_t index){
-        if ((index >= 0 && index < l.size()) && (l[index] != NULL)){
-            auto tile = l[index].get();
-            if(tile->getLevel() == 0){
-                tile->getOrigin()->releaseMemory();
-            }
-            delete l[index].get();
-        }
+        assert(index >= 0 && index < l.size() && l[index] != nullptr);
+        auto tile = l[index].get();
+        l.erase(l.begin() + index);
     }
 
     size_t numTileCol;

@@ -84,7 +84,7 @@ int main() {
     size_t numTileRow = gridGenerator->getGridMaxRow() + 1;
     size_t numTileCol = gridGenerator->getGridMaxCol() + 1;
 
-    auto graph = new htgs::TaskGraphConf<TileRequest, Tile<uint32_t> >();
+    auto graph = new htgs::TaskGraphConf<TileRequest, Tile<uint32_t>>();
 
     BaseTileGenerator<uint32_t >* generator = new BaseTileGenerator<uint32_t>(gridGenerator);
     auto baseTileTask = new BaseTileTask<uint32_t>(1, generator);
