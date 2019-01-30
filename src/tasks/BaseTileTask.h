@@ -18,7 +18,7 @@ public:
     BaseTileTask(size_t numThreads, BaseTileGenerator<T> *generator) : htgs::ITask<TileRequest , Tile<T>>(numThreads), generator(generator) {}
 
     void executeTask(std::shared_ptr<TileRequest> data) override {
-        size_t i = data.get()->getRow();
+        size_t i= data.get()->getRow();
         size_t j= data.get()->getCol();
         std::pair<size_t,size_t> index= std::make_pair(i,j);
         auto t = generator->generateTile(index);

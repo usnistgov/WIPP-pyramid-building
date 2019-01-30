@@ -25,7 +25,7 @@ add_subdirectory(src)
 add_subdirectory(test)
 
 set(ALL_SRCS CACHE INTERNAL "sources" FORCE)
-set(SOURCES src/utils/Helper.cpp src/data/BlockType.cpp src/tasks/WriteTileTask.h src/utils/SingleTiledTiffWriter.h src/tasks/WriteTiffTileWriter.h)
+set(SOURCES src/utils/Helper.cpp src/data/BlockType.cpp src/tasks/WriteTileTask.h src/utils/SingleTiledTiffWriter.h src/tasks/Write32UTiffTileWriter.h)
 
 #add_executable(old main.cpp ${ALL_SRCS} ${SOURCES})
 add_executable(stitching testStitchingVectorParser.cpp ${ALL_SRCS} ${SOURCES})

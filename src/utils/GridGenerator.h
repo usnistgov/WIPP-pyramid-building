@@ -50,8 +50,6 @@ private:
     size_t gridMaxRow = 0;
     size_t gridMaxCol = 0;
 
-    size_t gridSize;
-
 
 
 public:
@@ -132,9 +130,8 @@ public:
             size_t startCol, startRow, endCol, endRow = 0;
             startCol = fovGlobalX / tileSize;
             startRow =  fovGlobalY / tileSize;
-            //TODO CHECK INDEXES
-            endCol =  (fovGlobalX + fovWidth - 1) / tileSize;
-            endRow = (fovGlobalY + fovHeight - 1) / tileSize;
+            endCol = (double)(fovGlobalX + fovWidth - 1) / tileSize; // -1 because we need the pixel col index
+            endRow = (double)(fovGlobalY + fovHeight - 1) / tileSize;
 
             //compute overlap between an FOV and each pyramid tile.
 
@@ -172,7 +169,7 @@ public:
                     assert(overlapInFovRef.y >= 0);
 
                     // add the partial FOV to the corresponding pyramid tile.
-                    std::pair<uint32_t,uint32_t> index= std::make_pair(j,i);
+                    std::pair<size_t,size_t> index= std::make_pair(j,i);
                     auto it = grid.find(index);
 
                     if(it != grid.end()) {

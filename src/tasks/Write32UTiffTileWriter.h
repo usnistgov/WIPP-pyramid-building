@@ -9,15 +9,15 @@
 #include "WriteTileTask.h"
 
 template <class T>
-class WriteTiffTileWriter : public WriteTileTask<T> {
+class Write32UTiffTileWriter : public WriteTileTask<T> {
 
 public:
 
-    WriteTiffTileWriter(size_t numThreads, const std::string &_pathOut) :  WriteTileTask<T>(numThreads, _pathOut) {
+    Write32UTiffTileWriter(size_t numThreads, const std::string &_pathOut) :  WriteTileTask<T>(numThreads, _pathOut) {
     }
 
     //TODO check why compiler rejects that
-    //  WritePngTileTask(const std::string &_pathOut, SingleTiledTiffWriter writer) : WritePngTileTask(1, &_pathOut, writer) {}
+    //  Write16UPngTileTask(const std::string &_pathOut, SingleTiledTiffWriter writer) : Write16UPngTileTask(1, &_pathOut, writer) {}
 
     void executeTask(std::shared_ptr<Tile<T>> data) override {
 
@@ -46,7 +46,7 @@ public:
 
 
     htgs::ITask<Tile<T>, Tile<T>> *copy() override {
-        return new WriteTiffTileWriter(this->getNumThreads(), this->_pathOut);
+        return new Write32UTiffTileWriter(this->getNumThreads(), this->_pathOut);
     }
 
 };

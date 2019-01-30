@@ -28,8 +28,8 @@ public:
         for(auto l=0; l<numLevel; l++){
             std::array<size_t,2> gridSize = { (size_t)levelCol, (size_t)levelRow };
             levelGridSizes.push_back(gridSize);
-            levelCol = ceil(levelCol/2);
-            levelRow = ceil(levelRow /2);
+            levelCol = ceil((double)levelCol/2);
+            levelRow = ceil((double)levelRow /2);
         }
 
         //dimension the tile cache for each level of the pyramid
@@ -38,8 +38,8 @@ public:
         levelRow = numTileRow;
         for (auto it = grids.begin() ; it != grids.end(); ++it) {
             it->resize(levelCol * levelRow);
-            levelCol = ceil(levelCol/2);
-            levelRow = ceil(levelRow /2);
+            levelCol = ceil((double)levelCol/2);
+            levelRow = ceil((double)levelRow /2);
         }
 
     }

@@ -9,18 +9,18 @@
 #include <FastImage/api/FastImage.h>
 #include "../data/Tile.h"
 
-class WriteTileRule : public htgs::IRule< Tile<uint32_t>, Tile<uint32_t>> {
+template <class T>
+class WriteTileRule : public htgs::IRule< Tile<T>, Tile<T>> {
 public:
-    WriteTileRule(uint32_t level = 0) : level(level) {};
 
-    void applyRule(std::shared_ptr<Tile<uint32_t>> data, size_t pipelineId) override {
+    explicit WriteTileRule(size_t level = 0) : level(level) {};
 
-        uint32_t l = data->getLevel();
+    void applyRule(std::shared_ptr<Tile<T>> data, size_t pipelineId) override {
+
+        size_t l = data->getLevel();
         if(l >= level) {
             this->addResult(data);
         }
-
-     //   data.reset();
     }
 
 
@@ -29,7 +29,7 @@ public:
     }
 
 private:
-    uint32_t level;
+    size_t level;
 
 };
 

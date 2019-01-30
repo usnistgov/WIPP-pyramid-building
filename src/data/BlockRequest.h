@@ -10,11 +10,11 @@
 #include "./Tile.h"
 #include "BlockType.h"
 
-template <class Type>
+template <class T>
 class BlockRequest : public htgs::IData {
 
 public:
-    BlockRequest(const std::vector<std::shared_ptr<Tile<Type>>> &block) : block(block) {
+    BlockRequest(const std::vector<std::shared_ptr<Tile<T>>> &block) : block(block) {
         if(block.size() <= 0){
             //CHECK HOW TO DO IN C++
             //assert error
@@ -42,7 +42,7 @@ public:
 
     }
 
-    const std::vector<std::shared_ptr<Tile<Type>>> &getBlock() const {
+    const std::vector<std::shared_ptr<Tile<T>>> &getBlock() const {
         return block;
     }
 
@@ -63,10 +63,10 @@ private:
 
 
 
-    std::vector<std::shared_ptr<Tile<Type>>> block;
-    uint32_t row;
-    uint32_t col;
-    uint32_t level;
+    std::vector<std::shared_ptr<Tile<T>>> block;
+    size_t row;
+    size_t col;
+    size_t level;
     BlockType blockType;
 
 

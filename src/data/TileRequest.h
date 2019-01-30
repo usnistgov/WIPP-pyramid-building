@@ -13,21 +13,21 @@ class TileRequest : htgs::IData {
 
 public:
 
-    TileRequest(uint32_t row, uint32_t col) : row(row), col(col) {}
+    TileRequest(size_t row, size_t col) : row(row), col(col) {}
 
-    uint32_t getRow() const {
+    size_t getRow() const {
         return row;
     }
 
-    uint32_t getCol() const {
+    size_t getCol() const {
         return col;
     }
 
 
 private:
 
-    uint32_t row;
-    uint32_t col;
+    size_t row;
+    size_t col;
 
 
 };

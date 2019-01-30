@@ -34,7 +34,7 @@ public:
         delete dir;
     }
 
-    void executeTask(std::shared_ptr<Tile<T>> data) override {
+    virtual void executeTask(std::shared_ptr<Tile<T>> data) override {
 
         std::string level = std::to_string(data->getLevel());
 

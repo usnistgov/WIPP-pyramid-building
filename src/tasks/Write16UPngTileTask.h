@@ -18,15 +18,15 @@
 #include "WriteTileTask.h"
 
 template <class T>
-class WritePngTileTask : public WriteTileTask<T> {
+class Write16UPngTileTask : public WriteTileTask<T> {
 
 public:
 
 
-    WritePngTileTask(size_t numThreads, const std::string &_pathOut) :  WriteTileTask<T>(numThreads, _pathOut) {}
+    Write16UPngTileTask(size_t numThreads, const std::string &_pathOut) :  WriteTileTask<T>(numThreads, _pathOut) {}
 
     //TODO check why compiler rejects that
-  //  WritePngTileTask(const std::string &_pathOut) : WritePngTileTask(1, &_pathOut) {}
+  //  Write16UPngTileTask(const std::string &_pathOut) : Write16UPngTileTask(1, &_pathOut) {}
 
 
     void executeTask(std::shared_ptr<Tile<T>> data) override {
@@ -55,7 +55,7 @@ public:
     std::string getName() override { return "PngTileWriteTask"; }
 
     ITask<Tile<T>, Tile<T>> *copy() override {
-        return new WritePngTileTask(this->getNumThreads(), this->_pathOut);
+        return new Write16UPngTileTask(this->getNumThreads(), this->_pathOut);
     }
 
 };

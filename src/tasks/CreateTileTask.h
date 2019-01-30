@@ -8,8 +8,6 @@
 #include <htgs/api/ITask.hpp>
 #include <FastImage/api/FastImage.h>
 #include "../data/BlockRequest.h"
-#include "../data/FakeTile.h"
-#include "../rules/MatrixMemoryRule.h"
 
 #include <opencv/cv.h>
 #include <opencv2/imgproc.hpp>
@@ -23,14 +21,13 @@ class CreateTileTask : public htgs::ITask<BlockRequest<T>, Tile<T> > {
 
 public:
 
-    CreateTileTask(size_t numThreads) : ITask<BlockRequest<T>, Tile<T>>(numThreads) {}
+    explicit CreateTileTask(size_t numThreads) : ITask<BlockRequest<T>, Tile<T>>(numThreads) {}
 
     void executeTask(std::shared_ptr<BlockRequest<T>> data) override {
         auto block = data->getBlock();
 
         std::cout << "Create Tile Task - " << *data.get() << std::endl;
 
-        //TODO can providing large storage seriously hinder performance?
         size_t level = block[0]->getLevel() + 1;
         size_t row = floor(block[0]->getRow() / 2);
         size_t col = floor(block[0]->getCol() /2);
@@ -43,16 +40,13 @@ public:
 
         size_t width,height;
 
-
         switch (block.size()){
             //regular block
             case 4:
-
                 width = block[0]->get_width() + block[1]->get_width();
                 height = block[0]->get_height() + block[2]->get_height();
 
                 newTileData = new T[ width * height ];
-                memset( newTileData, 0, width * height * sizeof(T) );
                 copyTileBlock(newTileData, block[0].get(), width, height, 0, 0);
                 copyTileBlock(newTileData, block[1].get(), width, height, block[0]->get_width(), 0);
                 copyTileBlock(newTileData, block[2].get(), width, height, 0, block[0]->get_height());
@@ -65,7 +59,6 @@ public:
                 height = block[0]->get_height() + block[2]->get_height();
 
                 newTileData = new T[ width * height ];
-                memset( newTileData, 0, width * height * sizeof(T) );
                 copyTileBlock(newTileData, block[0].get(), width, height, 0, 0);
                 copyTileBlock(newTileData, block[2].get(), width, height, 0, block[0]->get_height());
                 downsampleData = generateDownsampleData(newTileData, width, height);
@@ -77,7 +70,6 @@ public:
                 height = block[0]->get_height();
 
                 newTileData = new T[ width * height ];
-                memset( newTileData, 0, width * height * sizeof(T) );
                 copyTileBlock(newTileData, block[0].get(), width, height, 0, 0);
                 copyTileBlock(newTileData, block[1].get(), width, height, block[0]->get_width(), 0);
                 downsampleData = generateDownsampleData(newTileData, width, height);
@@ -89,10 +81,12 @@ public:
                 height = block[0]->get_height();
 
                 newTileData = new T[ width * height ];
-                memset( newTileData, 0, width * height * sizeof(T) );
                 copyTileBlock(newTileData, block[0].get(), width, height, 0, 0);
                 downsampleData = generateDownsampleData(newTileData, width, height);
                 break;
+            default:
+                std::cerr << "block was malformed. Size : " << block.size() << std::endl;
+                exit(1);
         }
 
         //TODO check this kind of conversion throughout
@@ -123,7 +117,7 @@ public:
     }
 
 private:
-    void copyTileBlock(T *data, Tile<T>* block, uint32_t fullWidth, uint32_t fullHeight, uint32_t colOffset, uint32_t rowOffset) {
+    void copyTileBlock(T *data, Tile<T>* block, size_t fullWidth, size_t fullHeight, size_t colOffset, size_t rowOffset) {
 
         for (size_t j = 0; j < block->get_height(); j ++) {
             for (size_t i = 0; i < block->get_width(); i ++) {
@@ -142,9 +136,10 @@ private:
         }
     }
 
-    uint32_t* generateDownsampleData(T* newTileData, uint32_t width, uint32_t height) {
+    T* generateDownsampleData(T* newTileData, size_t width, size_t height) {
 
         //TODO check this kind of conversion throughout
+        //in particular : when we have size_t as inputs, how do we ensure there is no overflow
         auto downsampleWidth = ceil( (size_t)width / 2);
         auto downsampleHeight = ceil( (size_t)height / 2);
 

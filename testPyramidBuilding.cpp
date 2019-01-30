@@ -3,7 +3,7 @@
 #include <FastImage/TileLoaders/GrayscaleTiffTileLoader.h>
 #include "src/utils/Helper.h"
 #include "src/rules/WriteTileRule.h"
-#include "src/tasks/WritePngTileTask.h"
+#include "src/tasks/Write16UPngTileTask.h"
 #include "src/rules/PyramidRule.h"
 #include "src/tasks/CreateTileTask.h"
 #include "src/tasks/BaseTileTask.h"
@@ -47,12 +47,12 @@ int main() {
     // Run the example surrounding with a chrono
     auto begin = std::chrono::high_resolution_clock::now();
 
-//    std::string vector = "/Users/gerardin/Documents/projects/pyramidio/pyramidio/src/test/resources/dataset2/stitching_vector/tiled-pc/img-global-positions-1.txt";
-//    std::string directory = "/Users/gerardin/Documents/projects/pyramidio/pyramidio/src/test/resources/dataset2/images/tiled-pc/";
+    std::string vector = "/Users/gerardin/Documents/projects/pyramidio/pyramidio/src/test/resources/dataset2/stitching_vector/tiled-pc/img-global-positions-1.txt";
+    std::string directory = "/Users/gerardin/Documents/projects/pyramidio/pyramidio/src/test/resources/dataset2/images/tiled-pc/";
 
 
-    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset1/stitching_vector/img-global-positions-1.txt";
-    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset1/tiled-images/";
+//    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset1/stitching_vector/img-global-positions-1.txt";
+//    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset1/tiled-images/";
 
 //    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset02/stitching_vector/img-global-positions-1.txt";
 //    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset02/images/";
@@ -61,7 +61,8 @@ int main() {
 //    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset01/images/";
 
     //pyramid
-    size_t pyramidTileSize = 256;
+    size_t pyramidTileSize = 1024;
+//    size_t pyramidTileSize = 256;
 //   uint32_t pyramidTileSize = 32;
 
     auto gridGenerator = new GridGenerator(directory, vector, pyramidTileSize);
@@ -90,13 +91,13 @@ int main() {
 
     auto bookeeper = new htgs::Bookkeeper<Tile<uint32_t>>();
 
-    auto writeRule = new WriteTileRule();
+    auto writeRule = new WriteTileRule<uint32_t>();
 
     auto pyramidRule = new PyramidRule<uint32_t>(numTileCol,numTileRow);
 
     auto createTileTask = new CreateTileTask<uint32_t>(1);
 
-    auto writeTask = new WritePngTileTask<uint32_t>(1, "output");
+    auto writeTask = new Write16UPngTileTask<uint32_t>(1, "output");
 
     graph->setGraphConsumerTask(baseTileTask);
 
@@ -131,9 +132,9 @@ int main() {
 
     size_t numberBlockHeight,numberBlockWidth = 0;
 
-    //TODO Check usage of size_t
-    numberBlockHeight = ceil((size_t)numTileRow/2);
-    numberBlockWidth = ceil((size_t)numTileCol/2);
+    //TODO Check usage of double
+    numberBlockHeight = ceil((double)numTileRow/2);
+    numberBlockWidth = ceil((double)numTileCol/2);
 
     //we traverse the grid in blocks to minimize memory footprint of the pyramid generation.
     for(auto j = 0; j < numberBlockHeight; j++){

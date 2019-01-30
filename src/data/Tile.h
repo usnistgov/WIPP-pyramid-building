@@ -16,7 +16,7 @@ class Tile : public htgs::IData {
 public :
 
 
-    Tile(uint32_t _level, uint32_t _row, uint32_t _col, uint32_t _width, uint32_t _height, UserType *_data) : _level(_level), _row(_row), _col(_col), _width(_width),
+    Tile(size_t _level, size_t _row, size_t _col, size_t _width, size_t _height, UserType *_data) : _level(_level), _row(_row), _col(_col), _width(_width),
                                                         _height(_height), _data(_data), _origin(nullptr) {}
 
     // unpack a Fast Image View and keep track of the original for reclaiming memory at destruction.
@@ -26,30 +26,23 @@ public :
         _origin = view;
     }
 
-//    ~Tile() {
-//        if(_origin){
-//            _origin->releaseMemory();
-//        }
-//        delete _data;
-//    }
-
-    uint32_t getLevel() const {
+    size_t getLevel() const {
         return _level;
     }
 
-    uint32_t getRow() const {
+    size_t getRow() const {
         return _row;
     }
 
-    uint32_t getCol() const {
+    size_t getCol() const {
         return _col;
     }
 
-    uint32_t get_width() const {
+    size_t get_width() const {
         return _width;
     }
 
-    uint32_t get_height() const {
+    size_t get_height() const {
         return _height;
     }
 
@@ -64,11 +57,11 @@ public :
 
 private :
 
-    uint32_t _level;
-    uint32_t _row;
-    uint32_t _col;
-    uint32_t _width;
-    uint32_t _height;
+    size_t _level;
+    size_t _row;
+    size_t _col;
+    size_t _width;
+    size_t _height;
     UserType *_data;
     htgs::m_data_t<fi::View<UserType>> _origin;
 
