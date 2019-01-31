@@ -26,7 +26,7 @@ public:
         size_t levelCol, levelRow;
         levelCol = numTileCol;
         levelRow = numTileRow;
-        for(auto l=0; l<numLevel; l++){
+        for(size_t l=0; l<numLevel; l++){
             std::array<size_t,2> gridSize = { (size_t)levelCol, (size_t)levelRow };
             levelGridSizes.push_back(gridSize);
             levelCol = static_cast<size_t>(ceil((float)levelCol/2));
@@ -58,7 +58,6 @@ public:
 
         if(level > 0) {
             auto gridCol = levelGridSizes[level-1][0];
-            auto gridRow = levelGridSizes[level-1][1];
 
             std::vector<std::shared_ptr<Tile<T>>> &l = this->pyramidCache.at(level - 1);
 

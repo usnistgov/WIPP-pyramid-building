@@ -22,6 +22,17 @@ public:
 
     explicit CreateTileTask(size_t numThreads) : ITask<BlockRequest<T>, Tile<T>>(numThreads) {}
 
+    void print(std::string title, T* data, size_t w, size_t h){
+        std::cout << title << std::endl;
+        for (size_t i = 0; i < h; ++i){
+            for(size_t j = 0; j < w; ++j){
+                std::cout << std::setw(3) << (int)(data[i * w + j]) << " ";
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+    }
+
     void executeTask(std::shared_ptr<BlockRequest<T>> data) override {
         auto block = data->getBlock();
 
@@ -35,7 +46,7 @@ public:
         T* newTileData = nullptr;
         T* downsampleData = nullptr;
 
-        size_t width,height;
+        size_t width = 0, height = 0;
 
         switch (block.size()){
             //regular block
@@ -43,30 +54,34 @@ public:
                 width = block[0]->get_width() + block[1]->get_width();
                 height = block[0]->get_height() + block[2]->get_height();
 
-                newTileData = new T[ width * height ];
+                newTileData = new T[ width * height ]();
                 copyTileBlock(newTileData, block[0].get(), width, height, 0, 0);
+                print("NW", newTileData, width, height);
                 copyTileBlock(newTileData, block[1].get(), width, height, block[0]->get_width(), 0);
+                print("NE", newTileData, width, height);
                 copyTileBlock(newTileData, block[2].get(), width, height, 0, block[0]->get_height());
+                print("SW", newTileData, width, height);
                 copyTileBlock(newTileData, block[3].get(), width, height, block[0]->get_width(), block[0]->get_height());
+                print("SE", newTileData, width, height);
                 downsampleData = generateDownsampleData(newTileData, width, height);
+                print("DS", downsampleData, width/2, height/2);
                 break;
             //right vertical block
             case 3:
                 width = block[0]->get_width();
                 height = block[0]->get_height() + block[2]->get_height();
 
-                newTileData = new T[ width * height ];
+                newTileData = new T[ width * height ]();
                 copyTileBlock(newTileData, block[0].get(), width, height, 0, 0);
                 copyTileBlock(newTileData, block[2].get(), width, height, 0, block[0]->get_height());
                 downsampleData = generateDownsampleData(newTileData, width, height);
                 break;
             //bottom horizontal block
             case 2:
-
                 width = block[0]->get_width() + block[1]->get_width();
                 height = block[0]->get_height();
 
-                newTileData = new T[ width * height ];
+                newTileData = new T[ width * height ]();
                 copyTileBlock(newTileData, block[0].get(), width, height, 0, 0);
                 copyTileBlock(newTileData, block[1].get(), width, height, block[0]->get_width(), 0);
                 downsampleData = generateDownsampleData(newTileData, width, height);
@@ -77,7 +92,7 @@ public:
                 width = block[0]->get_width();
                 height = block[0]->get_height();
 
-                newTileData = new T[ width * height ];
+                newTileData = new T[ width * height ]();
                 copyTileBlock(newTileData, block[0].get(), width, height, 0, 0);
                 downsampleData = generateDownsampleData(newTileData, width, height);
                 break;
@@ -94,7 +109,7 @@ public:
         tile = new Tile<T>(level, row, col, downsampleWidth, downsampleHeight, downsampleData, origin);
 
 
-        //TODO REMOVE FOR DEBUG
+//        DEBUG
 //        cv::Mat image(height, width, CV_32SC1, newTileData);
 //        cv::imwrite("createTileTaskLargeFOV" + std::to_string(counter) + "orig.png", image);
 //        cv::Mat tmp(height, width, CV_16U);
@@ -127,7 +142,7 @@ private:
 //
 //                uint32_t index = indexRowOffset + (j * nbCols * width)  + indexColOffset + i;
 
-                T index = fullWidth * ( j + rowOffset) + colOffset + i;
+                size_t index = fullWidth * ( j + rowOffset) + colOffset + i;
 
     //            std::cout <<  "t : " << std::to_string(index) << std::endl;
 
@@ -141,21 +156,21 @@ private:
 
         //TODO check this kind of conversion throughout
         //in particular : when we have size_t as inputs, how do we ensure there is no overflow
-        auto downsampleWidth = ceil( (size_t)width / 2);
-        auto downsampleHeight = ceil( (size_t)height / 2);
+        auto downsampleWidth = static_cast<size_t>(ceil( (size_t)width / 2));
+        auto downsampleHeight = static_cast<size_t>(ceil( (size_t)height / 2));
 
-        T* downsampleData = new T[ width * height ];
+        T* downsampleData = new T[ downsampleWidth * downsampleHeight ]();
 
-        for(auto j= 0 ; j < downsampleHeight - 1; j++) {
-            for(auto i= 0 ; i < downsampleWidth - 1; i++){
-                T index = j * downsampleWidth + i;
+        for(size_t j= 0 ; j < downsampleHeight - 1; j++) {
+            for(size_t i= 0 ; i < downsampleWidth - 1; i++){
+                size_t index = j * downsampleWidth + i;
                 downsampleData[index] = (newTileData[2 * j * width + 2 * i] + newTileData[2 * j * width + 2 *i + 1] +
                                          newTileData[2 * (j+1) * width + 2 * i] + newTileData[2 * (j+1) * width + 2 *i + 1] ) / 4;
             }
         }
 
-        for(auto i= 0 ; i < downsampleWidth - 1; i++) {
-            T index = (downsampleHeight - 1) * downsampleWidth + i;
+        for(size_t i= 0 ; i < downsampleWidth - 1; i++) {
+            size_t index = (downsampleHeight - 1) * downsampleWidth + i;
             downsampleData[index] = (newTileData[(height - 1) * width + 2 * i] + newTileData[(height -1) * width + 2 * i + 1]) / 2;
         }
 

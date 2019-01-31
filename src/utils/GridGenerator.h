@@ -73,10 +73,6 @@ public:
         std::ifstream infile(stitchingVectorPath);
         size_t tileSize = pyramidTileSize;
 
-        //full image dim
-        size_t imageWidth = 0;
-        size_t imageHeight = 0;
-
         //partial images (fovs)
         size_t fovGlobalX = 0;
         size_t fovGlobalY = 0;

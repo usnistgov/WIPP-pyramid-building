@@ -73,7 +73,6 @@ public:
 
             auto fov = *it2;
             auto filename = fov->getPath();
-            auto file = (directory + filename).c_str();
             auto extension = Helper::getExtension(filename);
 
             if(extension != "tiff" && extension != "tif") {

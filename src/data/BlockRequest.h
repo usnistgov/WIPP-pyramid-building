@@ -29,17 +29,19 @@ public:
         switch (block.size()) {
             case 1:
                 blockType = BlockType::Single;
+                break;
             case 2:
                 blockType = BlockType::Horizontal;
+                break;
             case 3:
                 blockType = BlockType::Vertical;
+                break;
             case 4:
                 blockType = BlockType::Full;
+                break;
+            default:
+                exit(1);
         }
-    }
-
-    BlockType initBlockType() {
-
     }
 
     std::vector<std::shared_ptr<Tile<T>>> &getBlock() {

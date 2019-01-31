@@ -15,5 +15,7 @@ std::string blockTypeToString(BlockType type) {
             return "Block of 2 - Horizontal";
         case BlockType::Full:
             return " Block of 4 - Full";
+        default:
+            return "block error";
     }
 }

@@ -38,13 +38,15 @@ public:
 
         //TODO CHECK how this can vary with the template
         //TODO CHECK how opencv deals with the input array
-        cv::Mat image(data->get_height(), data->get_width(), CV_32SC1, data->getData());
+        cv::Mat image(data->get_height(), data->get_width(), CV_8UC1, data->getData());
+//        cv::Mat image(data->get_height(), data->get_width(), CV_32SC1, data->getData());
         //TODO CHECK if opencv can convert directly from 32U to 16U
-        cv::Mat tmp(data->get_height(), data->get_width(), CV_16U);
-        image.convertTo(tmp, CV_16U, 1,0);
-        cv::imwrite(fullImagePath, tmp);
+      //  cv::Mat tmp(data->get_height(), data->get_width(), CV_16U);
+     //   image.convertTo(tmp, CV_16U, 1,0);
+     //   cv::imwrite(fullImagePath, tmp);
 
-        tmp.release();
+     //   tmp.release();
+        cv::imwrite(fullImagePath, image);
         image.release();
 
         this->addResult(data);

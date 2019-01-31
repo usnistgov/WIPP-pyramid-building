@@ -3,6 +3,10 @@ project(pyramidBuilding)
 
 set(CMAKE_CXX_STANDARD 14)
 
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pedantic -Wno-reorder -Wno-unused-parameter -ansi" )
+
+
 set(TIFF_INCLUDE_DIR /usr/lib)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules")

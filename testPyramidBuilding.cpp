@@ -24,24 +24,6 @@
 #define DEBUG(x) do { std::cerr << x << std::endl; } while (0)
 
 
-Tile<uint32_t>* generateTile(uint32_t i, uint32_t j, std::map<std::pair<uint32_t, uint32_t>, std::vector<PartialFov *>> &grid, BaseTileGenerator<uint32_t> *generator, std::string directory) {
-    std::pair<uint32_t,uint32_t> index= std::make_pair(i,j);
-    auto it = grid.find(index);
-    assert(it != grid.end());
-    Tile<uint32_t>* tile = generator->generateTile(index);
-    return tile;
-}
-
-
-void writeTile(uint32_t row, uint32_t col, uint32_t* tile, uint32 pyramidTileSize){
-    //write as a tif output
-    auto outputFilename = "img_r" + std::to_string(row) + "_c" + std::to_string(col) + ".tif";
-    auto outputdir = "output_";
-    auto w = new SingleTiledTiffWriter(outputdir + outputFilename, pyramidTileSize);
-    w->write(tile);
-    //graph->produceData(tile);
-}
-
 int main() {
 
     // Run the example surrounding with a chrono
@@ -57,16 +39,16 @@ int main() {
 //    std::string vector = "/home/gerardin/Documents/pyramidBuilding/resources/dataset1/stitching_vector/img-global-positions-1.txt";
 //    std::string directory = "/home/gerardin/Documents/pyramidBuilding/resources/dataset1/tiled-images/";
 
-//    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset02/stitching_vector/img-global-positions-1.txt";
-//    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset02/images/";
+//    std::string vector = "/home/gerardin/Documents/pyramidBuilding/resources/dataset02/stitching_vector/img-global-positions-1.txt";
+//    std::string directory = "/home/gerardin/Documents/pyramidBuilding/resources/dataset02/images/";
 
 //    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset01/stitching_vector/img-global-positions-1.txt";
 //    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset01/images/";
 
     //pyramid
-  //  size_t pyramidTileSize = 1024;
+//    size_t pyramidTileSize = 1024;
     size_t pyramidTileSize = 256;
-//   uint32_t pyramidTileSize = 32;
+//   uint8_t pyramidTileSize = 16;
 
     auto gridGenerator = new GridGenerator(directory, vector, pyramidTileSize);
 
@@ -87,20 +69,20 @@ int main() {
     size_t numTileRow = gridGenerator->getGridMaxRow() + 1;
     size_t numTileCol = gridGenerator->getGridMaxCol() + 1;
 
-    auto graph = new htgs::TaskGraphConf<TileRequest, Tile<uint32_t>>();
+    auto graph = new htgs::TaskGraphConf<TileRequest, Tile<uint8_t>>();
 
-    BaseTileGenerator<uint32_t >* generator = new BaseTileGenerator<uint32_t>(gridGenerator);
-    auto baseTileTask = new BaseTileTask<uint32_t>(10, generator);
+    BaseTileGenerator<uint8_t >* generator = new BaseTileGenerator<uint8_t>(gridGenerator);
+    auto baseTileTask = new BaseTileTask<uint8_t>(1, generator);
 
-    auto bookkeeper = new htgs::Bookkeeper<Tile<uint32_t>>();
+    auto bookkeeper = new htgs::Bookkeeper<Tile<uint8_t>>();
 
-    auto writeRule = new WriteTileRule<uint32_t>();
+    auto writeRule = new WriteTileRule<uint8_t>();
 
-    auto pyramidRule = new PyramidRule<uint32_t>(numTileCol,numTileRow);
+    auto pyramidRule = new PyramidRule<uint8_t>(numTileCol,numTileRow);
 
-    auto createTileTask = new CreateTileTask<uint32_t>(10);
+    auto createTileTask = new CreateTileTask<uint8_t>(1);
 
-    auto writeTask = new Write16UPngTileTask<uint32_t>(10, "output");
+    auto writeTask = new Write16UPngTileTask<uint8_t>(1, "output");
 
     graph->setGraphConsumerTask(baseTileTask);
 
@@ -140,8 +122,8 @@ int main() {
     numberBlockWidth = ceil((double)numTileCol/2);
 
     //we traverse the grid in blocks to minimize memory footprint of the pyramid generation.
-    for(auto j = 0; j < numberBlockHeight; j++){
-        for(auto i = 0; i < numberBlockWidth; i++){
+    for(size_t j = 0; j < numberBlockHeight; j++){
+        for(size_t i = 0; i < numberBlockWidth; i++){
             if(2*i < numTileCol && 2*j < numTileRow) {
                 std::cout << 2*j << "," << 2*i << std::endl;
                 auto tileRequest = new TileRequest(2 * j, 2 * i);
