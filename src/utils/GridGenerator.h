@@ -193,6 +193,16 @@ public:
     }
 
 
+    ~GridGenerator(){
+      for(auto &elt : grid){
+          for(auto &fov : elt.second){
+              delete fov;
+          }
+          elt.second.clear();
+      }
+    }
+
+
     const std::map<std::pair<size_t, size_t>, std::vector<PartialFov *>> &getGrid() const {
         return grid;
     }
@@ -237,6 +247,8 @@ public:
     size_t getPyramidTileSize() const {
         return pyramidTileSize;
     }
+
+
 
 };
 

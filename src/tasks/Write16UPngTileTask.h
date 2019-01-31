@@ -37,15 +37,15 @@ public:
         auto fullImagePath = this->_pathOut + "/" + level + "/"  + outputFilename;
 
         //TODO CHECK how this can vary with the template
-        cv::Mat *image = new cv::Mat(data->get_height(), data->get_width(), CV_32SC1, data->getData());
-        cv::Mat *tmp = new cv::Mat(data->get_height(), data->get_width(), CV_16U);
-        image->convertTo(*tmp, CV_16U, 1,0);
-        cv::imwrite(fullImagePath, *tmp);
+        //TODO CHECK how opencv deals with the input array
+        cv::Mat image(data->get_height(), data->get_width(), CV_32SC1, data->getData());
+        //TODO CHECK if opencv can convert directly from 32U to 16U
+        cv::Mat tmp(data->get_height(), data->get_width(), CV_16U);
+        image.convertTo(tmp, CV_16U, 1,0);
+        cv::imwrite(fullImagePath, tmp);
 
-        tmp->release();
-        image->release();
-        delete image;
-        delete tmp;
+        tmp.release();
+        image.release();
 
         this->addResult(data);
     }

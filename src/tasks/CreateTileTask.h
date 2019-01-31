@@ -32,8 +32,6 @@ public:
         size_t col = floor(block[0]->getCol() /2);
 
         Tile<T> *tile = nullptr;
-        htgs::m_data_t<fi::View<T>> t ;
-
         T* newTileData = nullptr;
         T* downsampleData = nullptr;
 
@@ -102,6 +100,9 @@ public:
 //        cv::Mat tmp(height, width, CV_16U);
 //        image.convertTo(tmp, CV_16U);
 //        cv::imwrite("createTileTaskLargeFOV" + std::to_string(counter) + ".png", tmp);
+
+        delete[] newTileData;
+
 
         this->addResult(tile);
 

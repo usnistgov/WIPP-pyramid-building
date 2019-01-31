@@ -93,7 +93,7 @@ public:
                 //nb of tiles to load - we load all tiles in parallel
                 auto nbOfTileToLoad = (endCol - startCol + 1) * (endRow - startRow + 1);
 
-                fi::ATileLoader<T> *tileLoader = new fi::GrayscaleTiffTileLoader<T>(directory + filename, nbOfTileToLoad);
+                fi::ATileLoader<T> *tileLoader = new fi::GrayscaleTiffTileLoader<T>(directory + filename, 1);
 
                 auto *fi = new fi::FastImage<T>(tileLoader, 0);
                 fi->getFastImageOptions()->setNumberOfViewParallel(nbOfTileToLoad);
@@ -179,6 +179,8 @@ public:
                 delete fi;
 
         } //DONE generating the pyramid tile
+
+        std::cout << "generating base tile " << index.first << "," << index.second << std::endl;
 
         return new Tile<T>(0, index.first,index.second, pyramidTileWidth, pyramidTileHeight, tile);
     }
