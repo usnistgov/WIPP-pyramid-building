@@ -30,6 +30,7 @@ set(SOURCES src/utils/Helper.cpp src/data/BlockType.cpp src/rules/PyramidRule.h 
 add_executable(stitching testStitchingVectorParser.cpp ${ALL_SRCS} ${SOURCES})
 add_executable(libtiff testLibtiff.cpp ${ALL_SRCS} ${SOURCES})
 add_executable(pyramidBuilding testPyramidBuilding.cpp ${ALL_SRCS} ${SOURCES})
+add_executable(pyramidBuildingUbuntu testPyramidBuildingUbuntu.cpp ${ALL_SRCS} ${SOURCES})
 #add_executable(dowmsampling testDownSamplingOpenCV.cpp ${ALL_SRCS} ${SOURCES} )
 
 

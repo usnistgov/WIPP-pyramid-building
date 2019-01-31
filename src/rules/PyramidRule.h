@@ -60,7 +60,7 @@ public:
             auto gridCol = levelGridSizes[level-1][0];
             auto gridRow = levelGridSizes[level-1][1];
 
-            auto l = this->pyramidCache.at(level - 1);
+            std::vector<std::shared_ptr<Tile<T>>> &l = this->pyramidCache.at(level - 1);
 
             for(std::shared_ptr<Tile<T>>& value: data->getOrigin()) {
                 if(value!= nullptr) { //second value can be null for vertical block.

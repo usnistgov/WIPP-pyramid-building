@@ -25,8 +25,7 @@ public:
 
     Write16UPngTileTask(size_t numThreads, const std::string &_pathOut) :  WriteTileTask<T>(numThreads, _pathOut) {}
 
-    //TODO check why compiler rejects that
-  //  Write16UPngTileTask(const std::string &_pathOut) : Write16UPngTileTask(1, &_pathOut) {}
+    Write16UPngTileTask(const std::string &_pathOut) : Write16UPngTileTask(1, _pathOut) {}
 
 
     void executeTask(std::shared_ptr<Tile<T>> data) override {

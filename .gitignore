@@ -2,6 +2,7 @@
 build
 build-ubuntu
 cmake-build-debug
+cmake-build-release
 *.log
 VagrantFile
 .vagrant

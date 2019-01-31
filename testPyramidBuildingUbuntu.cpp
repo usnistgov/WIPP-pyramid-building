@@ -47,12 +47,12 @@ int main() {
     // Run the example surrounding with a chrono
     auto begin = std::chrono::high_resolution_clock::now();
 
-    std::string vector = "/Users/gerardin/Documents/projects/pyramidio/pyramidio/src/test/resources/dataset2/stitching_vector/tiled-pc/img-global-positions-1.txt";
-    std::string directory = "/Users/gerardin/Documents/projects/pyramidio/pyramidio/src/test/resources/dataset2/images/tiled-pc/";
+    std::string vector = "/vagrant/build-ubuntu/datasets/img-global-positions-1.txt";
+    std::string directory = "/vagrant/build-ubuntu/datasets/images/";
 
 
-//    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset1/stitching_vector/img-global-positions-1.txt";
-//    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset1/tiled-images/";
+//    std::string vector = "/vagrant/resources/dataset1/stitching_vector/img-global-positions-1.txt";
+//    std::string directory = "/vagrant/resources/dataset1/tiled-images/";
 
 //    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset02/stitching_vector/img-global-positions-1.txt";
 //    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset02/images/";
@@ -62,7 +62,7 @@ int main() {
 
     //pyramid
     size_t pyramidTileSize = 1024;
-//    size_t pyramidTileSize = 256;
+  //  size_t pyramidTileSize = 256;
 //   uint32_t pyramidTileSize = 32;
 
     auto gridGenerator = new GridGenerator(directory, vector, pyramidTileSize);
@@ -86,8 +86,8 @@ int main() {
 
     auto graph = new htgs::TaskGraphConf<TileRequest, Tile<uint32_t>>();
 
-    BaseTileGenerator<uint32_t >* generator = new BaseTileGenerator<uint32_t>(gridGenerator);
-    auto baseTileTask = new BaseTileTask<uint32_t>(1, generator);
+    auto generator = new BaseTileGenerator<uint32_t>(gridGenerator);
+    auto baseTileTask = new BaseTileTask<uint32_t>(20, generator);
 
     auto bookkeeper = new htgs::Bookkeeper<Tile<uint32_t>>();
 
@@ -95,9 +95,9 @@ int main() {
 
     auto pyramidRule = new PyramidRule<uint32_t>(numTileCol,numTileRow);
 
-    auto createTileTask = new CreateTileTask<uint32_t>(1);
+    auto createTileTask = new CreateTileTask<uint32_t>(20);
 
-    auto writeTask = new Write16UPngTileTask<uint32_t>(1, "output");
+    auto writeTask = new Write16UPngTileTask<uint32_t>(20    , "output");
 
     graph->setGraphConsumerTask(baseTileTask);
 
