@@ -23,17 +23,17 @@
 
 #define DEBUG(x) do { std::cerr << x << std::endl; } while (0)
 
-
+typedef uint8_t px_t;
 int main() {
 
     // Run the example surrounding with a chrono
     auto begin = std::chrono::high_resolution_clock::now();
 
-//    std::string vector = "/home/gerardin/Documents/img-global-positions-1.txt";
-//    std::string directory = "/home/gerardin/Documents/images/";
+    std::string vector = "/home/gerardin/Documents/img-global-positions-1.txt";
+    std::string directory = "/home/gerardin/Documents/images/";
 
-    std::string vector = "/home/gerardin/Documents/pyramidBuilding/resources/dataset03/stitching_vector/img-global-positions-1.txt";
-    std::string directory = "/home/gerardin/Documents/pyramidBuilding/resources/dataset03/images/";
+//    std::string vector = "/home/gerardin/Documents/pyramidBuilding/resources/dataset03/stitching_vector/img-global-positions-1.txt";
+//    std::string directory = "/home/gerardin/Documents/pyramidBuilding/resources/dataset03/images/";
 
 
 //    std::string vector = "/home/gerardin/Documents/pyramidBuilding/resources/dataset1/stitching_vector/img-global-positions-1.txt";
@@ -46,9 +46,9 @@ int main() {
 //    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset01/images/";
 
     //pyramid
-//    size_t pyramidTileSize = 1024;
-    size_t pyramidTileSize = 256;
-//   uint8_t pyramidTileSize = 16;
+    size_t pyramidTileSize = 1024;
+ //   size_t pyramidTileSize = 256;
+//   px_t pyramidTileSize = 16;
 
     auto gridGenerator = new GridGenerator(directory, vector, pyramidTileSize);
 
@@ -73,20 +73,20 @@ int main() {
     size_t numTileRow = gridGenerator->getGridMaxRow() + 1;
     size_t numTileCol = gridGenerator->getGridMaxCol() + 1;
 
-    auto graph = new htgs::TaskGraphConf<TileRequest, Tile<uint8_t>>();
+    auto graph = new htgs::TaskGraphConf<TileRequest, Tile<px_t>>();
 
-    auto generator = new BaseTileGenerator<uint8_t>(gridGenerator);
-    auto baseTileTask = new BaseTileTask<uint8_t>(1, generator);
+    auto generator = new BaseTileGenerator<px_t>(gridGenerator);
+    auto baseTileTask = new BaseTileTask<px_t>(10, generator);
 
-    auto bookkeeper = new htgs::Bookkeeper<Tile<uint8_t>>();
+    auto bookkeeper = new htgs::Bookkeeper<Tile<px_t>>();
 
-    auto writeRule = new WriteTileRule<uint8_t>();
+    auto writeRule = new WriteTileRule<px_t>();
 
-    auto pyramidRule = new PyramidRule<uint8_t>(numTileCol,numTileRow);
+    auto pyramidRule = new PyramidRule<px_t>(numTileCol,numTileRow);
 
-    auto createTileTask = new CreateTileTask<uint8_t>(1);
+    auto createTileTask = new CreateTileTask<px_t>(10);
 
-    auto writeTask = new Write16UPngTileTask<uint8_t>(1, "output");
+    auto writeTask = new Write16UPngTileTask<px_t>(10, "output");
 
     graph->setGraphConsumerTask(baseTileTask);
 

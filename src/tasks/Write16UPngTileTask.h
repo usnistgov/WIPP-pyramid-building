@@ -33,7 +33,8 @@ public:
         WriteTileTask<T>::executeTask(data);
 
         std::string level = std::to_string(data->getLevel());
-        auto outputFilename = "img_r" + std::to_string(data->getRow()) + "_c" + std::to_string(data->getCol()) + ".png";
+        //auto outputFilename = "img_r" + std::to_string(data->getRow()) + "_c" + std::to_string(data->getCol()) + ".png";
+        auto outputFilename = std::to_string(data->getRow()) + "_" + std::to_string(data->getCol()) + ".png";
         auto fullImagePath = this->_pathOut + "/" + level + "/"  + outputFilename;
 
         //TODO CHECK how this can vary with the template

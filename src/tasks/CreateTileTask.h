@@ -161,8 +161,8 @@ private:
 
         T* downsampleData = new T[ downsampleWidth * downsampleHeight ]();
 
-        for(size_t j= 0 ; j < downsampleHeight; j++) {
-            for(size_t i= 0 ; i < downsampleWidth; i++){
+        for(size_t j= 0 ; j < downsampleHeight -1; j++) {
+            for(size_t i= 0 ; i < downsampleWidth - 1; i++){
                 size_t index = j * downsampleWidth + i;
                 downsampleData[index] = (newTileData[2 * j * width + 2 * i] + newTileData[2 * j * width + 2 *i + 1] +
                                          newTileData[2 * (j+1) * width + 2 * i] + newTileData[2 * (j+1) * width + 2 *i + 1] ) / 4;
@@ -172,16 +172,16 @@ private:
 
         //TODO FIX this kind of cases are for uneven tile size. We either prevents that form happening or add this test.
 ////
-//        for(size_t i= 0 ; i < downsampleWidth; i++) {
-//            size_t index = (downsampleHeight - 1) * downsampleWidth + i;
-//            downsampleData[index] = (newTileData[(height - 1) * width + 2 * i] + newTileData[(height -1) * width + 2 * i + 1]) / 2;
-//        }
-//
-//
-//        for(size_t i= 0 ; i < downsampleHeight; i++) {
-//            size_t index = (downsampleWidth) * (i) + downsampleWidth - 1;
-//            downsampleData[index] = (newTileData[width * (i) + width - 1] + newTileData[width * (i + 1) + width - 1]) / 2;
-//        }
+        for(size_t i= 0 ; i < downsampleWidth; i++) {
+            size_t index = (downsampleHeight - 1) * downsampleWidth + i;
+            downsampleData[index] = (newTileData[(height - 1) * width + 2 * i] + newTileData[(height -1) * width + 2 * i + 1]) / 2;
+        }
+
+
+        for(size_t i= 0 ; i < downsampleHeight; i++) {
+            size_t index = (downsampleWidth) * (i) + downsampleWidth - 1;
+            downsampleData[index] = (newTileData[width * (i) + width - 1] + newTileData[width * (i + 1) + width - 1]) / 2;
+        }
 
         downsampleData[downsampleWidth * downsampleHeight - 1] = newTileData[width * height - 1];
 
