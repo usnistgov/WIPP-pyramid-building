@@ -48,7 +48,7 @@ public:
      */
     Tile<T>* generateTile(std::pair<size_t, size_t> index){
         //TODO CHECK we generate square tile of fixed size
-        //TODO CHECK if we wanted exact dimensions for the pyramid tile at level 0. Some later calculations might need to be adapted.
+        //TODO CHECK we could also allow rectangular tiles. Some later calculations might need to be adapted.
        // uint32_t pyramidTileWidth = (index.second != maxGridCol) ? pyramidTileSize : fullFovWidth % maxGridCol;
        // uint32_t pyramidTileHeight = (index.first != maxGridRow) ? pyramidTileSize : fullFovHeight % maxGridRow;
         size_t pyramidTileWidth = pyramidTileSize;

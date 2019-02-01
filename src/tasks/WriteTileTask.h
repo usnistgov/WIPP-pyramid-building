@@ -35,7 +35,7 @@ public:
         }
     }
 
-    virtual void executeTask(std::shared_ptr<Tile<T>> data) override {
+    void executeTask(std::shared_ptr<Tile<T>> data) override {
 
         std::string level = std::to_string(data->getLevel());
 

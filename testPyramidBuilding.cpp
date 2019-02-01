@@ -55,11 +55,15 @@ int main() {
     auto grid = gridGenerator->getGrid();
 
     //TODO CHECK we assume that all FOV have the same tiling scheme.
+
+#ifndef NDEBUG
     auto tileWidth = gridGenerator->getFovTileWidth();
     auto tileHeight = gridGenerator->getFovTileHeight();
-
     //TODO CHECK we assume all tiles are square. This is not necessary but it is safe to assume for the first tests.
     assert(tileWidth == tileHeight);
+#endif
+
+
 
     //TODO CHECK we could assume for now that pyramid tile size is a multiple of the underlying FOV tile size.
     //Will that be of any use?
@@ -71,7 +75,7 @@ int main() {
 
     auto graph = new htgs::TaskGraphConf<TileRequest, Tile<uint8_t>>();
 
-    BaseTileGenerator<uint8_t >* generator = new BaseTileGenerator<uint8_t>(gridGenerator);
+    auto generator = new BaseTileGenerator<uint8_t>(gridGenerator);
     auto baseTileTask = new BaseTileTask<uint8_t>(1, generator);
 
     auto bookkeeper = new htgs::Bookkeeper<Tile<uint8_t>>();
@@ -117,9 +121,8 @@ int main() {
 
     size_t numberBlockHeight,numberBlockWidth = 0;
 
-    //TODO Check usage of double
-    numberBlockHeight = ceil((double)numTileRow/2);
-    numberBlockWidth = ceil((double)numTileCol/2);
+    numberBlockHeight = static_cast<size_t>(ceil((double)numTileRow/2));
+    numberBlockWidth = static_cast<size_t>(ceil((double)numTileCol/2));
 
     //we traverse the grid in blocks to minimize memory footprint of the pyramid generation.
     for(size_t j = 0; j < numberBlockHeight; j++){

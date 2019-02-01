@@ -55,8 +55,7 @@ private:
 public:
 
     //TODO test that directory and vector are not mixed up.
-    //TODO CHECK we cast fovGlobalX and fovGlobalY into signed 32bits integer. Enough?
-    //TODO CHECK we cast most values to 32bits integers.
+    //TODO CHECK we cast all values to size_t
     /**
      *
      * @param imageDirectoryPath where to locate the FOVs
@@ -96,9 +95,9 @@ public:
                         std::regex rgx("\\(([0-9]+), ([0-9]+)\\)");
                         std::smatch matches;
                         if(std::regex_search(val, matches, rgx)) {
-                            //TODO CHECK CONVERSION
-                            fovGlobalX = std::stoi(matches[1].str());
-                            fovGlobalY = std::stoi(matches[2].str());
+                            //TODO CHECK best function to parse stitching vector coords (spec?)
+                            fovGlobalX = static_cast<size_t>(std::stoi(matches[1].str()));
+                            fovGlobalY = static_cast<size_t>(std::stoi(matches[2].str()));
                         } else {
                             throw "position coordinates cannot be converted to 4bytes signed integer";
                         }
@@ -120,19 +119,20 @@ public:
                 TIFFClose(tiff);
             }
 
+            //TODO CHECK openCV only accepts int, float or double. Should we keep size_t or int, uint32?
             cv::Rect fov = cv::Rect(fovGlobalX, fovGlobalY, fovWidth, fovHeight);
 
             //Find out across how many pyramid tiles span the current FOV
             size_t startCol, startRow, endCol, endRow = 0;
             startCol = fovGlobalX / tileSize;
             startRow =  fovGlobalY / tileSize;
-            endCol = (double)(fovGlobalX + fovWidth - 1) / tileSize; // -1 because we need the pixel col index
-            endRow = (double)(fovGlobalY + fovHeight - 1) / tileSize;
+            endCol = static_cast<size_t>((double)(fovGlobalX + fovWidth - 1) / tileSize); // -1 because we need the pixel col index
+            endRow = static_cast<size_t>((double)(fovGlobalY + fovHeight - 1) / tileSize);
 
             //compute overlap between an FOV and each pyramid tile.
 
-            for(auto j = startRow; j <= endRow ; j++) {
-                for(auto i = startCol; i <= endCol ; i++) {
+            for(size_t j = startRow; j <= endRow ; j++) {
+                for(size_t i = startCol; i <= endCol ; i++) {
                     cv::Rect tile = cv::Rect(i * tileSize, j * tileSize, tileSize, tileSize); //tile global coordinates
 
                     //global coordinates
@@ -155,7 +155,7 @@ public:
                     fovRelativeY = intersection.y - fovGlobalY;
                     cv::Rect overlapInFovRef = cv::Rect(fovRelativeX, fovRelativeY, intersection.width, intersection.height);
 
-                    PartialFov *partialFov = new PartialFov(file, fovGlobalX,fovGlobalY, overlapInTileRef, intersection, overlapInFovRef);
+                    auto *partialFov = new PartialFov(file, fovGlobalX,fovGlobalY, overlapInTileRef, intersection, overlapInFovRef);
 
                     assert(overlapInTileRef.width == overlapInFovRef.width);
                     assert(overlapInTileRef.height == overlapInFovRef.height);

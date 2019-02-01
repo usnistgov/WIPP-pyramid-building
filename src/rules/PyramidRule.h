@@ -39,8 +39,8 @@ public:
         levelRow = numTileRow;
         for (auto it = pyramidCache.begin() ; it != pyramidCache.end(); ++it) {
             it->resize(levelCol * levelRow);
-            levelCol = ceil((double)levelCol/2);
-            levelRow = ceil((double)levelRow /2);
+            levelCol = static_cast<size_t>(ceil((double)levelCol/2));
+            levelRow = static_cast<size_t>(ceil((double)levelRow /2));
         }
 
     }
@@ -67,19 +67,6 @@ public:
                     value.reset(); //delete from the origin vector so it can be reclaimed.
                 }
             }
-
-
-//            uint32_t i1 = 2 * row * gridCol + 2 * col;
-//            uint32_t i2 = 2 * row * gridCol + 2 * col + 1;
-//            uint32_t i3 = (2 * row + 1) * gridCol + 2 * col;
-//            uint32_t i4 = (2 * row + 1) * gridCol + 2 * col + 1;
-
-            //TODO managing vector structure and reference in function calls.
-//            auto l = this->pyramidCache.at(level - 1);
-//            removeFromCache(l, i1);
-//            removeFromCache(l, i2);
-//            removeFromCache(l, i3);
-//            removeFromCache(l, i4);
         }
 
         if(level == this->numLevel -1){
@@ -196,28 +183,6 @@ public:
                 this->addResult(new BlockRequest<T>(block));
             }
         }
-
-
-
-        //add to block
-//        std::vector<std::vector<fi::View<uint32_t>>> l = levels.at(level);
-//        std::vector<fi::View<uint32_t>> b = l.at(blockCol * levelGridSizes[level][0] + blockRow);
-//        b.push_back(data->get(0));
-//
-//
-//        //if block is full, send block
-//        if(blockCol == floor(levelGridSizes[level][0]) && blockRow == floor(levelGridSizes[level][1]) && b.size() == 1){
-//            //block is full
-//        }
-//        if(blockCol == floor(levelGridSizes[level][0]) && blockRow && b.size() == 2){
-//
-//        }
-//        if(blockRow == floor(levelGridSizes[level][1]) && blockRow && b.size() == 2){
-//
-//        }
-//        if(blockRow && b.size() == 4){
-//
-//        }
 
     }
 

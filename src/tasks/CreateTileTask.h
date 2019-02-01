@@ -56,15 +56,15 @@ public:
 
                 newTileData = new T[ width * height ]();
                 copyTileBlock(newTileData, block[0].get(), width, height, 0, 0);
-                print("NW", newTileData, width, height);
+         //       print("NW", newTileData, width, height);
                 copyTileBlock(newTileData, block[1].get(), width, height, block[0]->get_width(), 0);
-                print("NE", newTileData, width, height);
+          //      print("NE", newTileData, width, height);
                 copyTileBlock(newTileData, block[2].get(), width, height, 0, block[0]->get_height());
-                print("SW", newTileData, width, height);
+          //      print("SW", newTileData, width, height);
                 copyTileBlock(newTileData, block[3].get(), width, height, block[0]->get_width(), block[0]->get_height());
-                print("SE", newTileData, width, height);
+          //      print("SE", newTileData, width, height);
                 downsampleData = generateDownsampleData(newTileData, width, height);
-                print("DS", downsampleData, width/2, height/2);
+          //      print("DS", downsampleData, width/2, height/2);
                 break;
             //right vertical block
             case 3:
@@ -161,18 +161,29 @@ private:
 
         T* downsampleData = new T[ downsampleWidth * downsampleHeight ]();
 
-        for(size_t j= 0 ; j < downsampleHeight - 1; j++) {
-            for(size_t i= 0 ; i < downsampleWidth - 1; i++){
+        for(size_t j= 0 ; j < downsampleHeight; j++) {
+            for(size_t i= 0 ; i < downsampleWidth; i++){
                 size_t index = j * downsampleWidth + i;
                 downsampleData[index] = (newTileData[2 * j * width + 2 * i] + newTileData[2 * j * width + 2 *i + 1] +
                                          newTileData[2 * (j+1) * width + 2 * i] + newTileData[2 * (j+1) * width + 2 *i + 1] ) / 4;
             }
         }
 
-        for(size_t i= 0 ; i < downsampleWidth - 1; i++) {
-            size_t index = (downsampleHeight - 1) * downsampleWidth + i;
-            downsampleData[index] = (newTileData[(height - 1) * width + 2 * i] + newTileData[(height -1) * width + 2 * i + 1]) / 2;
-        }
+
+        //TODO FIX this kind of cases are for uneven tile size. We either prevents that form happening or add this test.
+////
+//        for(size_t i= 0 ; i < downsampleWidth; i++) {
+//            size_t index = (downsampleHeight - 1) * downsampleWidth + i;
+//            downsampleData[index] = (newTileData[(height - 1) * width + 2 * i] + newTileData[(height -1) * width + 2 * i + 1]) / 2;
+//        }
+//
+//
+//        for(size_t i= 0 ; i < downsampleHeight; i++) {
+//            size_t index = (downsampleWidth) * (i) + downsampleWidth - 1;
+//            downsampleData[index] = (newTileData[width * (i) + width - 1] + newTileData[width * (i + 1) + width - 1]) / 2;
+//        }
+
+        downsampleData[downsampleWidth * downsampleHeight - 1] = newTileData[width * height - 1];
 
 
 
