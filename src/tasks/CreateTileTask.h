@@ -165,23 +165,20 @@ private:
             }
         }
 
-
-        //TODO FIX this kind of cases are for uneven tile size. We either prevents that form happening or add this test.
-////
-        for(size_t i= 0 ; i < downsampleWidth; i++) {
+        for(size_t i= 0 ; i < downsampleWidth - 1; i++) {
             size_t index = (downsampleHeight - 1) * downsampleWidth + i;
-            downsampleData[index] = (newTileData[(height - 1) * width + 2 * i] + newTileData[(height -1) * width + 2 * i + 1]) / 2;
+            downsampleData[index] = (newTileData[(height - 1) * width + 2 * i] + (newTileData[(height - 2) * width + 2 * i] + newTileData[(height -1) * width + 2 * i + 1]) / 2 + newTileData[(height -2) * width + 2 * i + 1]) / 4;
         }
 
 
-        for(size_t i= 0 ; i < downsampleHeight; i++) {
-            size_t index = (downsampleWidth) * (i) + downsampleWidth - 1;
-            downsampleData[index] = (newTileData[width * (i) + width - 1] + newTileData[width * (i + 1) + width - 1]) / 2;
+        for(size_t i= 0 ; i < downsampleHeight - 1; i++) {
+            size_t index = downsampleWidth * i + downsampleWidth - 1;
+            downsampleData[index] = (newTileData[width * 2 * i + 2 * width - 1] + newTileData[width * 2 * i + 2 * width - 2] + newTileData[2 * width * (i + 1) + 2 * width - 1] + newTileData[2 * width * (i + 1) + 2 * width - 1]) / 4;
         }
 
-        downsampleData[downsampleWidth * downsampleHeight - 1] = newTileData[width * height - 1];
+        downsampleData[downsampleWidth * downsampleHeight - 1] = (newTileData[ 4 * width * height - 1] + newTileData[ 2 * width * (2 * height - 1) - 1] + newTileData[2 * width * 2 * height - 2] + newTileData[2 * width * (2 * height - 1) - 2]) / 4;
 
-
+       // downsampleData[downsampleWidth * downsampleHeight - 1] = (newTileData[ 4 * width * height - 1] + newTileData[ 2 * width * (2 * height - 1) - 1]);
 
         //TODO REMOVE FOR DEBUG
 //        cv::Mat  mat = cv::Mat(downsampleHeight, downsampleWidth, CV_32SC1 , downsampleData);

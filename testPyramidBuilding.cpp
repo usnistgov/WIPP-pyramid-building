@@ -52,7 +52,7 @@ int main() {
 //    size_t pyramidTileSize = 1024;
 //TODO inform user if wrong tile size
 //    size_t pyramidTileSize = 256;
-   px_t pyramidTileSize = 16;
+   size_t pyramidTileSize = 16;
 
     auto gridGenerator = new GridGenerator(directory, vector, pyramidTileSize);
 
