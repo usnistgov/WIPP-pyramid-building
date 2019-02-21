@@ -21,6 +21,7 @@
 #include "src/utils/GridGenerator.h"
 #include "src/utils/BaseTileGenerator.h"
 #include "src/tasks/WriteDeepZoomTileTask.h"
+#include "src/rules/DeepZoomDownsamplingRule.h"
 
 #define DEBUG(x) do { std::cerr << x << std::endl; } while (0)
 
@@ -98,9 +99,9 @@ int main() {
 
     auto pyramidRule = new PyramidRule<px_t>(numTileCol,numTileRow);
 
+    auto deepzoomDownsamplingRule = new DeepZoomDownsamplingRule<px_t>(numTileCol,numTileRow,deepZoomLevel,"output");
+
     auto createTileTask = new CreateTileTask<px_t>(10);
-
-
 
     auto writeTask = new WriteDeepZoomTileTask<px_t>(10, "output",deepZoomLevel);
 
@@ -112,6 +113,9 @@ int main() {
 
     //outgoing edges
     graph->addRuleEdge(bookkeeper, pyramidRule, createTileTask); //caching tiles and creating a tile at higher level;
+
+    //TODO CHECK for now we link to the writeTask but do not use it. We could. If large latency in write, it could be worthwhile. Otherwise thread management will dominate.
+    graph->addRuleEdge(bookkeeper, deepzoomDownsamplingRule, writeTask); //caching tiles and creating a tile at higher level;
     graph->addRuleEdge(bookkeeper, writeRule, writeTask); //exiting the graph;
 
     //output task

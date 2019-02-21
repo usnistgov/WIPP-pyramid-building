@@ -191,7 +191,7 @@ public:
     }
 
 
-public:
+private:
     void removeFromCache(std::vector<std::shared_ptr<Tile<T>>> &level, size_t index){
         assert(level.at(index) != nullptr);
         level[index].reset();
