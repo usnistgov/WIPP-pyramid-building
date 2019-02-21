@@ -29,12 +29,12 @@ int main() {
     // Run the example surrounding with a chrono
     auto begin = std::chrono::high_resolution_clock::now();
 
-//    std::string vector = "/home/gerardin/Documents/images/dataset2/img-global-positions-1.txt";
-//    std::string directory = "/home/gerardin/Documents/images/dataset2/images/";
+    std::string vector = "/home/gerardin/Documents/images/dataset2/img-global-positions-1.txt";
+    std::string directory = "/home/gerardin/Documents/images/dataset2/images/";
 
-    std::string vector = "/home/gerardin/Documents/images/dataset4/img-global-positions-1.txt";
-    std::string directory = "/home/gerardin/Documents/images/dataset4/images/";
-
+//    std::string vector = "/home/gerardin/Documents/images/dataset4/img-global-positions-1.txt";
+//    std::string directory = "/home/gerardin/Documents/images/dataset4/images/";
+//
 //    std::string vector = "/home/gerardin/Documents/pyramidBuilding/resources/dataset03/stitching_vector/img-global-positions-1.txt";
 //    std::string directory = "/home/gerardin/Documents/pyramidBuilding/resources/dataset03/images/";
 
@@ -49,10 +49,10 @@ int main() {
 //    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset01/images/";
 
     //pyramid
-//    size_t pyramidTileSize = 1024;
+    size_t pyramidTileSize = 1024;
 //TODO inform user if wrong tile size
 //    size_t pyramidTileSize = 256;
-   size_t pyramidTileSize = 16;
+//   size_t pyramidTileSize = 16;
 
     auto gridGenerator = new GridGenerator(directory, vector, pyramidTileSize);
 
@@ -80,7 +80,7 @@ int main() {
     auto graph = new htgs::TaskGraphConf<TileRequest, Tile<px_t>>();
 
     auto generator = new BaseTileGenerator<px_t>(gridGenerator);
-    auto baseTileTask = new BaseTileTask<px_t>(1, generator);
+    auto baseTileTask = new BaseTileTask<px_t>(10, generator);
 
     auto bookkeeper = new htgs::Bookkeeper<Tile<px_t>>();
 
@@ -88,9 +88,9 @@ int main() {
 
     auto pyramidRule = new PyramidRule<px_t>(numTileCol,numTileRow);
 
-    auto createTileTask = new CreateTileTask<px_t>(1);
+    auto createTileTask = new CreateTileTask<px_t>(10);
 
-    auto writeTask = new Write16UPngTileTask<px_t>(1, "output");
+    auto writeTask = new Write16UPngTileTask<px_t>(10, "output");
 
     graph->setGraphConsumerTask(baseTileTask);
 

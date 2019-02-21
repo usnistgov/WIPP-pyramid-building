@@ -56,17 +56,17 @@ public:
 
                 newTileData = new T[ width * height ]();
                 copyTileBlock(newTileData, block[0].get(), width, height, 0, 0);
-                print("NW", newTileData, width, height);
+           //     print("NW", newTileData, width, height);
                 copyTileBlock(newTileData, block[1].get(), width, height, block[0]->get_width(), 0);
-                print("NE", newTileData, width, height);
+         //       print("NE", newTileData, width, height);
                 copyTileBlock(newTileData, block[2].get(), width, height, 0, block[0]->get_height());
-                print("SW", newTileData, width, height);
+          //      print("SW", newTileData, width, height);
                 copyTileBlock(newTileData, block[3].get(), width, height, block[0]->get_width(), block[0]->get_height());
-                print("SE", newTileData, width, height);
+         //       print("SE", newTileData, width, height);
 
 
                 downsampleData = generateDownsampleData(newTileData, width, height);
-                print("DS", downsampleData, width/2, height/2);
+         //       print("DS", downsampleData, width/2, height/2);
                 break;
             //right vertical block
             case 3:
@@ -165,18 +165,26 @@ private:
             }
         }
 
+  //      print("d1", downsampleData, downsampleWidth, downsampleHeight);
+
         for(size_t i= 0 ; i < downsampleWidth - 1; i++) {
             size_t index = (downsampleHeight - 1) * downsampleWidth + i;
-            downsampleData[index] = (newTileData[(height - 1) * width + 2 * i] + (newTileData[(height - 2) * width + 2 * i] + newTileData[(height -1) * width + 2 * i + 1]) / 2 + newTileData[(height -2) * width + 2 * i + 1]) / 4;
+            downsampleData[index] = (newTileData[(height - 1) * width + 2 * i] + newTileData[(height - 2) * width + 2 * i] + newTileData[(height -1) * width + 2 * i + 1] + newTileData[(height -2) * width + 2 * i + 1]) / 4;
         }
+
+  //      print("d2", downsampleData, downsampleWidth, downsampleHeight);
 
 
         for(size_t i= 0 ; i < downsampleHeight - 1; i++) {
             size_t index = downsampleWidth * i + downsampleWidth - 1;
-            downsampleData[index] = (newTileData[width * 2 * i + 2 * width - 1] + newTileData[width * 2 * i + 2 * width - 2] + newTileData[2 * width * (i + 1) + 2 * width - 1] + newTileData[2 * width * (i + 1) + 2 * width - 1]) / 4;
+            downsampleData[index] = (newTileData[width * 2 * i + width - 1] + newTileData[width * 2 * i + width - 2] + newTileData[ width * ( 2 * i + 1) + width - 1] + newTileData[ width * (2 * i + 1) + width - 1]) / 4;
         }
 
-        downsampleData[downsampleWidth * downsampleHeight - 1] = (newTileData[ 4 * width * height - 1] + newTileData[ 2 * width * (2 * height - 1) - 1] + newTileData[2 * width * 2 * height - 2] + newTileData[2 * width * (2 * height - 1) - 2]) / 4;
+    //    print("d3", downsampleData, downsampleWidth, downsampleHeight);
+
+        downsampleData[downsampleWidth * downsampleHeight - 1] = (newTileData[ width * height - 1] + newTileData[ width * (height - 1) - 1] + newTileData[width * height - 2] + newTileData[width * (height - 1) - 2]) / 4;
+
+   //     print("d4", downsampleData, downsampleWidth, downsampleHeight);
 
        // downsampleData[downsampleWidth * downsampleHeight - 1] = (newTileData[ 4 * width * height - 1] + newTileData[ 2 * width * (2 * height - 1) - 1]);
 
