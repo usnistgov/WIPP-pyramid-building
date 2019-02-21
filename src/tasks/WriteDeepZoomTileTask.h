@@ -2,8 +2,8 @@
 // Created by Gerardin, Antoine D. (Assoc) on 12/19/18.
 //
 
-#ifndef PYRAMIDBUILDING_WRITETILETASK_H
-#define PYRAMIDBUILDING_WRITETILETASK_H
+#ifndef PYRAMIDBUILDING_WRITEDEEPZOOMTILETASK_H
+#define PYRAMIDBUILDING_WRITEDEEPZOOMTILETASK_H
 
 #include <htgs/api/ITask.hpp>
 #include "FastImage/api/FastImage.h"
@@ -14,25 +14,55 @@
 #include <dirent.h>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgcodecs.hpp>
-#include "../utils/SingleTiledTiffWriter.h"
 #include "WriteTileTask.h"
 
 template <class T>
-class Write16UPngTileTask : public WriteTileTask<T> {
+class WriteDeepZoomTileTask : public htgs::ITask< Tile<T>, Tile<T> > {
 
 public:
 
 
-    Write16UPngTileTask(size_t numThreads, const std::string &_pathOut) :  WriteTileTask<T>(numThreads, _pathOut) {}
+    WriteDeepZoomTileTask(size_t numThreads, const std::string &_pathOut, const int maxPyramidLevel) : htgs::ITask<Tile<T>, Tile<T>>(numThreads), _pathOut(_pathOut), maxPyramidLevel(maxPyramidLevel) {
 
-    Write16UPngTileTask(const std::string &_pathOut) : Write16UPngTileTask(1, _pathOut) {}
+        auto dir = opendir(_pathOut.c_str());
+        if(dir == nullptr){
+            const int dir_err = mkdir(_pathOut.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+            if (-1 == dir_err)
+            {
+                printf("Error creating output directory!n");
+                exit(1);
+            }
+        }
+        else {
+            closedir(dir);
+        }
+    }
 
 
     void executeTask(std::shared_ptr<Tile<T>> data) override {
 
-        WriteTileTask<T>::executeTask(data);
 
-        std::string level = std::to_string(data->getLevel());
+        //TODO change level. uint8 is enough!
+        int l = this->maxPyramidLevel - (int)data->getLevel();
+        std::string level = std::to_string(l);
+
+        auto dirPath = (this->_pathOut + "/" + level);
+
+        //  Create directory if it does not exists
+        auto dir = opendir(dirPath.c_str());
+        if(dir == nullptr){
+            const int dir_err = mkdir(dirPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+            if (-1 == dir_err)
+            {
+                // std::cout << "Error creating output directory for level" << level  << "!n";
+                exit(1);
+            }
+        }
+        else {
+            closedir(dir);
+        }
+
+
         //auto outputFilename = "img_r" + std::to_string(data->getRow()) + "_c" + std::to_string(data->getCol()) + ".png";
         auto outputFilename = std::to_string(data->getRow()) + "_" + std::to_string(data->getCol()) + ".png";
         auto fullImagePath = this->_pathOut + "/" + level + "/"  + outputFilename;
@@ -62,9 +92,13 @@ public:
     std::string getName() override { return "PngTileWriteTask"; }
 
     ITask<Tile<T>, Tile<T>> *copy() override {
-        return new Write16UPngTileTask(this->getNumThreads(), this->_pathOut);
+        return new WriteDeepZoomTileTask(this->getNumThreads(), this->_pathOut, this->maxPyramidLevel);
     }
+
+private:
+    const uint8 maxPyramidLevel = 0;
+    const std::string _pathOut;
 
 };
 
-#endif //PYRAMIDBUILDING_WRITETILETASK_H
+#endif //PYRAMIDBUILDING_WRITEDEEPZOOMTILETASK_H

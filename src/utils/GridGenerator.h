@@ -219,12 +219,16 @@ public:
         return fovTileHeight;
     }
 
-    size_t getFullFovWidth() const {
-        return gridMaxCol * fovWidth;
+    //TODO CHECK since we generate square tiles, we might add an extra padding on the right.
+    //This method account for this.
+    size_t getPyramidBaseWidth() const {
+        return (gridMaxCol + 1) * pyramidTileSize;
     }
 
-    size_t getFullFovHeight() const {
-        return gridMaxRow * fovHeight;
+    //TODO CHECK since we generate square tiles, we might add an extra padding at the bottom.
+    //This method account for this.
+    size_t getPyramidBaseHeight() const {
+        return (gridMaxRow + 1) * pyramidTileSize;
     }
 
     size_t getGridMaxRow() const {

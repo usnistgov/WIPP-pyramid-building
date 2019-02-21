@@ -3,7 +3,7 @@
 #include <FastImage/TileLoaders/GrayscaleTiffTileLoader.h>
 #include "src/utils/Helper.h"
 #include "src/rules/WriteTileRule.h"
-#include "src/tasks/Write16UPngTileTask.h"
+#include "src/tasks/Write8UPngTileTask.h"
 #include "src/rules/PyramidRule.h"
 #include "src/tasks/CreateTileTask.h"
 #include "src/tasks/BaseTileTask.h"
@@ -97,7 +97,7 @@ int main() {
 
     auto createTileTask = new CreateTileTask<uint32_t>(20);
 
-    auto writeTask = new Write16UPngTileTask<uint32_t>(20    , "output");
+    auto writeTask = new Write8UPngTileTask<uint32_t>(20    , "output");
 
     graph->setGraphConsumerTask(baseTileTask);
 

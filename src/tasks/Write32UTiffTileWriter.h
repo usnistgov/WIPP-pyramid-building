@@ -2,8 +2,8 @@
 // Created by Gerardin, Antoine D. (Assoc) on 1/29/19.
 //
 
-#ifndef PYRAMIDBUILDING_WRITETIFFTILEWRITER_H
-#define PYRAMIDBUILDING_WRITETIFFTILEWRITER_H
+#ifndef PYRAMIDBUILDING_WRITE32UTIFFTILEWRITER_H
+#define PYRAMIDBUILDING_WRITE32UTIFFTILEWRITER_H
 
 #include "../utils/SingleTiledTiffWriter.h"
 #include "WriteTileTask.h"
@@ -17,7 +17,7 @@ public:
     }
 
     //TODO check why compiler rejects that
-    //  Write16UPngTileTask(const std::string &_pathOut, SingleTiledTiffWriter writer) : Write16UPngTileTask(1, &_pathOut, writer) {}
+    //  Write8UPngTileTask(const std::string &_pathOut, SingleTiledTiffWriter writer) : Write8UPngTileTask(1, &_pathOut, writer) {}
 
     void executeTask(std::shared_ptr<Tile<T>> data) override {
 
@@ -52,4 +52,4 @@ public:
 
 };
 
-#endif //PYRAMIDBUILDING_WRITETIFFTILEWRITER_H
+#endif //PYRAMIDBUILDING_WRITE32UTIFFTILEWRITER_H

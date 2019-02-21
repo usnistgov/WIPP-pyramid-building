@@ -3,7 +3,7 @@
 #include <FastImage/TileLoaders/GrayscaleTiffTileLoader.h>
 #include "src/utils/Helper.h"
 #include "src/rules/WriteTileRule.h"
-#include "src/tasks/Write16UPngTileTask.h"
+#include "src/tasks/Write8UPngTileTask.h"
 #include "src/rules/PyramidRule.h"
 #include "src/tasks/CreateTileTask.h"
 #include "src/tasks/BaseTileTask.h"
@@ -20,6 +20,7 @@
 #include "src/utils/SingleTiledTiffWriter.h"
 #include "src/utils/GridGenerator.h"
 #include "src/utils/BaseTileGenerator.h"
+#include "src/tasks/WriteDeepZoomTileTask.h"
 
 #define DEBUG(x) do { std::cerr << x << std::endl; } while (0)
 
@@ -29,11 +30,11 @@ int main() {
     // Run the example surrounding with a chrono
     auto begin = std::chrono::high_resolution_clock::now();
 
-    std::string vector = "/home/gerardin/Documents/images/dataset2/img-global-positions-1.txt";
-    std::string directory = "/home/gerardin/Documents/images/dataset2/images/";
+//    std::string vector = "/home/gerardin/Documents/images/dataset2/img-global-positions-1.txt";
+//    std::string directory = "/home/gerardin/Documents/images/dataset2/images/";
 
-//    std::string vector = "/home/gerardin/Documents/images/dataset4/img-global-positions-1.txt";
-//    std::string directory = "/home/gerardin/Documents/images/dataset4/images/";
+    std::string vector = "/home/gerardin/Documents/images/dataset4/img-global-positions-1.txt";
+    std::string directory = "/home/gerardin/Documents/images/dataset4/images/";
 //
 //    std::string vector = "/home/gerardin/Documents/pyramidBuilding/resources/dataset03/stitching_vector/img-global-positions-1.txt";
 //    std::string directory = "/home/gerardin/Documents/pyramidBuilding/resources/dataset03/images/";
@@ -49,10 +50,10 @@ int main() {
 //    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset01/images/";
 
     //pyramid
-    size_t pyramidTileSize = 1024;
+//    size_t pyramidTileSize = 1024;
 //TODO inform user if wrong tile size
 //    size_t pyramidTileSize = 256;
-//   size_t pyramidTileSize = 16;
+  size_t pyramidTileSize = 16;
 
     auto gridGenerator = new GridGenerator(directory, vector, pyramidTileSize);
 
@@ -77,6 +78,15 @@ int main() {
     size_t numTileRow = gridGenerator->getGridMaxRow() + 1;
     size_t numTileCol = gridGenerator->getGridMaxCol() + 1;
 
+
+    size_t fullFovWidth = gridGenerator->getPyramidBaseWidth();
+    size_t fullFovHeight = gridGenerator->getPyramidBaseHeight();
+    int deepZoomLevel = 0;
+    //calculate pyramid depth
+    auto maxDim = std::max(fullFovWidth,fullFovHeight);
+    deepZoomLevel = int(ceil(log2(maxDim)) + 1);
+
+
     auto graph = new htgs::TaskGraphConf<TileRequest, Tile<px_t>>();
 
     auto generator = new BaseTileGenerator<px_t>(gridGenerator);
@@ -90,7 +100,9 @@ int main() {
 
     auto createTileTask = new CreateTileTask<px_t>(10);
 
-    auto writeTask = new Write16UPngTileTask<px_t>(10, "output");
+
+
+    auto writeTask = new WriteDeepZoomTileTask<px_t>(10, "output",deepZoomLevel);
 
     graph->setGraphConsumerTask(baseTileTask);
 
@@ -158,6 +170,11 @@ int main() {
 
 
     graph->finishedProducingData();
+
+
+
+
+
 
     while(!graph->isOutputTerminated()){
         auto r = graph->consumeData();
