@@ -4,7 +4,7 @@ project(pyramidBuilding)
 set(CMAKE_CXX_STANDARD 14)
 
 #TODO Set this flag only in debug
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pedantic -Wno-reorder -Wno-unused-parameter -ansi" )
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pedantic -Wno-reorder -Wno-unused-parameter -ansi" )
 
 
 set(TIFF_INCLUDE_DIR /usr/lib)

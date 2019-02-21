@@ -89,7 +89,7 @@ public:
                 std::string key, val;
                 std::istringstream iss2(pair);
                 while( std::getline(std::getline(iss2 >> std::ws , key, ':') >> std::ws, val)) {
-                    std::cout << key << "||||||" << val << std::endl;
+                    // std::cout << key << "||||||" << val << std::endl;
 
                     if(key  == "position") {
                         std::regex rgx("\\(([0-9]+), ([0-9]+)\\)");

@@ -25,3 +25,7 @@ We need to build some flexibility in the code to perform conversion.
 How do we deal with variability of inputs since we use templates? In production we need to run pre-compiled code.
 
 ### Convert result of whole division back to indice type.
+
+### The execution may fail if the output directory does not exist.
+
+### Stripe example : 1pixel stripes are averaged and disappear!

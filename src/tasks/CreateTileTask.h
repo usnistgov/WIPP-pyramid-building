@@ -36,7 +36,7 @@ public:
     void executeTask(std::shared_ptr<BlockRequest<T>> data) override {
         auto block = data->getBlock();
 
-        std::cout << "Create Tile Task - " << *data.get() << std::endl;
+        // std::cout << "Create Tile Task - " << *data.get() << std::endl;
 
         size_t level = block[0]->getLevel() + 1;
         size_t row = floor(block[0]->getRow() / 2);
@@ -56,15 +56,17 @@ public:
 
                 newTileData = new T[ width * height ]();
                 copyTileBlock(newTileData, block[0].get(), width, height, 0, 0);
-         //       print("NW", newTileData, width, height);
+                print("NW", newTileData, width, height);
                 copyTileBlock(newTileData, block[1].get(), width, height, block[0]->get_width(), 0);
-          //      print("NE", newTileData, width, height);
+                print("NE", newTileData, width, height);
                 copyTileBlock(newTileData, block[2].get(), width, height, 0, block[0]->get_height());
-          //      print("SW", newTileData, width, height);
+                print("SW", newTileData, width, height);
                 copyTileBlock(newTileData, block[3].get(), width, height, block[0]->get_width(), block[0]->get_height());
-          //      print("SE", newTileData, width, height);
+                print("SE", newTileData, width, height);
+
+
                 downsampleData = generateDownsampleData(newTileData, width, height);
-          //      print("DS", downsampleData, width/2, height/2);
+                print("DS", downsampleData, width/2, height/2);
                 break;
             //right vertical block
             case 3:
@@ -137,14 +139,8 @@ private:
 
         for (size_t j = 0; j < block->get_height(); j ++) {
             for (size_t i = 0; i < block->get_width(); i ++) {
-//                uint32_t indexRowOffset = row * ( nbCols * width * height);
-//                uint32_t indexColOffset = (nbCols == 2) ? col * width : 0;
-//
-//                uint32_t index = indexRowOffset + (j * nbCols * width)  + indexColOffset + i;
 
                 size_t index = fullWidth * ( j + rowOffset) + colOffset + i;
-
-    //            std::cout <<  "t : " << std::to_string(index) << std::endl;
 
                 data[index] = block->getData()[j * block->get_width() + i];
 

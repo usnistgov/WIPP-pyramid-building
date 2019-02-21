@@ -140,24 +140,24 @@ int main() {
     for(auto j = 0; j < numberBlockHeight; j++){
         for(auto i = 0; i < numberBlockWidth; i++){
             if(2*i < numTileCol && 2*j < numTileRow) {
-                std::cout << 2*j << "," << 2*i << std::endl;
+                // std::cout << 2*j << "," << 2*i << std::endl;
                 auto tileRequest = new TileRequest(2 * j, 2 * i);
                 graph->produceData(tileRequest);
             }
             if(2*i+1 < numTileCol) {
-                std::cout << 2 * j << "," << 2 * i + 1 << std::endl;
+                // std::cout << 2 * j << "," << 2 * i + 1 << std::endl;
                 auto tileRequest = new TileRequest(2 * j, 2 * i + 1);
                 graph->produceData(tileRequest);
             }
 
             if(2*j+1 < numTileRow) {
-                std::cout << 2 * j + 1 << "," << 2 * i << std::endl;
+                // std::cout << 2 * j + 1 << "," << 2 * i << std::endl;
                 auto tileRequest = new TileRequest(2 * j + 1, 2 * i);
                 graph->produceData(tileRequest);
             }
 
             if(2*j+1 < numTileRow && 2*i+1 < numTileCol) {
-                std::cout << 2 * j + 1 << "," << 2 * i + 1 << std::endl;
+                // std::cout << 2 * j + 1 << "," << 2 * i + 1 << std::endl;
                 auto tileRequest = new TileRequest(2 * j + 1, 2 * i + 1);
                 graph->produceData(tileRequest);
             }
@@ -172,10 +172,10 @@ int main() {
         if(r == nullptr){
             break;
         }
-        std::cout << "output : " << r->getLevel() << ": " << r->getRow() << "," << r->getCol() << std::endl;
+        // std::cout << "output : " << r->getLevel() << ": " << r->getRow() << "," << r->getCol() << std::endl;
     }
 
-    std::cout << "we should be done" << std::endl;
+    // std::cout << "we should be done" << std::endl;
     runtime->waitForRuntime();
 
     delete runtime;
@@ -183,7 +183,7 @@ int main() {
     delete generator;
 
     auto end = std::chrono::high_resolution_clock::now();
-    std::cout << "Execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
+    // std::cout << "Execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
               << " mS" << std::endl;
 
 }

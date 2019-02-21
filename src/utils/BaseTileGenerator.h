@@ -157,10 +157,10 @@ public:
 
                                 assert( 0 <= index1D && index1D < pyramidTileSize * pyramidTileSize);
 
-                                //        std::cout << index1D << ": " << val << std::endl;
+                                //        // std::cout << index1D << ": " << val << std::endl;
 
 //                                if(tile[index1D] != 0){
-//                                    std::cout << "overwriting at index " << index1D << " old value : " << tile[index1D] << " with value : " << val << std:: endl;
+//                                    // std::cout << "overwriting at index " << index1D << " old value : " << tile[index1D] << " with value : " << val << std:: endl;
 //                                }
 
                                 tile[ index1D ] = val;
@@ -179,7 +179,7 @@ public:
 
         } //DONE generating the pyramid tile
 
-        std::cout << "generating base tile " << index.first << "," << index.second << std::endl;
+        // std::cout << "generating base tile " << index.first << "," << index.second << std::endl;
 
         return new Tile<T>(0, index.first,index.second, pyramidTileWidth, pyramidTileHeight, tile);
     }
