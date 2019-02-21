@@ -22,7 +22,7 @@ class WriteDeepZoomTileTask : public htgs::ITask< Tile<T>, Tile<T> > {
 public:
 
 
-    WriteDeepZoomTileTask(size_t numThreads, const std::string &_pathOut, const int maxPyramidLevel) : htgs::ITask<Tile<T>, Tile<T>>(numThreads), _pathOut(_pathOut), maxPyramidLevel(maxPyramidLevel) {
+    WriteDeepZoomTileTask(size_t numThreads, const std::string &_pathOut, const int nbPyramidLevel) : htgs::ITask<Tile<T>, Tile<T>>(numThreads), _pathOut(_pathOut), nbPyramidLevel(nbPyramidLevel) {
 
         auto dir = opendir(_pathOut.c_str());
         if(dir == nullptr){
@@ -43,7 +43,7 @@ public:
 
 
         //TODO change level. uint8 is enough!
-        int l = this->maxPyramidLevel - (int)data->getLevel();
+        int l = this->nbPyramidLevel - 1 - (int)data->getLevel();
         std::string level = std::to_string(l);
 
         auto dirPath = (this->_pathOut + "/" + level);
@@ -64,7 +64,7 @@ public:
 
 
         //auto outputFilename = "img_r" + std::to_string(data->getRow()) + "_c" + std::to_string(data->getCol()) + ".png";
-        auto outputFilename = std::to_string(data->getRow()) + "_" + std::to_string(data->getCol()) + ".png";
+        auto outputFilename =  std::to_string(data->getCol()) + "_" + std::to_string(data->getRow()) + ".png";
         auto fullImagePath = this->_pathOut + "/" + level + "/"  + outputFilename;
 
         //TODO CHECK how this can vary with the template
@@ -92,11 +92,11 @@ public:
     std::string getName() override { return "PngTileWriteTask"; }
 
     ITask<Tile<T>, Tile<T>> *copy() override {
-        return new WriteDeepZoomTileTask(this->getNumThreads(), this->_pathOut, this->maxPyramidLevel);
+        return new WriteDeepZoomTileTask(this->getNumThreads(), this->_pathOut, this->nbPyramidLevel);
     }
 
 private:
-    const uint8 maxPyramidLevel = 0;
+    const uint8 nbPyramidLevel = 0;
     const std::string _pathOut;
 
 };

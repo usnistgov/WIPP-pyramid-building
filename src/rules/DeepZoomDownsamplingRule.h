@@ -42,7 +42,7 @@ public:
 
             for(int i = this->numLevel; i < maxDeepZoomLevel; i++){
 
-                int l = this->maxDeepZoomLevel - i;
+                int l = this->maxDeepZoomLevel - 1 - i;
                 std::string level = std::to_string(l);
 
                 auto dirPath = (this->_pathOut + "/" + level);
@@ -70,7 +70,7 @@ public:
                 width = static_cast<size_t>(ceil((double) width / 2));
                 height = static_cast<size_t>(ceil((double) height / 2));
 
-                auto outputFilename = std::to_string(data->getRow()) + "_" + std::to_string(data->getCol()) + ".png";
+                auto outputFilename =  std::to_string(data->getCol()) + "_" + std::to_string(data->getRow()) + ".png";
                 auto fullImagePath = this->_pathOut + "/" + level + "/"  + outputFilename;
                 cv::Mat image(height, width, CV_8UC1, newTileData);
                 cv::imwrite(fullImagePath, image);
