@@ -34,8 +34,11 @@ int main() {
 //    std::string vector = "/home/gerardin/Documents/images/dataset2/img-global-positions-1.txt";
 //    std::string directory = "/home/gerardin/Documents/images/dataset2/images/";
 
-    std::string vector = "/home/gerardin/Documents/images/dataset4/img-global-positions-1.txt";
-    std::string directory = "/home/gerardin/Documents/images/dataset4/images/";
+    std::string vector = "/home/gerardin/Documents/images/dataset5_big/img-global-positions-1.txt";
+    std::string directory = "/home/gerardin/Documents/images/dataset5_big/images/";
+
+//    std::string vector = "/home/gerardin/Documents/images/dataset4/img-global-positions-1.txt";
+//    std::string directory = "/home/gerardin/Documents/images/dataset4/images/";
 //
 //    std::string vector = "/home/gerardin/Documents/pyramidBuilding/resources/dataset03/stitching_vector/img-global-positions-1.txt";
 //    std::string directory = "/home/gerardin/Documents/pyramidBuilding/resources/dataset03/images/";
@@ -51,10 +54,10 @@ int main() {
 //    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset01/images/";
 
     //pyramid
-//    size_t pyramidTileSize = 1024;
+    size_t pyramidTileSize = 1024;
 //TODO inform user if wrong tile size
-//    size_t pyramidTileSize = 256;
-  size_t pyramidTileSize = 16;
+//   size_t pyramidTileSize = 256;
+//  size_t pyramidTileSize = 16;
 
     auto gridGenerator = new GridGenerator(directory, vector, pyramidTileSize);
 
@@ -99,11 +102,11 @@ int main() {
 
     auto pyramidRule = new PyramidRule<px_t>(numTileCol,numTileRow);
 
-    auto deepzoomDownsamplingRule = new DeepZoomDownsamplingRule<px_t>(numTileCol,numTileRow,deepZoomLevel,"output");
+    auto deepzoomDownsamplingRule = new DeepZoomDownsamplingRule<px_t>(numTileCol,numTileRow,deepZoomLevel,"output_files");
 
     auto createTileTask = new CreateTileTask<px_t>(10);
 
-    auto writeTask = new WriteDeepZoomTileTask<px_t>(10, "output",deepZoomLevel);
+    auto writeTask = new WriteDeepZoomTileTask<px_t>(10, "output_files",deepZoomLevel);
 
     graph->setGraphConsumerTask(baseTileTask);
 
@@ -148,24 +151,24 @@ int main() {
     for(size_t j = 0; j < numberBlockHeight; j++){
         for(size_t i = 0; i < numberBlockWidth; i++){
             if(2*i < numTileCol && 2*j < numTileRow) {
-                // std::cout << 2*j << "," << 2*i << std::endl;
+                std::cout << 2*j << "," << 2*i << std::endl;
                 auto tileRequest = new TileRequest(2 * j, 2 * i);
                 graph->produceData(tileRequest);
             }
             if(2*i+1 < numTileCol) {
-                // std::cout << 2 * j << "," << 2 * i + 1 << std::endl;
+                std::cout << 2 * j << "," << 2 * i + 1 << std::endl;
                 auto tileRequest = new TileRequest(2 * j, 2 * i + 1);
                 graph->produceData(tileRequest);
             }
 
             if(2*j+1 < numTileRow) {
-                // std::cout << 2 * j + 1 << "," << 2 * i << std::endl;
+                std::cout << 2 * j + 1 << "," << 2 * i << std::endl;
                 auto tileRequest = new TileRequest(2 * j + 1, 2 * i);
                 graph->produceData(tileRequest);
             }
 
             if(2*j+1 < numTileRow && 2*i+1 < numTileCol) {
-                // std::cout << 2 * j + 1 << "," << 2 * i + 1 << std::endl;
+                std::cout << 2 * j + 1 << "," << 2 * i + 1 << std::endl;
                 auto tileRequest = new TileRequest(2 * j + 1, 2 * i + 1);
                 graph->produceData(tileRequest);
             }
@@ -185,10 +188,10 @@ int main() {
         if(r == nullptr){
             break;
         }
-      //  // std::cout << "output : " << r->getLevel() << ": " << r->getRow() << "," << r->getCol() << std::endl;
+      //  std::cout << "output : " << r->getLevel() << ": " << r->getRow() << "," << r->getCol() << std::endl;
     }
 
-    // std::cout << "we should be done" << std::endl;
+    std::cout << "we should be done" << std::endl;
     runtime->waitForRuntime();
 
     graph->writeDotToFile("graph", DOTGEN_FLAG_SHOW_ALL_THREADING | DOTGEN_COLOR_COMP_TIME);
@@ -198,7 +201,7 @@ int main() {
     delete generator;
 
     auto end = std::chrono::high_resolution_clock::now();
-    // std::cout << "Execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " mS" << std::endl;
+    std::cout << "Execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " mS" << std::endl;
 
 }
 

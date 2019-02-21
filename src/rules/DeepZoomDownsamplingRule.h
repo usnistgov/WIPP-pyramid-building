@@ -53,7 +53,7 @@ public:
                     const int dir_err = mkdir(dirPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
                     if (-1 == dir_err)
                     {
-                        // std::cout << "Error creating output directory for level" << level  << "!n";
+                        std::cout << "Error creating output directory for level" << level  << "!n";
                         exit(1);
                     }
                 }

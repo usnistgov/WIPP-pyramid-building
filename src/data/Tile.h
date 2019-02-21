@@ -53,7 +53,7 @@ public :
     ~Tile(){
         delete[] _data;
         _data = nullptr;
-        // std::cout << "I am dead! " << getRow() << "," << getCol() <<"," << getLevel() << std::endl;
+        std::cout << "I am dead! " << getRow() << "," << getCol() <<"," << getLevel() << std::endl;
     }
 
 

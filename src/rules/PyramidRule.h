@@ -77,7 +77,7 @@ public:
         std::ostringstream oss;
         oss << "applying pyramid rule \n" << "tile : (" << row << "," << col << ")" <<
                                           " - grid size at level: " << level << " (" << levelGridSizes[level][0] << "," <<  levelGridSizes[level][1] << ")";
-        // std::cout  << oss.str() << std::endl;
+        std::cout  << oss.str() << std::endl;
 
         auto gridCol = levelGridSizes[level][0];
         auto gridRow = levelGridSizes[level][1];
@@ -95,7 +95,7 @@ public:
         pyramidCache.at(level).at(row * gridCol + col) = data;
 
         if(col >= gridCol -1 && row >= gridRow -1 && col % 2 ==0 && row % 2 ==0) {
-            // std::cout << "corner case : block size 1 " << std::endl;
+            std::cout << "corner case : block size 1 " << std::endl;
             //sendTile
             std::vector<std::shared_ptr<Tile<T>>> block{data};
             this->addResult(new BlockRequest<T>(block));
@@ -103,7 +103,7 @@ public:
         }
 
         if(col >= gridCol -1 && col % 2 == 0){
-            // std::cout << "corner case : column block size 2 " << std::endl;
+            std::cout << "corner case : column block size 2 " << std::endl;
             if(row % 2 == 0 && pyramidCache.at(level).at(SOUTH).get() != nullptr) {
                 //send 2 tiles
                 std::vector<std::shared_ptr<Tile<T>>> block{ data, nullptr, pyramidCache.at(level).at(SOUTH) };
@@ -118,7 +118,7 @@ public:
         }
 
         if(row >= gridRow -1 && row % 2 == 0){
-            // std::cout << "corner case : row block size 2 " << std::endl;
+            std::cout << "corner case : row block size 2 " << std::endl;
             if(col % 2 == 0 && pyramidCache.at(level).at(EAST).get() != nullptr) {
                 //send 2 tiles
                 std::vector<std::shared_ptr<Tile<T>>> block{ data, pyramidCache.at(level).at(EAST) };
@@ -133,13 +133,13 @@ public:
         }
 
         if(col % 2 == 0 && row % 2 == 0) {
-            // std::cout << "check SE " << std::endl;
+            std::cout << "check SE " << std::endl;
             //check SE
             if( pyramidCache.at(level).at(EAST).get() != nullptr &&
                 pyramidCache.at(level).at(SOUTH).get() != nullptr &&
                 pyramidCache.at(level).at(SOUTH_EAST).get() != nullptr){
                 //sendTile
-                // std::cout << "new tile! " << std::endl;
+                std::cout << "new tile! " << std::endl;
                 std::vector<std::shared_ptr<Tile<T>>> block{ data, pyramidCache.at(level).at(EAST), pyramidCache.at(level).at(SOUTH), pyramidCache.at(level).at(SOUTH_EAST)};
                 this->addResult(new BlockRequest<T>(block));
             };
@@ -147,12 +147,12 @@ public:
 
         else if(col % 2 != 0 && row % 2 == 0){
             //check SW
-            // std::cout << "check SW " << std::endl;
+            std::cout << "check SW " << std::endl;
             if( pyramidCache.at(level).at(WEST).get() != nullptr &&
                 pyramidCache.at(level).at(SOUTH).get() != nullptr &&
                 pyramidCache.at(level).at(SOUTH_WEST).get() != nullptr){
                 //sendTile
-                // std::cout << "new tile! " << std::endl;
+                std::cout << "new tile! " << std::endl;
                 std::vector<std::shared_ptr<Tile<T>>> block{ pyramidCache.at(level).at(WEST), data, pyramidCache.at(level).at(SOUTH_WEST), pyramidCache.at(level).at(SOUTH)};
                 this->addResult(new BlockRequest<T>(block));
             }
@@ -160,12 +160,12 @@ public:
 
         else if(col % 2 == 0 && row % 2 != 0){
             //check NE
-            // std::cout << "check NE " << std::endl;
+            std::cout << "check NE " << std::endl;
             if( pyramidCache.at(level).at(NORTH).get() != nullptr &&
                 pyramidCache.at(level).at(NORTH_EAST).get() != nullptr &&
                 pyramidCache.at(level).at(EAST).get() != nullptr){
                 //sendTile
-                // std::cout << "new tile! " << std::endl;
+                std::cout << "new tile! " << std::endl;
                 std::vector<std::shared_ptr<Tile<T>>> block{ pyramidCache.at(level).at(NORTH), pyramidCache.at(level).at(NORTH_EAST), data, pyramidCache.at(level).at(EAST)};
                 this->addResult(new BlockRequest<T>(block));
             }
@@ -173,12 +173,12 @@ public:
 
         else if(col % 2 != 0 && row % 2 != 0){
             //check NW
-            // std::cout << "check NW " << std::endl;
+            std::cout << "check NW " << std::endl;
             if( pyramidCache.at(level).at(NORTH_WEST).get() != nullptr &&
                 pyramidCache.at(level).at(NORTH).get() != nullptr &&
                 pyramidCache.at(level).at(WEST).get() != nullptr){
                 //sendTile
-                // std::cout << "new tile! " << std::endl;
+                std::cout << "new tile! " << std::endl;
                 std::vector<std::shared_ptr<Tile<T>>> block{ pyramidCache.at(level).at(NORTH_WEST), pyramidCache.at(level).at(NORTH), pyramidCache.at(level).at(WEST), data};
                 this->addResult(new BlockRequest<T>(block));
             }

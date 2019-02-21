@@ -84,10 +84,10 @@ int main() {
         cv::Mat small_image2(32, 32, CV_32SC1, tile3);
         cv::Mat small_image3(32, 32, CV_32SC1, tile4);
 
-        // std::cout << "M = "<< std::endl << " "  << small_image0 << std::endl << std::endl;
-        // std::cout << "M = "<< std::endl << " "  << small_image1 << std::endl << std::endl;
-        // std::cout << "M = "<< std::endl << " "  << small_image2 << std::endl << std::endl;
-        // std::cout << "M = "<< std::endl << " "  << small_image3 << std::endl << std::endl;
+        std::cout << "M = "<< std::endl << " "  << small_image0 << std::endl << std::endl;
+        std::cout << "M = "<< std::endl << " "  << small_image1 << std::endl << std::endl;
+        std::cout << "M = "<< std::endl << " "  << small_image2 << std::endl << std::endl;
+        std::cout << "M = "<< std::endl << " "  << small_image3 << std::endl << std::endl;
 
         //TODO CHECK 32 signed?
         cv::Mat big_image(cv::Size(2 * pyramidTileSize, 2 * pyramidTileSize), CV_32SC1);
@@ -102,7 +102,7 @@ int main() {
         cv::pyrDown( tmp, final_image, cv::Size( big_image.cols/2, big_image.rows/2 ));
 
 
-        // std::cout << "final  = "<< std::endl << " "  << final_image << std::endl << std::endl;
+        std::cout << "final  = "<< std::endl << " "  << final_image << std::endl << std::endl;
 
         cv::imwrite("alpha.png", final_image);
 };

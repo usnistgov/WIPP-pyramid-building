@@ -36,7 +36,7 @@ public:
     void executeTask(std::shared_ptr<BlockRequest<T>> data) override {
         auto block = data->getBlock();
 
-        // std::cout << "Create Tile Task - " << *data.get() << std::endl;
+        std::cout << "Create Tile Task - " << *data.get() << std::endl;
 
         size_t level = block[0]->getLevel() + 1;
         size_t row = floor(block[0]->getRow() / 2);

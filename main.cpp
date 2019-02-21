@@ -26,7 +26,7 @@ int main() {
     if (extension == "tiff" || extension == "tif") {
         tileLoader = new fi::GrayscaleTiffTileLoader<uint32_t>(pathImage, 10);
     } else {
-        // std::cout << "File Format not recognized !" << std::endl;
+        std::cout << "File Format not recognized !" << std::endl;
     }
 
     // Create the fast image with the tile loader
@@ -40,7 +40,7 @@ int main() {
 
 
 
-    // std::cout << numTileRow << "," << numTileCol << std::endl;
+    std::cout << numTileRow << "," << numTileCol << std::endl;
 
     auto graph = new htgs::TaskGraphConf<Tile<uint32_t>, Tile<uint32_t> >();
 
@@ -79,19 +79,19 @@ int main() {
     for(auto i = 0; i < numberBlockHeight; i++){
         for(auto j = 0; j < numberBlockWidth; j++){
             if(2*j < numTileCol && 2*i < numTileRow) {
-//                // std::cout << 2*i << "," << 2*j << std::endl;
+//                std::cout << 2*i << "," << 2*j << std::endl;
                 fi->requestTile(2 * i, 2 * j, false, 0);
             }
             if(2*j+1 < numTileCol) {
-//                // std::cout << 2 * i << "," << 2 * j + 1 << std::endl;
+//                std::cout << 2 * i << "," << 2 * j + 1 << std::endl;
                 fi->requestTile(2 * i, 2 * j + 1, false, 0);
             }
             if(2*i+1 < numTileRow) {
-//                // std::cout << 2 * i + 1 << "," << 2 * j << std::endl;
+//                std::cout << 2 * i + 1 << "," << 2 * j << std::endl;
                 fi->requestTile(2 * i + 1, 2 * j, false, 0);
             }
             if(2*j+1 < numTileCol && 2*i+1 < numTileRow) {
-//                // std::cout << 2 * i + 1 << "," << 2 * j + 1 << std::endl;
+//                std::cout << 2 * i + 1 << "," << 2 * j + 1 << std::endl;
                 fi->requestTile(2 * i + 1, 2 * j + 1, false, 0);
             }
 
@@ -114,7 +114,7 @@ int main() {
       //      view->get()->getTileHeight();
     //        view->get()->getTileWidth();
   //          data = view->get()->getData();
-//            // std::cout << data[0] << std::endl;
+//            std::cout << data[0] << std::endl;
             auto tile = new Tile<uint32_t>(view);
             graph->produceData(tile);
         }
@@ -128,10 +128,10 @@ int main() {
         if(r == nullptr){
             break;
         }
-        // std::cout << r->getLevel() << ": " << r->getRow() << "," << r->getCol() << std::endl;
+        std::cout << r->getLevel() << ": " << r->getRow() << "," << r->getCol() << std::endl;
     }
 
-    // std::cout << "we should be done" << std::endl;
+    std::cout << "we should be done" << std::endl;
     runtime->waitForRuntime();
 
     delete fi;
