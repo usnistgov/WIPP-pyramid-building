@@ -29,3 +29,11 @@ How do we deal with variability of inputs since we use templates? In production 
 ### The execution may fail if the output directory does not exist.
 
 ### Stripe example : 1pixel stripes are averaged and disappear!
+
+### Check if need overlap? 
+
+### Support for non tiled images? (From big dataset)
+
+### remove square tile assumption and generate tile of anysize at level 0?
+
+### Check inputs : if bad path, it does not detect it a return

@@ -22,6 +22,8 @@
 #include "src/utils/BaseTileGenerator.h"
 #include "src/tasks/WriteDeepZoomTileTask.h"
 #include "src/rules/DeepZoomDownsamplingRule.h"
+#include <string>
+#include <sstream>
 
 #define DEBUG(x) do { std::cerr << x << std::endl; } while (0)
 
@@ -34,8 +36,8 @@ int main() {
 //    std::string vector = "/home/gerardin/Documents/images/dataset2/img-global-positions-1.txt";
 //    std::string directory = "/home/gerardin/Documents/images/dataset2/images/";
 
-    std::string vector = "/home/gerardin/Documents/images/dataset5_big/img-global-positions-1.txt";
-    std::string directory = "/home/gerardin/Documents/images/dataset5_big/images/";
+//    std::string vector = "/home/gerardin/Documents/images/dataset5_big/img-global-positions-1.txt";
+//    std::string directory = "/home/gerardin/Documents/images/dataset5_big/images/";
 
 //    std::string vector = "/home/gerardin/Documents/images/dataset4/img-global-positions-1.txt";
 //    std::string directory = "/home/gerardin/Documents/images/dataset4/images/";
@@ -47,6 +49,9 @@ int main() {
 //    std::string vector = "/home/gerardin/Documents/pyramidBuilding/resources/dataset1/stitching_vector/img-global-positions-1.txt";
 //    std::string directory = "/home/gerardin/Documents/pyramidBuilding/resources/dataset1/tiled-images/";
 
+    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset1/stitching_vector/img-global-positions-1.txt";
+    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset1/tiled-images/";
+
 //    std::string vector = "/home/gerardin/Documents/pyramidBuilding/resources/dataset02/stitching_vector/img-global-positions-1.txt";
 //    std::string directory = "/home/gerardin/Documents/pyramidBuilding/resources/dataset02/images/";
 
@@ -54,10 +59,16 @@ int main() {
 //    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset01/images/";
 
     //pyramid
-    size_t pyramidTileSize = 1024;
+   // size_t pyramidTileSize = 1024;
 //TODO inform user if wrong tile size
-//   size_t pyramidTileSize = 256;
+   size_t pyramidTileSize = 256;
 //  size_t pyramidTileSize = 16;
+
+    int overlap = 0;
+
+    std::string format = "png";
+
+    std::string pyramidName = "output";
 
     auto gridGenerator = new GridGenerator(directory, vector, pyramidTileSize);
 
@@ -102,11 +113,11 @@ int main() {
 
     auto pyramidRule = new PyramidRule<px_t>(numTileCol,numTileRow);
 
-    auto deepzoomDownsamplingRule = new DeepZoomDownsamplingRule<px_t>(numTileCol,numTileRow,deepZoomLevel,"output_files");
+    auto deepzoomDownsamplingRule = new DeepZoomDownsamplingRule<px_t>(numTileCol,numTileRow,deepZoomLevel, pyramidName + "_files");
 
     auto createTileTask = new CreateTileTask<px_t>(10);
 
-    auto writeTask = new WriteDeepZoomTileTask<px_t>(10, "output_files",deepZoomLevel);
+    auto writeTask = new WriteDeepZoomTileTask<px_t>(10, pyramidName + "_files",deepZoomLevel);
 
     graph->setGraphConsumerTask(baseTileTask);
 
@@ -190,6 +201,20 @@ int main() {
         }
       //  std::cout << "output : " << r->getLevel() << ": " << r->getRow() << "," << r->getCol() << std::endl;
     }
+
+    //'<?xml version="1.0" encoding="utf-8"?><Image TileSize="254" Overlap="1" Format="jpg" xmlns="http://schemas.microsoft.com/deepzoom/2008"><Size Width="13920" Height="10200"/></Image>';
+
+    std::ostringstream oss;
+    oss << "<?xml version=\"1.0\" encoding=\"utf-8\"?><Image TileSize=\"" << pyramidTileSize << "\" Overlap=\"" << overlap
+    << "\" Format=\""  << format << "\" xmlns=\"http://schemas.microsoft.com/deepzoom/2008\"><Size Width=\""
+    << gridGenerator->getPyramidBaseWidth() << "\" Height=\"" << gridGenerator->getPyramidBaseHeight() << "\"/></Image>";
+
+    std::ofstream outFile;
+    outFile.open(pyramidName +".dzi");
+    outFile << oss.str();
+    outFile.close();
+
+
 
     std::cout << "we should be done" << std::endl;
     runtime->waitForRuntime();
