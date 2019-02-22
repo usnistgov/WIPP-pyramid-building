@@ -29,8 +29,8 @@ public:
         for(size_t l=0; l<numLevel; l++){
             std::array<size_t,2> gridSize = { (size_t)levelCol, (size_t)levelRow };
             levelGridSizes.push_back(gridSize);
-            levelCol = static_cast<size_t>(ceil((float)levelCol/2));
-            levelRow = static_cast<size_t>(ceil((float)levelRow /2));
+            levelCol = static_cast<size_t>(ceil((double)levelCol/2));
+            levelRow = static_cast<size_t>(ceil((double)levelRow /2));
         }
 
         //dimension the tile cache for each level of the pyramid

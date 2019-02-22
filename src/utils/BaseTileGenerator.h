@@ -38,7 +38,7 @@ public:
      */
     BaseTileGenerator(GridGenerator *reader): grid(reader->getGrid()), directory(reader->getImageDirectoryPath()), tileWidth(
             reader->getFovTileWidth()), tileHeight(reader->getFovTileHeight()), pyramidTileSize(reader->getPyramidTileSize()),
-                    fullFovWidth(reader->getFovTileWidth()), fullFovHeight(reader->getFovTileHeight()),
+                    fullFovWidth(reader->getFullFovWidth()), fullFovHeight(reader->getFullFovHeight()),
                     maxGridCol(reader->getGridMaxCol()), maxGridRow(reader->getGridMaxRow()) {}
 
     /**
@@ -49,10 +49,10 @@ public:
     Tile<T>* generateTile(std::pair<size_t, size_t> index){
         //TODO CHECK we generate square tile of fixed size
         //TODO CHECK we could also allow rectangular tiles. Some later calculations might need to be adapted.
-       // uint32_t pyramidTileWidth = (index.second != maxGridCol) ? pyramidTileSize : fullFovWidth % maxGridCol;
-       // uint32_t pyramidTileHeight = (index.first != maxGridRow) ? pyramidTileSize : fullFovHeight % maxGridRow;
-        size_t pyramidTileWidth = pyramidTileSize;
-        size_t pyramidTileHeight = pyramidTileSize;
+        size_t pyramidTileWidth = (index.second != maxGridCol) ? pyramidTileSize : fullFovWidth % pyramidTileSize;
+        size_t pyramidTileHeight = (index.first != maxGridRow) ? pyramidTileSize : fullFovHeight % pyramidTileSize;
+//        size_t pyramidTileWidth = pyramidTileSize;
+//        size_t pyramidTileHeight = pyramidTileSize;
 
         T* tile = new T[ pyramidTileWidth * pyramidTileHeight ]();  //the pyramid tile we will be filling from partial FOVs.
 
@@ -153,9 +153,9 @@ public:
 
                                 //to get the final tile, we report the coordinates of the pixel obtained in the FOVOverlap coordinates
                                 //into the the tileOverlap coordinates.
-                                auto index1D = yInTile * pyramidTileSize + xInTile;
+                                auto index1D = yInTile * pyramidTileWidth + xInTile;
 
-                                assert( 0 <= index1D && index1D < pyramidTileSize * pyramidTileSize);
+                                assert( 0 <= index1D && index1D < pyramidTileWidth * pyramidTileHeight);
 
                                 //        std::cout << index1D << ": " << val << std::endl;
 

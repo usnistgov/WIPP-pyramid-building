@@ -56,17 +56,17 @@ public:
 
                 newTileData = new T[ width * height ]();
                 copyTileBlock(newTileData, block[0].get(), width, height, 0, 0);
-           //     print("NW", newTileData, width, height);
+         //       print("NW", newTileData, width, height);
                 copyTileBlock(newTileData, block[1].get(), width, height, block[0]->get_width(), 0);
-         //       print("NE", newTileData, width, height);
+          //      print("NE", newTileData, width, height);
                 copyTileBlock(newTileData, block[2].get(), width, height, 0, block[0]->get_height());
-          //      print("SW", newTileData, width, height);
+           //     print("SW", newTileData, width, height);
                 copyTileBlock(newTileData, block[3].get(), width, height, block[0]->get_width(), block[0]->get_height());
-         //       print("SE", newTileData, width, height);
+           //     print("SE", newTileData, width, height);
 
 
                 downsampleData = generateDownsampleData(newTileData, width, height);
-         //       print("DS", downsampleData, width/2, height/2);
+           //     print("DS", downsampleData, width/2, height/2);
                 break;
             //right vertical block
             case 3:
@@ -104,17 +104,18 @@ public:
         }
 
         //TODO check this kind of conversion throughout
-        auto downsampleWidth = ceil( (size_t)width / 2);
-        auto downsampleHeight = ceil( (size_t)height / 2);
+        auto downsampleWidth = ceil( (double)width / 2);
+        auto downsampleHeight = ceil( (double)height / 2);
 
         std::vector<std::shared_ptr<Tile<T>>> & origin = data->getBlock();
         tile = new Tile<T>(level, row, col, downsampleWidth, downsampleHeight, downsampleData, origin);
 
 
 //        DEBUG
-//        cv::Mat image(height, width, CV_32SC1, newTileData);
-//        cv::imwrite("createTileTaskLargeFOV" + std::to_string(counter) + "orig.png", image);
+//        cv::Mat image(height, width, CV_8U, newTileData);
+//        cv::imwrite("createTileTaskLargeFOV-level" + std::to_string(data->getLevel()) + "_" + std::to_string(counter) + "orig.png", image);
 //        cv::Mat tmp(height, width, CV_16U);
+//        ++counter;
 //        image.convertTo(tmp, CV_16U);
 //        cv::imwrite("createTileTaskLargeFOV" + std::to_string(counter) + ".png", tmp);
 
@@ -123,7 +124,7 @@ public:
 
         this->addResult(tile);
 
-     //   counter++;
+
     }
 
     std::string getName() override {
@@ -165,14 +166,14 @@ private:
             }
         }
 
-  //      print("d1", downsampleData, downsampleWidth, downsampleHeight);
+   //     print("d1", downsampleData, downsampleWidth, downsampleHeight);
 
         for(size_t i= 0 ; i < downsampleWidth - 1; i++) {
             size_t index = (downsampleHeight - 1) * downsampleWidth + i;
             downsampleData[index] = (newTileData[(height - 1) * width + 2 * i] + newTileData[(height - 2) * width + 2 * i] + newTileData[(height -1) * width + 2 * i + 1] + newTileData[(height -2) * width + 2 * i + 1]) / 4;
         }
 
-  //      print("d2", downsampleData, downsampleWidth, downsampleHeight);
+     //   print("d2", downsampleData, downsampleWidth, downsampleHeight);
 
 
         for(size_t i= 0 ; i < downsampleHeight - 1; i++) {
@@ -180,16 +181,16 @@ private:
             downsampleData[index] = (newTileData[width * 2 * i + width - 1] + newTileData[width * 2 * i + width - 2] + newTileData[ width * ( 2 * i + 1) + width - 1] + newTileData[ width * (2 * i + 1) + width - 1]) / 4;
         }
 
-    //    print("d3", downsampleData, downsampleWidth, downsampleHeight);
+       // print("d3", downsampleData, downsampleWidth, downsampleHeight);
 
         downsampleData[downsampleWidth * downsampleHeight - 1] = (newTileData[ width * height - 1] + newTileData[ width * (height - 1) - 1] + newTileData[width * height - 2] + newTileData[width * (height - 1) - 2]) / 4;
 
-   //     print("d4", downsampleData, downsampleWidth, downsampleHeight);
+       // print("d4", downsampleData, downsampleWidth, downsampleHeight);
 
        // downsampleData[downsampleWidth * downsampleHeight - 1] = (newTileData[ 4 * width * height - 1] + newTileData[ 2 * width * (2 * height - 1) - 1]);
 
         //TODO REMOVE FOR DEBUG
-//        cv::Mat  mat = cv::Mat(downsampleHeight, downsampleWidth, CV_32SC1 , downsampleData);
+//        cv::Mat  mat = cv::Mat(downsampleHeight, downsampleWidth, CV_8U , downsampleData);
 //        cv::imwrite("createTileTaskDownsample" + std::to_string(counter) + "orig.png", mat);
 //        cv::Mat tmp(downsampleHeight, downsampleWidth, CV_16U);
 //        mat.convertTo(tmp, CV_16U, 1,0);
@@ -204,6 +205,8 @@ private:
 //    uint32_t counter = 0;
 
 };
+
+
 
 
 #endif //PYRAMIDBUILDING_CREATETILETASK_H

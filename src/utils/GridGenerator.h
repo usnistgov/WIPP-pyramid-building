@@ -46,6 +46,8 @@ private:
     size_t fovHeight = 0;
     size_t fovTileWidth = 0;
     size_t fovTileHeight = 0;
+    size_t fullFovWidth = 0;
+    size_t fullFovHeight = 0;
 
     size_t gridMaxRow = 0;
     size_t gridMaxCol = 0;
@@ -76,6 +78,10 @@ public:
         size_t fovGlobalX = 0;
         size_t fovGlobalY = 0;
 
+        //fullFOV dim
+        size_t maxFovGlobalX = 0;
+        size_t maxFovGlobalY = 0;
+
         //parse stitching vector
         std::string line;
         std::string pair;
@@ -95,9 +101,17 @@ public:
                         std::regex rgx("\\(([0-9]+), ([0-9]+)\\)");
                         std::smatch matches;
                         if(std::regex_search(val, matches, rgx)) {
+                            uint32_t valueX = std::strtoul(matches[1].str().data(), NULL, 10);
+                            uint32_t valueY = std::strtoul(matches[2].str().data(), NULL, 10);
+                            fovGlobalX = static_cast<size_t>(valueX);
+                            fovGlobalY = static_cast<size_t>(valueY);
+
+                            if(fovGlobalX > maxFovGlobalX) maxFovGlobalX = fovGlobalX;
+                            if(fovGlobalY > maxFovGlobalY) maxFovGlobalY = fovGlobalY;
+
                             //TODO CHECK best function to parse stitching vector coords (spec?)
-                            fovGlobalX = static_cast<size_t>(std::stoi(matches[1].str()));
-                            fovGlobalY = static_cast<size_t>(std::stoi(matches[2].str()));
+//                            fovGlobalX = static_cast<size_t>(std::stoi(matches[1].str()));
+//                            fovGlobalY = static_cast<size_t>(std::stoi(matches[2].str()));
                         } else {
                             throw "position coordinates cannot be converted to 4bytes signed integer";
                         }
@@ -118,6 +132,9 @@ public:
                 TIFFGetField(tiff, TIFFTAG_TILELENGTH, &fovTileHeight);
                 TIFFClose(tiff);
             }
+
+            fullFovWidth = maxFovGlobalX + fovWidth;
+            fullFovHeight = maxFovGlobalY + fovHeight;
 
             //TODO CHECK openCV only accepts int, float or double. Should we keep size_t or int, uint32?
             cv::Rect fov = cv::Rect(fovGlobalX, fovGlobalY, fovWidth, fovHeight);
@@ -217,6 +234,14 @@ public:
 
     size_t getFovTileHeight() const {
         return fovTileHeight;
+    }
+
+    size_t getFullFovWidth() const {
+        return fullFovWidth;
+    }
+
+    size_t getFullFovHeight() const {
+        return fullFovHeight;
     }
 
     //TODO CHECK since we generate square tiles, we might add an extra padding on the right.

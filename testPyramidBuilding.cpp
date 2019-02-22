@@ -49,8 +49,11 @@ int main() {
 //    std::string vector = "/home/gerardin/Documents/pyramidBuilding/resources/dataset1/stitching_vector/img-global-positions-1.txt";
 //    std::string directory = "/home/gerardin/Documents/pyramidBuilding/resources/dataset1/tiled-images/";
 
-    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset1/stitching_vector/img-global-positions-1.txt";
-    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset1/tiled-images/";
+//    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset1/stitching_vector/img-global-positions-1.txt";
+//    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset1/tiled-images/";
+
+    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset03/stitching_vector/img-global-positions-1.txt";
+    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset03/images/";
 
 //    std::string vector = "/home/gerardin/Documents/pyramidBuilding/resources/dataset02/stitching_vector/img-global-positions-1.txt";
 //    std::string directory = "/home/gerardin/Documents/pyramidBuilding/resources/dataset02/images/";
@@ -105,7 +108,7 @@ int main() {
     auto graph = new htgs::TaskGraphConf<TileRequest, Tile<px_t>>();
 
     auto generator = new BaseTileGenerator<px_t>(gridGenerator);
-    auto baseTileTask = new BaseTileTask<px_t>(10, generator);
+    auto baseTileTask = new BaseTileTask<px_t>(1, generator);
 
     auto bookkeeper = new htgs::Bookkeeper<Tile<px_t>>();
 
@@ -115,9 +118,9 @@ int main() {
 
     auto deepzoomDownsamplingRule = new DeepZoomDownsamplingRule<px_t>(numTileCol,numTileRow,deepZoomLevel, pyramidName + "_files");
 
-    auto createTileTask = new CreateTileTask<px_t>(10);
+    auto createTileTask = new CreateTileTask<px_t>(1);
 
-    auto writeTask = new WriteDeepZoomTileTask<px_t>(10, pyramidName + "_files",deepZoomLevel);
+    auto writeTask = new WriteDeepZoomTileTask<px_t>(1, pyramidName + "_files",deepZoomLevel);
 
     graph->setGraphConsumerTask(baseTileTask);
 

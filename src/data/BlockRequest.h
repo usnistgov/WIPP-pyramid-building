@@ -48,6 +48,11 @@ public:
         return block;
     }
 
+
+    size_t getLevel() const {
+        return level;
+    }
+
     /// \brief Output operator stream to print a TileRequest
     /// \param os Stream to put the tileRequest information
     /// \param data The TileRequest to print

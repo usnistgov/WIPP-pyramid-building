@@ -12,6 +12,8 @@
 #include <sys/stat.h>
 #include "../data/Tile.h"
 #include "../data/BlockRequest.h"
+#include <opencv2/core/mat.hpp>
+#include <opencv2/imgcodecs.hpp>
 
 template <class T>
 class DeepZoomDownsamplingRule : public htgs::IRule<Tile<T>, Tile<T>> {
