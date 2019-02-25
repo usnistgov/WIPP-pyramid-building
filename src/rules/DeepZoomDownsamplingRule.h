@@ -97,8 +97,8 @@ private:
 
         //TODO check this kind of conversion throughout
         //in particular : when we have size_t as inputs, how do we ensure there is no overflow
-        auto downsampleWidth = static_cast<size_t>(ceil( (size_t)width / 2));
-        auto downsampleHeight = static_cast<size_t>(ceil( (size_t)height / 2));
+        auto downsampleWidth = static_cast<size_t>(ceil( (double)width / 2));
+        auto downsampleHeight = static_cast<size_t>(ceil( (double)height / 2));
 
         T* downsampleData = new T[ downsampleWidth * downsampleHeight ]();
 
@@ -110,14 +110,14 @@ private:
             }
         }
 
-        //      print("d1", downsampleData, downsampleWidth, downsampleHeight);
+        //     print("d1", downsampleData, downsampleWidth, downsampleHeight);
 
         for(size_t i= 0 ; i < downsampleWidth - 1; i++) {
             size_t index = (downsampleHeight - 1) * downsampleWidth + i;
             downsampleData[index] = (newTileData[(height - 1) * width + 2 * i] + newTileData[(height - 2) * width + 2 * i] + newTileData[(height -1) * width + 2 * i + 1] + newTileData[(height -2) * width + 2 * i + 1]) / 4;
         }
 
-        //      print("d2", downsampleData, downsampleWidth, downsampleHeight);
+        //   print("d2", downsampleData, downsampleWidth, downsampleHeight);
 
 
         for(size_t i= 0 ; i < downsampleHeight - 1; i++) {
@@ -125,16 +125,16 @@ private:
             downsampleData[index] = (newTileData[width * 2 * i + width - 1] + newTileData[width * 2 * i + width - 2] + newTileData[ width * ( 2 * i + 1) + width - 1] + newTileData[ width * (2 * i + 1) + width - 1]) / 4;
         }
 
-        //    print("d3", downsampleData, downsampleWidth, downsampleHeight);
+        // print("d3", downsampleData, downsampleWidth, downsampleHeight);
 
         downsampleData[downsampleWidth * downsampleHeight - 1] = (newTileData[ width * height - 1] + newTileData[ width * (height - 1) - 1] + newTileData[width * height - 2] + newTileData[width * (height - 1) - 2]) / 4;
 
-        //     print("d4", downsampleData, downsampleWidth, downsampleHeight);
+        // print("d4", downsampleData, downsampleWidth, downsampleHeight);
 
         // downsampleData[downsampleWidth * downsampleHeight - 1] = (newTileData[ 4 * width * height - 1] + newTileData[ 2 * width * (2 * height - 1) - 1]);
 
         //TODO REMOVE FOR DEBUG
-//        cv::Mat  mat = cv::Mat(downsampleHeight, downsampleWidth, CV_32SC1 , downsampleData);
+//        cv::Mat  mat = cv::Mat(downsampleHeight, downsampleWidth, CV_8U , downsampleData);
 //        cv::imwrite("createTileTaskDownsample" + std::to_string(counter) + "orig.png", mat);
 //        cv::Mat tmp(downsampleHeight, downsampleWidth, CV_16U);
 //        mat.convertTo(tmp, CV_16U, 1,0);
