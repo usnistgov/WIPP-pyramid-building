@@ -101,10 +101,8 @@ public:
                         std::regex rgx("\\(([0-9]+), ([0-9]+)\\)");
                         std::smatch matches;
                         if(std::regex_search(val, matches, rgx)) {
-                            uint32_t valueX = std::strtoul(matches[1].str().data(), NULL, 10);
-                            uint32_t valueY = std::strtoul(matches[2].str().data(), NULL, 10);
-                            fovGlobalX = static_cast<size_t>(valueX);
-                            fovGlobalY = static_cast<size_t>(valueY);
+                            fovGlobalX = std::strtoul(matches[1].str().data(), NULL, 10);
+                            fovGlobalY = std::strtoul(matches[2].str().data(), NULL, 10);
 
                             if(fovGlobalX > maxFovGlobalX) maxFovGlobalX = fovGlobalX;
                             if(fovGlobalY > maxFovGlobalY) maxFovGlobalY = fovGlobalY;
@@ -137,6 +135,7 @@ public:
             fullFovHeight = maxFovGlobalY + fovHeight;
 
             //TODO CHECK openCV only accepts int, float or double. Should we keep size_t or int, uint32?
+            //Definitely should use uint32 if we use openCV.
             cv::Rect fov = cv::Rect(fovGlobalX, fovGlobalY, fovWidth, fovHeight);
 
             //Find out across how many pyramid tiles span the current FOV

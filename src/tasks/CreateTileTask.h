@@ -22,6 +22,8 @@ public:
 
     explicit CreateTileTask(size_t numThreads) : ITask<BlockRequest<T>, Tile<T>>(numThreads) {}
 
+
+    //TODO MOVE TO UTILS. C++ WAY?
     void print(std::string title, T* data, size_t w, size_t h){
         std::cout << title << std::endl;
         for (size_t i = 0; i < h; ++i){
@@ -39,8 +41,8 @@ public:
         std::cout << "Create Tile Task - " << *data.get() << std::endl;
 
         size_t level = block[0]->getLevel() + 1;
-        size_t row = floor(block[0]->getRow() / 2);
-        size_t col = floor(block[0]->getCol() /2);
+        size_t row = block[0]->getRow() / 2;
+        size_t col = block[0]->getCol() / 2;
 
         Tile<T> *tile = nullptr;
         T* newTileData = nullptr;

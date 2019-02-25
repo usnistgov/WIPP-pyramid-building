@@ -51,20 +51,20 @@ int main() {
 
 //    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset1/stitching_vector/img-global-positions-1.txt";
 //    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset1/tiled-images/";
+//
+//    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset03/stitching_vector/img-global-positions-1.txt";
+//    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset03/images/";
 
-    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset03/stitching_vector/img-global-positions-1.txt";
-    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset03/images/";
-
-//    std::string vector = "/home/gerardin/Documents/pyramidBuilding/resources/dataset02/stitching_vector/img-global-positions-1.txt";
-//    std::string directory = "/home/gerardin/Documents/pyramidBuilding/resources/dataset02/images/";
+    std::string vector = "/Users/gerardin/Documents/projects/pyramidio/pyramidio/src/test/resources/dataset2/stitching_vector/tiled-pc/img-global-positions-1.txt";
+    std::string directory = "/Users/gerardin/Documents/projects/pyramidio/pyramidio/src/test/resources/dataset2/images/tiled-pc/";
 
 //    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset01/stitching_vector/img-global-positions-1.txt";
 //    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramidBuildingCleanup/resources/dataset01/images/";
 
     //pyramid
-   // size_t pyramidTileSize = 1024;
+    size_t pyramidTileSize = 1024;
 //TODO inform user if wrong tile size
-   size_t pyramidTileSize = 256;
+  // size_t pyramidTileSize = 256;
 //  size_t pyramidTileSize = 16;
 
     int overlap = 0;
@@ -108,7 +108,7 @@ int main() {
     auto graph = new htgs::TaskGraphConf<TileRequest, Tile<px_t>>();
 
     auto generator = new BaseTileGenerator<px_t>(gridGenerator);
-    auto baseTileTask = new BaseTileTask<px_t>(1, generator);
+    auto baseTileTask = new BaseTileTask<px_t>(10, generator);
 
     auto bookkeeper = new htgs::Bookkeeper<Tile<px_t>>();
 
@@ -118,9 +118,9 @@ int main() {
 
     auto deepzoomDownsamplingRule = new DeepZoomDownsamplingRule<px_t>(numTileCol,numTileRow,deepZoomLevel, pyramidName + "_files");
 
-    auto createTileTask = new CreateTileTask<px_t>(1);
+    auto createTileTask = new CreateTileTask<px_t>(10);
 
-    auto writeTask = new WriteDeepZoomTileTask<px_t>(1, pyramidName + "_files",deepZoomLevel);
+    auto writeTask = new WriteDeepZoomTileTask<px_t>(10, pyramidName + "_files",deepZoomLevel);
 
     graph->setGraphConsumerTask(baseTileTask);
 
