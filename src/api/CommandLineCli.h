@@ -68,6 +68,7 @@ int pyramidBuilding(int argc, const char** argv)
         options->setOverlap(0);
         options->setPyramidFormat(PyramidFormat::DEEPZOOM);
         options->setDownsamplingType(DownsamplingType::NEIGHBORS_AVERAGE);
+        options->setBlendingMethod(BlendingMethod::MAX);
         auto builder = new PyramidBuilding(inputDir,inputVector,options);
         builder->build();
 

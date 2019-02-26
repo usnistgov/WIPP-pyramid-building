@@ -11,20 +11,26 @@
 int main(int argc, const char** argv)
 {
 
-    std::string vector = "/Users/gerardin/Documents/projects/pyramidio/pyramidio/src/test/resources/dataset2/stitching_vector/tiled-pc/img-global-positions-1.txt";
-    std::string directory = "/Users/gerardin/Documents/projects/pyramidio/pyramidio/src/test/resources/dataset2/images/tiled-pc/";
-
-//    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset1/stitching_vector/img-global-positions-1.txt";
-//    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset1/tiled-images/";
+    //    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset1/stitching_vector/img-global-positions-1.txt";
+    //    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset1/tiled-images/";
+    std::string vector = "/home/gerardin/Documents/images/dataset5_big/img-global-positions-1.txt";
+    std::string directory = "/home/gerardin/Documents/images/dataset5_big/images/";
+    uint32_t tilesize = 1024;
 
     std::string vector_option = "-v " + vector;
+    std::string tilesize_option = "-t " + std::to_string(tilesize);
+
+
+
 
     std::vector<const char*> new_argv(argv, argv + argc);
+
     new_argv.push_back(directory.c_str());
     new_argv.push_back(vector_option.c_str());
+    new_argv.push_back(tilesize_option.c_str());
     new_argv.push_back(nullptr); //no more arguments
     argv = new_argv.data();
-    argc = argc + 2;
+    argc = argc + 3;
 
     pyramidBuilding(argc, argv);
 }

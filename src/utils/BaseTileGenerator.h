@@ -16,6 +16,7 @@
 #include <FastImage/TileLoaders/GrayscaleTiffTileLoader.h>
 #include "GridGenerator.h"
 #include "../data/Tile.h"
+#include "../api/Datatype.h"
 
 #define DEBUG(x) do { std::cerr << x << std::endl; } while (0)
 
@@ -47,6 +48,10 @@ public:
      * @return
      */
     Tile<T>* generateTile(std::pair<size_t, size_t> index){
+
+        auto row = index.first;
+        auto col = index.second;
+
         //TODO CHECK we generate square tile of fixed size
         //TODO CHECK we could also allow rectangular tiles. Some later calculations might need to be adapted.
         size_t pyramidTileWidth = (index.second != maxGridCol) ? pyramidTileSize : fullFovWidth % pyramidTileSize;
@@ -68,6 +73,8 @@ public:
 
         std::vector<PartialFov *> fovs = it->second;
 
+        uint32_t counter = 0;
+
         //iterating over each partial FOV.
         for(auto it2 = fovs.begin(); it2 != fovs.end(); ++it2) {
 
@@ -86,6 +93,7 @@ public:
                 size_t startRow, startCol, endRow, endCol;
                 startCol = overlapFov.x /  tileWidth;
                 startRow = overlapFov.y / tileHeight;
+                //TODO CHECK if -1 is correct
                 endCol = ( overlapFov.x + overlapFov.width - 1 ) / tileWidth;
                 endRow = ( overlapFov.y + overlapFov.height - 1 ) / tileHeight;
 
@@ -134,8 +142,8 @@ public:
                         height = overlapFov.height - (yOriginGlobal - overlapFov.y);
 
                         //how many fit in this tile? (width and height of the ROI rectangle)
-                        auto endX = std::min(width, tileWidth);
-                        auto endY = std::min(height, tileHeight);
+                        auto endX = std::min(width + xOrigin, tileWidth);
+                        auto endY = std::min(height + yOrigin, tileHeight);
 
                         //get all pixels for this ROI
                         for(auto j = yOrigin; j < endY ; j++){
@@ -163,7 +171,13 @@ public:
 //                                    std::cout << "overwriting at index " << index1D << " old value : " << tile[index1D] << " with value : " << val << std:: endl;
 //                                }
 
-                                tile[ index1D ] = val;
+                                //TODO Inject blending strategy. This is for max.
+                                if (val > tile[index1D]) {
+                                    tile[index1D] = val;
+                                }
+
+                                //TODO Inject blending strategy. This is for overlay.
+//                                tile[index1D] = val;
 
                             }
                         } //DONE copying the relevant portion of one tile of the FOV in this pyramid tile
@@ -172,6 +186,13 @@ public:
 
                     }
                 } //DONE copying the relevant portion of the FOV in this pyramid tile
+
+                if(col == 16){
+                    cv::Mat image(pyramidTileHeight, pyramidTileWidth, CV_8UC1, tile);
+                    std::string fullImagePath = "/home/gerardin/Documents/pyramidBuilding/cmake-build-debug/debugBaseTile/" + std::to_string(col) + "_" + std::to_string(row) + "_" + std::to_string(counter) + ".png";
+                    cv::imwrite(fullImagePath, image);
+                    ++counter;
+                }
 
                 //TODO CHECK we should eventually cache the fast image instances since they are used for each overlap.
                 //depending on the overlap factor, some performance should be expected.

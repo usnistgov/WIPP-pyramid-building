@@ -80,6 +80,16 @@ public:
             return pyramidName;
         }
 
+
+        BlendingMethod getBlendingMethod() const {
+            return blendingMethod;
+        }
+
+        void setBlendingMethod(BlendingMethod blendingMethod) {
+            Options::blendingMethod = blendingMethod;
+        }
+
+
         void setPyramidName(const std::string &pyramidName) {
             Options::pyramidName = pyramidName;
         }
@@ -97,6 +107,7 @@ public:
         uint32_t _tilesize = 256;
         DownsamplingType downsamplingType = DownsamplingType::NEIGHBORS_AVERAGE;
         PyramidFormat pyramidFormat = PyramidFormat::DEEPZOOM;
+        BlendingMethod blendingMethod = BlendingMethod::MAX;
         std::string pyramidName = "output";
         uint32_t overlap = 0;
 
@@ -123,8 +134,8 @@ public:
         size_t numTileCol = gridGenerator->getGridMaxCol() + 1;
 
 
-        size_t fullFovWidth = gridGenerator->getPyramidBaseWidth();
-        size_t fullFovHeight = gridGenerator->getPyramidBaseHeight();
+        size_t fullFovWidth = gridGenerator->getFullFovWidth();
+        size_t fullFovHeight = gridGenerator->getFullFovHeight();
         int deepZoomLevel = 0;
         //calculate pyramid depth
         auto maxDim = std::max(fullFovWidth,fullFovHeight);
@@ -228,7 +239,7 @@ public:
             oss << "<?xml version=\"1.0\" encoding=\"utf-8\"?><Image TileSize=\"" << pyramidTileSize << "\" Overlap=\""
                 << overlap
                 << "\" Format=\"" << format << "\" xmlns=\"http://schemas.microsoft.com/deepzoom/2008\"><Size Width=\""
-                << gridGenerator->getPyramidBaseWidth() << "\" Height=\"" << gridGenerator->getPyramidBaseHeight()
+                << gridGenerator->getFullFovWidth() << "\" Height=\"" << gridGenerator->getFullFovHeight()
                 << "\"/></Image>";
 
             std::ofstream outFile;

@@ -143,8 +143,8 @@ public:
             startCol = fovGlobalX / tileSize;
             startRow =  fovGlobalY / tileSize;
             //TODO CHECK no ceil?
-            endCol = static_cast<size_t>((double)(fovGlobalX + fovWidth - 1) / tileSize); // -1 because we need the pixel col index
-            endRow = static_cast<size_t>((double)(fovGlobalY + fovHeight - 1) / tileSize);
+            endCol = (fovGlobalX + fovWidth - 1) / tileSize; // -1 because we need the pixel col index
+            endRow = (fovGlobalY + fovHeight - 1) / tileSize;
 
             //compute overlap between an FOV and each pyramid tile.
 
@@ -244,17 +244,17 @@ public:
         return fullFovHeight;
     }
 
-    //TODO CHECK since we generate square tiles, we might add an extra padding on the right.
-    //This method account for this.
-    size_t getPyramidBaseWidth() const {
-        return (gridMaxCol + 1) * pyramidTileSize;
-    }
-
-    //TODO CHECK since we generate square tiles, we might add an extra padding at the bottom.
-    //This method account for this.
-    size_t getPyramidBaseHeight() const {
-        return (gridMaxRow + 1) * pyramidTileSize;
-    }
+//    //TODO CHECK since we generate square tiles, we might add an extra padding on the right.
+//    //This method account for this.
+//    size_t getPyramidBaseWidth() const {
+//        return (gridMaxCol + 1) * pyramidTileSize;
+//    }
+//
+//    //TODO CHECK since we generate square tiles, we might add an extra padding at the bottom.
+//    //This method account for this.
+//    size_t getPyramidBaseHeight() const {
+//        return (gridMaxRow + 1) * pyramidTileSize;
+//    }
 
     size_t getGridMaxRow() const {
         return gridMaxRow;

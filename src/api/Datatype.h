@@ -14,4 +14,9 @@ enum class PyramidFormat {
     DEEPZOOM,
 };
 
+enum class BlendingMethod {
+    OVERLAY,
+    MAX
+};
+
 #endif //PYRAMIDBUILDING_DATATYPE_H
