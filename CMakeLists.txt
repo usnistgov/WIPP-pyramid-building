@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(pyramidBuilding CXX)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 #TODO Set this flag only in debug
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pedantic -Wno-reorder -Wno-unused-parameter -ansi" )
@@ -28,14 +28,13 @@ add_subdirectory(src)
 add_subdirectory(test)
 
 set(ALL_SRCS CACHE INTERNAL "sources" FORCE)
-set(SOURCES src/utils/Helper.cpp src/data/BlockType.cpp src/rules/PyramidRule.h src/tasks/WriteTileTask.h src/utils/SingleTiledTiffWriter.h src/tasks/Write32UTiffTileWriter.h src/tasks/WriteDeepZoomTileTask.h src/rules/DeepZoomDownsamplingRule.h)
+set(SOURCES src/api/PyramidBuilding.h src/api/CommandLineCli.h src/utils/Helper.cpp src/data/BlockType.cpp src/rules/PyramidRule.h src/tasks/WriteTileTask.h src/utils/SingleTiledTiffWriter.h src/tasks/Write32UTiffTileWriter.h src/tasks/WriteDeepZoomTileTask.h src/rules/DeepZoomDownsamplingRule.h)
 
 #add_executable(old main.cpp ${ALL_SRCS} ${SOURCES})
 add_executable(stitching testStitchingVectorParser.cpp ${ALL_SRCS} ${SOURCES})
 add_executable(libtiff testLibtiff.cpp ${ALL_SRCS} ${SOURCES})
 add_executable(pyramidBuilding testPyramidBuilding.cpp ${ALL_SRCS} ${SOURCES})
-add_executable(pyramidBuildingUbuntu testPyramidBuildingUbuntu.cpp ${ALL_SRCS} ${SOURCES})
-#add_executable(dowmsampling testDownSamplingOpenCV.cpp ${ALL_SRCS} ${SOURCES} )
+add_executable(pyramidBuildingCLITest PyramidBuildingCLITest.cpp ${ALL_SRCS} ${SOURCES})
 
 
 

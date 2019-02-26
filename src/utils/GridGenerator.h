@@ -101,8 +101,8 @@ public:
                         std::regex rgx("\\(([0-9]+), ([0-9]+)\\)");
                         std::smatch matches;
                         if(std::regex_search(val, matches, rgx)) {
-                            fovGlobalX = std::strtoul(matches[1].str().data(), NULL, 10);
-                            fovGlobalY = std::strtoul(matches[2].str().data(), NULL, 10);
+                            fovGlobalX = std::strtoul(matches[1].str().data(), nullptr, 10);
+                            fovGlobalY = std::strtoul(matches[2].str().data(), nullptr, 10);
 
                             if(fovGlobalX > maxFovGlobalX) maxFovGlobalX = fovGlobalX;
                             if(fovGlobalY > maxFovGlobalY) maxFovGlobalY = fovGlobalY;
@@ -142,6 +142,7 @@ public:
             size_t startCol, startRow, endCol, endRow = 0;
             startCol = fovGlobalX / tileSize;
             startRow =  fovGlobalY / tileSize;
+            //TODO CHECK no ceil?
             endCol = static_cast<size_t>((double)(fovGlobalX + fovWidth - 1) / tileSize); // -1 because we need the pixel col index
             endRow = static_cast<size_t>((double)(fovGlobalY + fovHeight - 1) / tileSize);
 
