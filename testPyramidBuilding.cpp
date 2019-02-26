@@ -36,8 +36,8 @@ int main() {
 //    std::string vector = "/home/gerardin/Documents/images/dataset2/img-global-positions-1.txt";
 //    std::string directory = "/home/gerardin/Documents/images/dataset2/images/";
 
-//    std::string vector = "/home/gerardin/Documents/images/dataset5_big/img-global-positions-1.txt";
-//    std::string directory = "/home/gerardin/Documents/images/dataset5_big/images/";
+    std::string vector = "/home/gerardin/Documents/images/dataset5_big/img-global-positions-1.txt";
+    std::string directory = "/home/gerardin/Documents/images/dataset5_big/images/";
 
 //    std::string vector = "/home/gerardin/Documents/images/dataset4/img-global-positions-1.txt";
 //    std::string directory = "/home/gerardin/Documents/images/dataset4/images/";
