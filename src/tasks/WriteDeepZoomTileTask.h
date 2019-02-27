@@ -53,7 +53,7 @@ public:
 
         //TODO CHECK how this can vary with the template
         //TODO CHECK how opencv deals with the input array
-        cv::Mat image(data->get_height(), data->get_width(), CV_8UC1, data->getData());
+        cv::Mat image(data->get_height(), data->get_width(), CV_16U, data->getData());
         cv::imwrite(fullImagePath.string(), image);
         image.release();
 

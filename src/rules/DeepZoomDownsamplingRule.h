@@ -67,7 +67,7 @@ public:
                 auto fullImagePath = dirPath / outputFilename;
                 //TODO CHECK how this can vary with the template
                 //TODO CHECK how opencv deals with the input array
-                cv::Mat image(height, width, CV_8UC1, newTileData);
+                cv::Mat image(height, width, CV_16U, newTileData);
                 cv::imwrite(fullImagePath.string(), image);
                 image.release();
             }

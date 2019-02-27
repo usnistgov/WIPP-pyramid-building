@@ -37,7 +37,7 @@
 #include <string>
 #include <sstream>
 
-typedef uint8_t px_t;
+typedef uint16_t px_t;
 
 //HTGS Graph
 //Create tileRequest
@@ -117,6 +117,8 @@ public:
 
     void build(){
 
+        size_t nbThreadsPerTask = 10;
+
         auto begin = std::chrono::high_resolution_clock::now();
 
         std::string pyramidName = options->getPyramidName();
@@ -145,7 +147,7 @@ public:
         auto graph = new htgs::TaskGraphConf<TileRequest, Tile<px_t>>();
 
         auto generator = new BaseTileGenerator<px_t>(gridGenerator, BlendingMethod::MAX);
-        auto baseTileTask = new BaseTileTask<px_t>(1, generator);
+        auto baseTileTask = new BaseTileTask<px_t>(nbThreadsPerTask, generator);
 
         auto bookkeeper = new htgs::Bookkeeper<Tile<px_t>>();
 
@@ -153,12 +155,12 @@ public:
 
         auto pyramidRule = new PyramidRule<px_t>(numTileCol,numTileRow);
 
-        auto createTileTask = new CreateTileTask<px_t>(1);
+        auto createTileTask = new CreateTileTask<px_t>(nbThreadsPerTask);
 
         htgs::ITask< Tile<px_t>, Tile<px_t>> *writeTask = nullptr;
 
         if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
-            writeTask = new WriteDeepZoomTileTask<px_t>(1, pyramidName + "_files", deepZoomLevel);
+            writeTask = new WriteDeepZoomTileTask<px_t>(nbThreadsPerTask, pyramidName + "_files", deepZoomLevel);
         }
         graph->setGraphConsumerTask(baseTileTask);
 
