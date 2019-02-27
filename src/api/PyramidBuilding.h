@@ -145,7 +145,7 @@ public:
         auto graph = new htgs::TaskGraphConf<TileRequest, Tile<px_t>>();
 
         auto generator = new BaseTileGenerator<px_t>(gridGenerator);
-        auto baseTileTask = new BaseTileTask<px_t>(10, generator);
+        auto baseTileTask = new BaseTileTask<px_t>(1, generator);
 
         auto bookkeeper = new htgs::Bookkeeper<Tile<px_t>>();
 
@@ -153,12 +153,12 @@ public:
 
         auto pyramidRule = new PyramidRule<px_t>(numTileCol,numTileRow);
 
-        auto createTileTask = new CreateTileTask<px_t>(10);
+        auto createTileTask = new CreateTileTask<px_t>(1);
 
         htgs::ITask< Tile<px_t>, Tile<px_t>> *writeTask = nullptr;
 
         if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
-            writeTask = new WriteDeepZoomTileTask<px_t>(10, pyramidName + "_files", deepZoomLevel);
+            writeTask = new WriteDeepZoomTileTask<px_t>(1, pyramidName + "_files", deepZoomLevel);
         }
         graph->setGraphConsumerTask(baseTileTask);
 

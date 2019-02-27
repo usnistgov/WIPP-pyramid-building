@@ -49,16 +49,13 @@ public:
      */
     Tile<T>* generateTile(std::pair<size_t, size_t> index){
 
+        std::cout << "generating base tile at index (" << index.first << "," << index.second << ")" << std::endl;
+
         auto row = index.first;
         auto col = index.second;
 
-        //TODO CHECK we generate square tile of fixed size
-        //TODO CHECK we could also allow rectangular tiles. Some later calculations might need to be adapted.
-        size_t pyramidTileWidth = (index.second != maxGridCol) ? pyramidTileSize : fullFovWidth % pyramidTileSize;
-        size_t pyramidTileHeight = (index.first != maxGridRow) ? pyramidTileSize : fullFovHeight % pyramidTileSize;
-//        size_t pyramidTileWidth = pyramidTileSize;
-//        size_t pyramidTileHeight = pyramidTileSize;
-
+        size_t pyramidTileWidth = (index.second != maxGridCol) ? pyramidTileSize : fullFovWidth  - col * pyramidTileSize;
+        size_t pyramidTileHeight = (index.first != maxGridRow) ? pyramidTileSize : fullFovHeight - row * pyramidTileSize;
         T* tile = new T[ pyramidTileWidth * pyramidTileHeight ]();  //the pyramid tile we will be filling from partial FOVs.
 
         auto it = grid.find(index);
@@ -200,7 +197,7 @@ public:
 
         } //DONE generating the pyramid tile
 
-        std::cout << "generating base tile " << index.first << "," << index.second << std::endl;
+        std::cout << "base tile generated at index (" << index.first << "," << index.second << ")" << std::endl;
 
         return new Tile<T>(0, index.first,index.second, pyramidTileWidth, pyramidTileHeight, tile);
     }
