@@ -24,60 +24,37 @@ public:
 
     WriteDeepZoomTileTask(size_t numThreads, const std::string &_pathOut, const int nbPyramidLevel) : htgs::ITask<Tile<T>, Tile<T>>(numThreads), _pathOut(_pathOut), nbPyramidLevel(nbPyramidLevel) {
 
-        auto dir = opendir(_pathOut.c_str());
-        if(dir == nullptr){
-            const int dir_err = mkdir(_pathOut.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-            if (-1 == dir_err)
-            {
-                printf("Error creating output directory!n");
-                exit(1);
-            }
+        //create the images directory structure
+        filesystem::path path = _pathOut;
+
+        if(! filesystem::exists(path)) {
+                filesystem::create_directory(path);
         }
-        else {
-            closedir(dir);
+
+        for(int i= 0; i < nbPyramidLevel; i++){
+            filesystem::create_directory(path / std::to_string(i) );
         }
+
     }
 
 
     void executeTask(std::shared_ptr<Tile<T>> data) override {
 
+        filesystem::path path = _pathOut;
 
+        //deepzoom base level is the maximum depth of the pyramid
         //TODO change level. uint8 is enough!
         int l = this->nbPyramidLevel - 1 - (int)data->getLevel();
         std::string level = std::to_string(l);
 
-        auto dirPath = (this->_pathOut + "/" + level);
-
-        //  Create directory if it does not exists
-        auto dir = opendir(dirPath.c_str());
-        if(dir == nullptr){
-            const int dir_err = mkdir(dirPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-            if (-1 == dir_err)
-            {
-                std::cout << "Error creating output directory for level" << level  << "!n";
-                exit(1);
-            }
-        }
-        else {
-            closedir(dir);
-        }
-
-
-        //auto outputFilename = "img_r" + std::to_string(data->getRow()) + "_c" + std::to_string(data->getCol()) + ".png";
+        auto dirPath = path / level;
         auto outputFilename =  std::to_string(data->getCol()) + "_" + std::to_string(data->getRow()) + ".png";
-        auto fullImagePath = this->_pathOut + "/" + level + "/"  + outputFilename;
+        auto fullImagePath = dirPath / outputFilename;
 
         //TODO CHECK how this can vary with the template
         //TODO CHECK how opencv deals with the input array
         cv::Mat image(data->get_height(), data->get_width(), CV_8UC1, data->getData());
-//        cv::Mat image(data->get_height(), data->get_width(), CV_32SC1, data->getData());
-        //TODO CHECK if opencv can convert directly from 32U to 16U
-      //  cv::Mat tmp(data->get_height(), data->get_width(), CV_16U);
-     //   image.convertTo(tmp, CV_16U, 1,0);
-     //   cv::imwrite(fullImagePath, tmp);
-
-     //   tmp.release();
-        cv::imwrite(fullImagePath, image);
+        cv::imwrite(fullImagePath.string(), image);
         image.release();
 
         this->addResult(data);

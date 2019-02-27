@@ -42,25 +42,16 @@ public:
             size_t width = data->get_width();
             size_t height = data->get_height();
 
-            for(int i = this->numLevel; i < maxDeepZoomLevel; i++){
+            //TODO level should be int
+            for(int i = (int)this->numLevel; i < maxDeepZoomLevel; i++){
 
                 int l = this->maxDeepZoomLevel - 1 - i;
                 std::string level = std::to_string(l);
 
-                auto dirPath = (this->_pathOut + "/" + level);
-
-                //  Create directory if it does not exists
-                auto dir = opendir(dirPath.c_str());
-                if(dir == nullptr){
-                    const int dir_err = mkdir(dirPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-                    if (-1 == dir_err)
-                    {
-                        std::cout << "Error creating output directory for level" << level  << "!n";
-                        exit(1);
-                    }
-                }
-                else {
-                    closedir(dir);
+                filesystem::path path = _pathOut;
+                auto dirPath = path / level;
+                if(! filesystem::exists(dirPath)) {
+                    filesystem::create_directory(dirPath);
                 }
 
                 if(l > 1){
@@ -73,9 +64,11 @@ public:
                 height = static_cast<size_t>(ceil((double) height / 2));
 
                 auto outputFilename =  std::to_string(data->getCol()) + "_" + std::to_string(data->getRow()) + ".png";
-                auto fullImagePath = this->_pathOut + "/" + level + "/"  + outputFilename;
+                auto fullImagePath = dirPath / outputFilename;
+                //TODO CHECK how this can vary with the template
+                //TODO CHECK how opencv deals with the input array
                 cv::Mat image(height, width, CV_8UC1, newTileData);
-                cv::imwrite(fullImagePath, image);
+                cv::imwrite(fullImagePath.string(), image);
                 image.release();
             }
 

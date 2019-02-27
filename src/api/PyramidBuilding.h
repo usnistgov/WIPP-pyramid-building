@@ -144,7 +144,7 @@ public:
 
         auto graph = new htgs::TaskGraphConf<TileRequest, Tile<px_t>>();
 
-        auto generator = new BaseTileGenerator<px_t>(gridGenerator);
+        auto generator = new BaseTileGenerator<px_t>(gridGenerator, BlendingMethod::MAX);
         auto baseTileTask = new BaseTileTask<px_t>(1, generator);
 
         auto bookkeeper = new htgs::Bookkeeper<Tile<px_t>>();

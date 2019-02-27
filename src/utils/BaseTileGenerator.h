@@ -17,8 +17,11 @@
 #include "GridGenerator.h"
 #include "../data/Tile.h"
 #include "../api/Datatype.h"
+#include <experimental/filesystem>
 
 #define DEBUG(x) do { std::cerr << x << std::endl; } while (0)
+
+using namespace std::experimental;
 
 /**
  * @class BaseTileGenerator BaseTileGenerator.h
@@ -37,10 +40,10 @@ public:
      * The pyramid base level tile generator needs information on the general structure of the full FOVs.
      * @param reader the MistStitchedImageReader that contains information on partial FOV overlaps.
      */
-    BaseTileGenerator(GridGenerator *reader): grid(reader->getGrid()), directory(reader->getImageDirectoryPath()), tileWidth(
+    BaseTileGenerator(GridGenerator *reader, BlendingMethod blendingMethod): grid(reader->getGrid()), directory(reader->getImageDirectoryPath()), tileWidth(
             reader->getFovTileWidth()), tileHeight(reader->getFovTileHeight()), pyramidTileSize(reader->getPyramidTileSize()),
                     fullFovWidth(reader->getFullFovWidth()), fullFovHeight(reader->getFullFovHeight()),
-                    maxGridCol(reader->getGridMaxCol()), maxGridRow(reader->getGridMaxRow()) {}
+                    maxGridCol(reader->getGridMaxCol()), maxGridRow(reader->getGridMaxRow()), blendingMethod(blendingMethod) {}
 
     /**
      * Generate a pyramid base level tile at a specific coordinates.
@@ -168,14 +171,18 @@ public:
 //                                    std::cout << "overwriting at index " << index1D << " old value : " << tile[index1D] << " with value : " << val << std:: endl;
 //                                }
 
-                                //TODO Inject blending strategy. This is for max.
-                                if (val > tile[index1D]) {
-                                    tile[index1D] = val;
+                                //TODO Rather inject a blending strategy?
+                                switch(blendingMethod) {
+                                    case BlendingMethod::MAX:
+                                        if (val > tile[index1D]) {
+                                            tile[index1D] = val;
+                                        }
+                                        break;
+                                    case BlendingMethod::OVERLAY:
+                                    default:
+                                        tile[index1D] = val;
+                                        break;
                                 }
-
-                                //TODO Inject blending strategy. This is for overlay.
-//                                tile[index1D] = val;
-
                             }
                         } //DONE copying the relevant portion of one tile of the FOV in this pyramid tile
 
@@ -184,12 +191,17 @@ public:
                     }
                 } //DONE copying the relevant portion of the FOV in this pyramid tile
 
-                if(col == 16){
-                    cv::Mat image(pyramidTileHeight, pyramidTileWidth, CV_8UC1, tile);
-                    std::string fullImagePath = "/home/gerardin/Documents/pyramidBuilding/cmake-build-debug/debugBaseTile/" + std::to_string(col) + "_" + std::to_string(row) + "_" + std::to_string(counter) + ".png";
-                    cv::imwrite(fullImagePath, image);
-                    ++counter;
-                }
+
+                //TODO REMOVE. FOR DEBUGGING MIST DATASET
+//            if(col == 16){
+//            if(! filesystem::exists(filesystem::current_path() / "debugBaseTile")) {
+//                filesystem::create_directory(filesystem::current_path() / "debugBaseTile");
+//            }
+//                    cv::Mat image(pyramidTileHeight, pyramidTileWidth, CV_8UC1, tile);
+//                    std::string fullImagePath = "/home/gerardin/Documents/pyramidBuilding/cmake-build-debug/debugBaseTile/" + std::to_string(col) + "_" + std::to_string(row) + "_" + std::to_string(counter) + ".png";
+//                    cv::imwrite(fullImagePath, image);
+//                    ++counter;
+//                }
 
                 //TODO CHECK we should eventually cache the fast image instances since they are used for each overlap.
                 //depending on the overlap factor, some performance should be expected.
@@ -213,6 +225,7 @@ private:
     const size_t fullFovHeight;
     const size_t maxGridRow;
     const size_t maxGridCol;
+    const BlendingMethod blendingMethod;
 
 
 };

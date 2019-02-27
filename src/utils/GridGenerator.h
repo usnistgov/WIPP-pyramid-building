@@ -21,6 +21,7 @@
 #include <map>
 
 #include "../data/PartialFov.h"
+#include "../api/Datatype.h"
 #include <assert.h>
 
 //TODO CHECK Following the previous Java implementation, we expect all FOVs to have the same size and the same tile size.
@@ -244,18 +245,6 @@ public:
         return fullFovHeight;
     }
 
-//    //TODO CHECK since we generate square tiles, we might add an extra padding on the right.
-//    //This method account for this.
-//    size_t getPyramidBaseWidth() const {
-//        return (gridMaxCol + 1) * pyramidTileSize;
-//    }
-//
-//    //TODO CHECK since we generate square tiles, we might add an extra padding at the bottom.
-//    //This method account for this.
-//    size_t getPyramidBaseHeight() const {
-//        return (gridMaxRow + 1) * pyramidTileSize;
-//    }
-
     size_t getGridMaxRow() const {
         return gridMaxRow;
     }
@@ -263,7 +252,6 @@ public:
     size_t getGridMaxCol() const {
         return gridMaxCol;
     }
-
 
     const std::string &getImageDirectoryPath() const {
         return imageDirectoryPath;

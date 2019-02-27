@@ -22,6 +22,11 @@ find_package(OpenCV 3 REQUIRED)
 link_libraries(${OpenCV_LIBRARIES})
 message("OpenCV Version: ${OpenCV_VERSION}")
 
+
+link_libraries(stdc++fs)
+message("Linking C++17 experimental filesystem library")
+
+
 add_definitions(-DPROFILE)
 
 add_subdirectory(src)
@@ -35,6 +40,5 @@ add_executable(stitching testStitchingVectorParser.cpp ${ALL_SRCS} ${SOURCES})
 add_executable(libtiff testLibtiff.cpp ${ALL_SRCS} ${SOURCES})
 add_executable(pyramidBuilding testPyramidBuilding.cpp ${ALL_SRCS} ${SOURCES})
 add_executable(pyramidBuildingCLITest PyramidBuildingCLITest.cpp ${ALL_SRCS} ${SOURCES})
-
 
 
