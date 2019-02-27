@@ -37,8 +37,6 @@
 #include <string>
 #include <sstream>
 
-typedef uint16_t px_t;
-
 //HTGS Graph
 //Create tileRequest
 //Task1 : (BlockRequest, Tile) base level tile generation : generate individual pyramid tiles
@@ -102,6 +100,14 @@ public:
             Options::overlap = overlap;
         }
 
+        ImageDepth getDepth() const {
+            return depth;
+        }
+
+        void setDepth(ImageDepth depth) {
+            Options::depth = depth;
+        }
+
     private:
 
         uint32_t _tilesize = 256;
@@ -110,12 +116,27 @@ public:
         BlendingMethod blendingMethod = BlendingMethod::MAX;
         std::string pyramidName = "output";
         uint32_t overlap = 0;
+        ImageDepth depth = ImageDepth::_16U;
 
     };
 
     PyramidBuilding(std::string inputDirectory, std::string stitching_vector, Options* options) : _inputDir(inputDirectory), _inputVector(stitching_vector), options(options) {};
 
-    void build(){
+    void build() {
+
+        switch (this->options->getDepth()) {
+            case ImageDepth::_8U:
+                _build<uint8_t>();
+                break;
+            case ImageDepth::_16U:
+            default:
+                _build<uint16_t>();
+        };
+    }
+
+
+    template<typename px_t>
+    void _build(){
 
         size_t nbThreadsPerTask = 10;
 
@@ -160,7 +181,7 @@ public:
         htgs::ITask< Tile<px_t>, Tile<px_t>> *writeTask = nullptr;
 
         if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
-            writeTask = new WriteDeepZoomTileTask<px_t>(nbThreadsPerTask, pyramidName + "_files", deepZoomLevel);
+            writeTask = new WriteDeepZoomTileTask<px_t>(nbThreadsPerTask, pyramidName + "_files", deepZoomLevel, this->options->getDepth());
         }
         graph->setGraphConsumerTask(baseTileTask);
 
@@ -175,7 +196,7 @@ public:
         // If large latency in write, it could be worthwhile. Otherwise thread management will dominate.
         if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
             auto deepzoomDownsamplingRule = new DeepZoomDownsamplingRule<px_t>(numTileCol, numTileRow, deepZoomLevel,
-                                                                               pyramidName + "_files");
+                                                                               pyramidName + "_files", this->options->getDepth());
             graph->addRuleEdge(bookkeeper, deepzoomDownsamplingRule,
                                writeTask); //generating extra tiles up to 1x1 pixel to satisfy deepzoom format
         }

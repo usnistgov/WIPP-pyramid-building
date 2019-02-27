@@ -19,7 +19,8 @@ template <class T>
 class DeepZoomDownsamplingRule : public htgs::IRule<Tile<T>, Tile<T>> {
 
 public:
-    DeepZoomDownsamplingRule(size_t numTileCol, size_t numTileRow, int maxDeepZoomLevel, const std::string &_pathOut) :  numTileCol(numTileCol), numTileRow(numTileRow), maxDeepZoomLevel(maxDeepZoomLevel), _pathOut(_pathOut) {
+    DeepZoomDownsamplingRule(size_t numTileCol, size_t numTileRow, int maxDeepZoomLevel, const std::string &_pathOut, ImageDepth imageDepth) :
+    numTileCol(numTileCol), numTileRow(numTileRow), maxDeepZoomLevel(maxDeepZoomLevel), _pathOut(_pathOut), imageDepth(imageDepth) {
 
         //calculate pyramid depth
         auto maxDim = std::max(numTileCol,numTileRow);
@@ -65,11 +66,24 @@ public:
 
                 auto outputFilename =  std::to_string(data->getCol()) + "_" + std::to_string(data->getRow()) + ".png";
                 auto fullImagePath = dirPath / outputFilename;
-                //TODO CHECK how this can vary with the template
-                //TODO CHECK how opencv deals with the input array
-                cv::Mat image(height, width, CV_16U, newTileData);
-                cv::imwrite(fullImagePath.string(), image);
-                image.release();
+
+
+                //TODO CHECK how to clean up? Plus need to be factored
+                switch(imageDepth){
+                    case ImageDepth::_16U : {
+                        cv::Mat image(height, width, CV_16U, newTileData);
+                        cv::imwrite(fullImagePath.string(), image);
+                        image.release();
+                        break;
+                    }
+                    case ImageDepth::_8U : {
+                        cv::Mat image(height, width, CV_8U, newTileData);
+                        cv::imwrite(fullImagePath.string(), image);
+                        image.release();
+                        break;
+                    }
+                }
+
             }
 
             done = true;
@@ -156,6 +170,7 @@ private:
     int maxDeepZoomLevel = 0;
     bool done = false;
     const std::string _pathOut;
+    ImageDepth imageDepth;
 
 
 

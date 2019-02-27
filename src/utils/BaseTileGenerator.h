@@ -63,6 +63,8 @@ public:
 
         auto it = grid.find(index);
 
+
+
         //Dealing with corner case.
         //It should never happen with real data, but we might have missing tiles or have so much overlap between FOVs that
         //some gap appears in the image. If this is the case, we generate an empty tile.

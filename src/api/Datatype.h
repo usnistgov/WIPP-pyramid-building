@@ -19,4 +19,10 @@ enum class BlendingMethod {
     MAX
 };
 
+enum class ImageDepth {
+    _8U,
+    _16U,
+};
+
+
 #endif //PYRAMIDBUILDING_DATATYPE_H

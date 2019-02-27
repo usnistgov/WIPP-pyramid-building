@@ -20,6 +20,18 @@ bool hasEnding (std::string const &fullString, std::string const &ending) {
     }
 }
 
+ImageDepth parseImageDepth(const std::string depth) {
+    if (depth == "16U") {
+        return ImageDepth::_16U;
+    }
+    else if(depth == "8U"){
+        return ImageDepth::_8U;
+    }
+    else {
+        throw TCLAP::ArgException("image depth not recognized. Should  be one of : 8U, 16U");
+    }
+}
+
 int pyramidBuilding(int argc, const char** argv)
 {
 
@@ -39,6 +51,9 @@ int pyramidBuilding(int argc, const char** argv)
         TCLAP::ValueArg<std::string> nameArg("n","name","Pyramid Name",false,"output","string");
         cmd.add( nameArg );
 
+        TCLAP::ValueArg<std::string> depthArg("d","depth","Image Depth",false,"16U", "string");
+        cmd.add( depthArg );
+
         //TODO CHECK. unused. Check best way to handle different format. PyramidBuilding expects DeepZoom.
         TCLAP::ValueArg<std::string> formatArg("f","format","Image Format",false,"png","string");
         cmd.add( formatArg );
@@ -49,6 +64,7 @@ int pyramidBuilding(int argc, const char** argv)
         std::string inputVector = inputVectorArg.getValue();
         std::string pyramidName = nameArg.getValue();
         std::string format = formatArg.getValue();
+        std::string depth = depthArg.getValue();
         //TODO check if TCLAP accept uint32_t
         uint32_t tilesize = tilesizeArg.getValue();
 
@@ -61,6 +77,10 @@ int pyramidBuilding(int argc, const char** argv)
         std::cout << tilesizeArg.getDescription() << ": "  << tilesize << std::endl;
         std::cout << nameArg.getDescription() << ": " << pyramidName << std::endl;
         std::cout << formatArg.getDescription() << ": " << format << std::endl;
+        std::cout << depthArg.getDescription() << ": " << depth << std::endl;
+
+        ImageDepth d = parseImageDepth(depth);
+
 
         auto *options = new PyramidBuilding::Options();
         options->setTilesize(tilesize);
@@ -69,6 +89,9 @@ int pyramidBuilding(int argc, const char** argv)
         options->setPyramidFormat(PyramidFormat::DEEPZOOM);
         options->setDownsamplingType(DownsamplingType::NEIGHBORS_AVERAGE);
         options->setBlendingMethod(BlendingMethod::MAX);
+        options->setDepth(d);
+
+
         auto builder = new PyramidBuilding(inputDir,inputVector,options);
         builder->build();
 

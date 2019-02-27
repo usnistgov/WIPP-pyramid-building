@@ -37,7 +37,7 @@ set(SOURCES src/api/PyramidBuilding.h src/api/CommandLineCli.h src/utils/Helper.
 
 #add_executable(old main.cpp ${ALL_SRCS} ${SOURCES})
 add_executable(stitching testStitchingVectorParser.cpp ${ALL_SRCS} ${SOURCES})
-add_executable(libtiff testLibtiff.cpp ${ALL_SRCS} ${SOURCES})
+add_executable(libtiff testLibtiff.cpp ${ALL_SRCS} ${SOURCES} src/utils/StitchedFOVTileLoader.h)
 add_executable(pyramidBuilding testPyramidBuilding.cpp ${ALL_SRCS} ${SOURCES})
 add_executable(pyramidBuildingCLITest PyramidBuildingCLITest.cpp ${ALL_SRCS} ${SOURCES})
 
