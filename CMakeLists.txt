@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 #TODO Set this flag only in debug
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pedantic -Wno-reorder -Wno-unused-parameter -ansi" )
 
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(TIFF_INCLUDE_DIR /usr/lib)
 
@@ -22,10 +23,12 @@ find_package(OpenCV 3 REQUIRED)
 link_libraries(${OpenCV_LIBRARIES})
 message("OpenCV Version: ${OpenCV_VERSION}")
 
-
-link_libraries(stdc++fs)
-message("Linking C++17 experimental filesystem library")
-
+if(APPLE)
+    link_directories(/usr/local/Cellar/llvm/7.0.1/lib/)
+    link_libraries(c++fs)
+else(APPLE)
+    link_libraries(stdc++fs)
+endif(APPLE)
 
 add_definitions(-DPROFILE)
 
@@ -35,10 +38,7 @@ add_subdirectory(test)
 set(ALL_SRCS CACHE INTERNAL "sources" FORCE)
 set(SOURCES src/api/PyramidBuilding.h src/api/CommandLineCli.h src/utils/Helper.cpp src/data/BlockType.cpp src/rules/PyramidRule.h src/tasks/WriteTileTask.h src/utils/SingleTiledTiffWriter.h src/tasks/Write32UTiffTileWriter.h src/tasks/WriteDeepZoomTileTask.h src/rules/DeepZoomDownsamplingRule.h)
 
-#add_executable(old main.cpp ${ALL_SRCS} ${SOURCES})
 add_executable(stitching testStitchingVectorParser.cpp ${ALL_SRCS} ${SOURCES})
 add_executable(libtiff testLibtiff.cpp ${ALL_SRCS} ${SOURCES} src/utils/StitchedFOVTileLoader.h)
 add_executable(pyramidBuilding testPyramidBuilding.cpp ${ALL_SRCS} ${SOURCES})
 add_executable(pyramidBuildingCLITest PyramidBuildingCLITest.cpp ${ALL_SRCS} ${SOURCES})
-
-

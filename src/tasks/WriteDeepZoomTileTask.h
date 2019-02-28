@@ -15,6 +15,11 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include "WriteTileTask.h"
+#include "../api/Datatype.h"
+
+#include <experimental/filesystem>
+
+using namespace std::experimental;
 
 template <class T>
 class WriteDeepZoomTileTask : public htgs::ITask< Tile<T>, Tile<T> > {

@@ -11,9 +11,9 @@
 int main(int argc, const char** argv)
 {
 
-    //    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset1/stitching_vector/img-global-positions-1.txt";
-    //    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset1/tiled-images/";
-
+        std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset1/stitching_vector/img-global-positions-1.txt";
+        std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset1/tiled-images/";
+        uint32_t tilesize = 256;
 
 //    std::string vector = "/home/gerardin/Documents/pyramidBuilding/resources/dataset1/stitching_vector/img-global-positions-1.txt";
 //    std::string directory = "/home/gerardin/Documents/pyramidBuilding/resources/dataset1/tiled-images/";
@@ -31,9 +31,9 @@ int main(int argc, const char** argv)
 //    std::string directory = "/home/gerardin/Documents/images/dataset4/images/";
 //    uint32_t tilesize = 16;
 
-    std::string vector = "/home/gerardin/Documents/images/dataset5_big/img-global-positions-1.txt";
-    std::string directory = "/home/gerardin/Documents/images/dataset5_big/images/";
-    uint32_t tilesize = 1024;
+//    std::string vector = "/home/gerardin/Documents/images/dataset5_big/img-global-positions-1.txt";
+//    std::string directory = "/home/gerardin/Documents/images/dataset5_big/images/";
+//    uint32_t tilesize = 1024;
 
     std::string vector_option = "-v " + vector;
     std::string tilesize_option = "-t " + std::to_string(tilesize);
