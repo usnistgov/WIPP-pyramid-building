@@ -30,7 +30,7 @@
 #include "../data/TileRequest.h"
 #include "../utils/SingleTiledTiffWriter.h"
 #include "../utils/GridGenerator.h"
-#include "../utils/BaseTileGenerator.h"
+#include "../utils/BaseTileGeneratorSmallFOV.h"
 #include "../tasks/WriteDeepZoomTileTask.h"
 #include "../rules/DeepZoomDownsamplingRule.h"
 #include "./Datatype.h"
@@ -138,7 +138,7 @@ public:
     template<typename px_t>
     void _build(){
 
-        size_t nbThreadsPerTask = 10;
+        size_t nbThreadsPerTask = 1;
 
         auto begin = std::chrono::high_resolution_clock::now();
 
@@ -167,7 +167,7 @@ public:
 
         auto graph = new htgs::TaskGraphConf<TileRequest, Tile<px_t>>();
 
-        auto generator = new BaseTileGenerator<px_t>(gridGenerator, BlendingMethod::MAX);
+        auto generator = new BaseTileGeneratorSmallFOV<px_t>(gridGenerator, this->options->getBlendingMethod());
         auto baseTileTask = new BaseTileTask<px_t>(nbThreadsPerTask, generator);
 
         auto bookkeeper = new htgs::Bookkeeper<Tile<px_t>>();

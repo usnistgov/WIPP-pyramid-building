@@ -8,14 +8,14 @@
 #include <htgs/api/ITask.hpp>
 #include "../data/BlockRequest.h"
 #include "../data/TileRequest.h"
-#include "../utils/BaseTileGenerator.h"
+#include "../utils/BaseTileGeneratorSmallFOV.h"
 
 template <class T>
 class BaseTileTask : public htgs::ITask<TileRequest , Tile<T>> {
 
 public:
 
-    BaseTileTask(size_t numThreads, BaseTileGenerator<T> *generator) : htgs::ITask<TileRequest , Tile<T>>(numThreads), generator(generator) {}
+    BaseTileTask(size_t numThreads, BaseTileGeneratorSmallFOV<T> *generator) : htgs::ITask<TileRequest , Tile<T>>(numThreads), generator(generator) {}
 
     void executeTask(std::shared_ptr<TileRequest> data) override {
         size_t i= data.get()->getRow();
@@ -35,7 +35,7 @@ public:
 
 private:
 
-    BaseTileGenerator<T>* generator;
+    BaseTileGeneratorSmallFOV<T>* generator;
 
 
 
