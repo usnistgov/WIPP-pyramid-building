@@ -53,52 +53,57 @@ int main()
 
     if (tif) {
 
+        uint32_t roi_x = 500;
+        uint32_t roi_y = 500;
+        uint32_t roi_width = 200;
+        uint32_t roi_height = 500;
+
         auto begin = std::chrono::high_resolution_clock::now();
 
         tdata_t buf;
         uint32_t tileSize =TIFFTileSize(tif);
         buf = _TIFFmalloc(tileSize);
 
-        for (tileY = 0; tileY < height; tileY += tileHeight){
-            for (tileX = 0; tileX < width; tileX += tileWidth) {
-                TIFFReadTile(tif, buf, tileX, tileY, 0, 0);
-                for (uint32_t row = 0; row < tileHeight; ++row) {
-                    for (uint32_t col = 0; col < tileWidth; ++col) {
-                        //  std::copy_n((int8_t *) buf, tileWidth * tileHeight, region + tileY * tileWidth);
-                      //  std::cout << std::setw(5) << (uint32_t)((uint8_t*)buf)[row * tileWidth + col] << " ";
-                        uint32_t y = tileY + row;
-                        uint32_t x = tileX + col;
-                        uint32_t index = y * width + (tileX + col);
-                        uint8_t value = ((uint8_t*)buf)[row * tileWidth + col];
-                 //       std::cout << index << ":" << (uint32_t)  value << std::endl;
-                        if(y<height && x < width) { //those values are not defined for tiles at the border (tile's dimensions are fixed).
-                            region[index] = value;
-                        }
-                    }
-                    std::cout << "\n";
-                }
-                std::cout << std::endl;
-            }
-        }
-
-
-
-//
-//        for (tileY = 0; tileY < height; tileY += tileHeight){
-//            for (tileX = 0; tileX < width; tileX += tileWidth) {
-//
+//        for (tileY = roi_y; tileY < roi_y + roi_height; tileY += tileHeight){
+//            for (tileX = roi_x; tileX < roi_x + roi_width; tileX += tileWidth) {
 //                TIFFReadTile(tif, buf, tileX, tileY, 0, 0);
-//
 //                for (uint32_t row = 0; row < tileHeight; ++row) {
-//                    uint32_t y = tileY + row;
-//                    if(y>=height){
-//                        break;
+//                    for (uint32_t col = 0; col < tileWidth; ++col) {
+//                        //  std::copy_n((int8_t *) buf, tileWidth * tileHeight, region + tileY * tileWidth);
+//                      //  std::cout << std::setw(5) << (uint32_t)((uint8_t*)buf)[row * tileWidth + col] << " ";
+//                        uint32_t y = tileY + row;
+//                        uint32_t x = tileX + col;
+//                        uint32_t index = y * width + (tileX + col);
+//                        uint8_t value = ((uint8_t*)buf)[row * tileWidth + col];
+//                 //       std::cout << index << ":" << (uint32_t)  value << std::endl;
+//                        if(y<height && x < width) { //those values are not defined for tiles at the border (tile's dimensions are fixed).
+//                            region[index] = value;
+//                        }
 //                    }
-//                    std::copy_n((int8_t *) buf + row * tileWidth, tileWidth, region + (tileY + row) * width + tileX);
+//                    std::cout << "\n";
 //                }
 //                std::cout << std::endl;
 //            }
 //        }
+
+
+
+
+        for (tileY = roi_y; tileY < roi_y + roi_height; tileY += tileHeight){
+            for (tileX = roi_x; tileX < roi_x + roi_width; tileX += tileWidth) {
+
+                TIFFReadTile(tif, buf, tileX, tileY, 0, 0);
+
+                for (uint32_t row = 0; row < tileHeight; ++row) {
+                    uint32_t y = tileY + row;
+                    if(y>=height){
+                        break;
+                    }
+                    std::copy_n((int8_t *) buf + row * tileWidth, tileWidth, region + (tileY + row) * width + tileX);
+                }
+                std::cout << std::endl;
+            }
+        }
 
         _TIFFfree(buf);
         TIFFClose(tif);

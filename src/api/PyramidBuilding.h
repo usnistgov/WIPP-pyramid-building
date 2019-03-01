@@ -30,7 +30,7 @@
 #include "../data/TileRequest.h"
 #include "../utils/SingleTiledTiffWriter.h"
 #include "../utils/GridGenerator.h"
-#include "../utils/BaseTileGeneratorSmallFOV.h"
+#include "../utils/BaseTileGenerator.h"
 #include "../tasks/WriteDeepZoomTileTask.h"
 #include "../rules/DeepZoomDownsamplingRule.h"
 #include "./Datatype.h"
@@ -167,7 +167,7 @@ public:
 
         auto graph = new htgs::TaskGraphConf<TileRequest, Tile<px_t>>();
 
-        auto generator = new BaseTileGeneratorSmallFOV<px_t>(gridGenerator, this->options->getBlendingMethod());
+        auto generator = new BaseTileGenerator<px_t>(gridGenerator, this->options->getBlendingMethod());
         auto baseTileTask = new BaseTileTask<px_t>(nbThreadsPerTask, generator);
 
         auto bookkeeper = new htgs::Bookkeeper<Tile<px_t>>();
