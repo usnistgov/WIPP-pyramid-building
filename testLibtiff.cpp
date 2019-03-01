@@ -49,18 +49,22 @@ int main()
     //https://www.awaresystems.be/imaging/tiff/tifftags/sampleformat.html
     uint8_t *region = new uint8_t[ width * height ]();
 
+
+
     if (tif) {
+
+        auto begin = std::chrono::high_resolution_clock::now();
+
         tdata_t buf;
         uint32_t tileSize =TIFFTileSize(tif);
         buf = _TIFFmalloc(tileSize);
-//        for (tile = 0; tile < TIFFNumberOfTiles(tif); tile++) {
-//            TIFFReadEncodedTile(tif, tile, buf, (tsize_t) -1);
+
         for (tileY = 0; tileY < height; tileY += tileHeight){
             for (tileX = 0; tileX < width; tileX += tileWidth) {
                 TIFFReadTile(tif, buf, tileX, tileY, 0, 0);
-              //  std::copy_n((int8_t *) buf, tileWidth * tileHeight, region + tileY * tileWidth);
                 for (uint32_t row = 0; row < tileHeight; ++row) {
                     for (uint32_t col = 0; col < tileWidth; ++col) {
+                        //  std::copy_n((int8_t *) buf, tileWidth * tileHeight, region + tileY * tileWidth);
                       //  std::cout << std::setw(5) << (uint32_t)((uint8_t*)buf)[row * tileWidth + col] << " ";
                         uint32_t y = tileY + row;
                         uint32_t x = tileX + col;
@@ -77,13 +81,40 @@ int main()
             }
         }
 
+
+
+//
+//        for (tileY = 0; tileY < height; tileY += tileHeight){
+//            for (tileX = 0; tileX < width; tileX += tileWidth) {
+//
+//                TIFFReadTile(tif, buf, tileX, tileY, 0, 0);
+//
+//                for (uint32_t row = 0; row < tileHeight; ++row) {
+//                    uint32_t y = tileY + row;
+//                    if(y>=height){
+//                        break;
+//                    }
+//                    std::copy_n((int8_t *) buf + row * tileWidth, tileWidth, region + (tileY + row) * width + tileX);
+//                }
+//                std::cout << std::endl;
+//            }
+//        }
+
         _TIFFfree(buf);
         TIFFClose(tif);
 
         cv::Mat image(height, width, CV_8U, region);
         std::string fullImagePath = (filesystem::current_path() / "testLibTiff" / "output").string() + ".png";
         cv::imwrite(fullImagePath, image);
+
+        auto end = std::chrono::high_resolution_clock::now();
+        double diskDuration = (std::chrono::duration_cast<std::chrono::nanoseconds>(
+                end - begin).count());
+
+        std::cout << "array copy time : " << diskDuration;
     }
+
+
 
     return 0;
 }
