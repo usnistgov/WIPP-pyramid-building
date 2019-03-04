@@ -27,6 +27,10 @@ int main(int argc, const char** argv)
 //    std::string directory = "/home/gerardin/Documents/pyramidBuilding/resources/dataset03/images/";
 //    uint32_t tilesize = 256;
 
+//    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset03/stitching_vector/img-global-positions-1.txt";
+//        std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset03/images/";
+//        uint32_t tilesize = 512;
+
 //    std::string vector = "/home/gerardin/Documents/images/dataset4/img-global-positions-1.txt";
 //    std::string directory = "/home/gerardin/Documents/images/dataset4/images/";
 //    uint32_t tilesize = 16;

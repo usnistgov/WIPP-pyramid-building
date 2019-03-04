@@ -2,8 +2,8 @@
 // Created by Gerardin, Antoine D. (Assoc) on 1/19/19.
 //
 
-#ifndef PYRAMIDBUILDING_BASETILEGENERATORSMALLFOV_H
-#define PYRAMIDBUILDING_BASETILEGENERATORSMALLFOV_H
+#ifndef PYRAMIDBUILDING_BASETILEGENERATORFASTIMAGE_H
+#define PYRAMIDBUILDING_BASETILEGENERATORFASTIMAGE_H
 
 #include <string>
 #include <iostream>
@@ -32,7 +32,7 @@ using namespace std::experimental;
  * We can then used this information to generate each tile.
  */
 template <class T>
-class BaseTileGeneratorSmallFOV {
+class BaseTileGeneratorFastImage {
 
 public:
 
@@ -40,7 +40,7 @@ public:
      * The pyramid base level tile generator needs information on the general structure of the full FOVs.
      * @param reader the MistStitchedImageReader that contains information on partial FOV overlaps.
      */
-    BaseTileGeneratorSmallFOV(GridGenerator *reader, BlendingMethod blendingMethod): grid(reader->getGrid()), directory(reader->getImageDirectoryPath()), tileWidth(
+    BaseTileGeneratorFastImage(GridGenerator *reader, BlendingMethod blendingMethod): grid(reader->getGrid()), directory(reader->getImageDirectoryPath()), tileWidth(
             reader->getFovTileWidth()), tileHeight(reader->getFovTileHeight()), pyramidTileSize(reader->getPyramidTileSize()),
                     fullFovWidth(reader->getFullFovWidth()), fullFovHeight(reader->getFullFovHeight()),
                     maxGridCol(reader->getGridMaxCol()), maxGridRow(reader->getGridMaxRow()), blendingMethod(blendingMethod) {}
@@ -232,4 +232,4 @@ private:
 
 };
 
-#endif //PYRAMIDBUILDING_BASETILEGENERATORSMALLFOV_H
+#endif //PYRAMIDBUILDING_BASETILEGENERATORFASTIMAGE_H
