@@ -195,13 +195,13 @@ private:
             TIFFClose(_tiff);
         }
 
-        if(! filesystem::exists(filesystem::current_path() / "debugSimpleTile")) {
-            filesystem::create_directory(filesystem::current_path() / "debugSimpleTile");
-        }
-        cv::Mat image(_FOVHeight, _FOVWidth, CV_16UC1, region);
-        counter++;
-        std::string fullImagePath = filesystem::current_path().string() +  "/debugSimpleTile/" + std::to_string(counter) + ".png";
-        cv::imwrite(fullImagePath, image);
+//        if(! filesystem::exists(filesystem::current_path() / "debugSimpleTile")) {
+//            filesystem::create_directory(filesystem::current_path() / "debugSimpleTile");
+//        }
+//        cv::Mat image(_FOVHeight, _FOVWidth, CV_16UC1, region);
+//     //   counter++;
+//        std::string fullImagePath = filesystem::current_path().string() +  "/debugSimpleTile/" + std::to_string(counter) + ".png";
+//        cv::imwrite(fullImagePath, image);
 
         return region;
 
