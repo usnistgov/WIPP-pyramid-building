@@ -138,7 +138,7 @@ public:
     template<typename px_t>
     void _build(){
 
-        size_t nbThreadsPerTask = 1;
+        size_t nbThreadsPerTask = 2;
 
         auto begin = std::chrono::high_resolution_clock::now();
 

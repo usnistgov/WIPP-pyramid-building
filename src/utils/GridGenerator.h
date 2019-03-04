@@ -53,6 +53,8 @@ private:
     size_t gridMaxRow = 0;
     size_t gridMaxCol = 0;
 
+    std::map<std::string, uint32_t> cache;
+
 
 
 public:
@@ -147,6 +149,9 @@ public:
             endCol = (fovGlobalX + fovWidth - 1) / tileSize; // -1 because we need the pixel col index
             endRow = (fovGlobalY + fovHeight - 1) / tileSize;
 
+            uint32_t count = ((endCol - startCol) + 1) * (endRow - startRow + 1);
+            cache.insert({file, count});
+
             //compute overlap between an FOV and each pyramid tile.
 
             for(size_t j = startRow; j <= endRow ; j++) {
@@ -173,7 +178,7 @@ public:
                     fovRelativeY = intersection.y - fovGlobalY;
                     cv::Rect overlapInFovRef = cv::Rect(fovRelativeX, fovRelativeY, intersection.width, intersection.height);
 
-                    auto *partialFov = new PartialFov(file, fovGlobalX,fovGlobalY, overlapInTileRef, intersection, overlapInFovRef);
+                    auto *partialFov = new PartialFov(file, fovGlobalX,fovGlobalY, overlapInTileRef, intersection, overlapInFovRef, count);
 
                     assert(overlapInTileRef.width == overlapInFovRef.width);
                     assert(overlapInTileRef.height == overlapInFovRef.height);
@@ -261,6 +266,9 @@ public:
         return pyramidTileSize;
     }
 
+    const std::map<std::string, uint32_t> &getCache() const {
+        return cache;
+    }
 
 
 };

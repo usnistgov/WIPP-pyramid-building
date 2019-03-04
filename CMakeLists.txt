@@ -35,7 +35,7 @@ add_definitions(-DPROFILE)
 add_subdirectory(src)
 add_subdirectory(test)
 
-set(ALL_SRCS CACHE INTERNAL "sources" FORCE)
+#set(ALL_SRCS CACHE INTERNAL "sources" FORCE)
 set(SOURCES src/api/PyramidBuilding.h src/api/CommandLineCli.h src/utils/Helper.cpp src/data/BlockType.cpp src/rules/PyramidRule.h src/tasks/WriteTileTask.h src/utils/SingleTiledTiffWriter.h src/tasks/Write32UTiffTileWriter.h src/tasks/WriteDeepZoomTileTask.h src/rules/DeepZoomDownsamplingRule.h)
 
 add_executable(stitching testStitchingVectorParser.cpp ${ALL_SRCS} ${SOURCES})

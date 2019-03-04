@@ -18,6 +18,7 @@
 #include "../data/Tile.h"
 #include "../api/Datatype.h"
 #include <experimental/filesystem>
+#include "FOVCache.h"
 
 #define DEBUG(x) do { std::cerr << x << std::endl; } while (0)
 
@@ -43,7 +44,9 @@ public:
     BaseTileGenerator(GridGenerator *reader, BlendingMethod blendingMethod): grid(reader->getGrid()), directory(reader->getImageDirectoryPath()), tileWidth(
             reader->getFovTileWidth()), tileHeight(reader->getFovTileHeight()), pyramidTileSize(reader->getPyramidTileSize()),
                     fullFovWidth(reader->getFullFovWidth()), fullFovHeight(reader->getFullFovHeight()),
-                    maxGridCol(reader->getGridMaxCol()), maxGridRow(reader->getGridMaxRow()), blendingMethod(blendingMethod) {}
+                    maxGridCol(reader->getGridMaxCol()), maxGridRow(reader->getGridMaxRow()), blendingMethod(blendingMethod) {
+        fovsCache = new FOVCache<T>(reader->getImageDirectoryPath(), reader->getCache());
+    }
 
     /**
      * Generate a pyramid base level tile at a specific coordinates.
@@ -102,11 +105,21 @@ public:
                 //nb of tiles to load - we load all tiles in parallel
                 auto nbOfTileToLoad = (endCol - startCol + 1) * (endRow - startRow + 1);
 
-                fi::ATileLoader<T> *tileLoader = new fi::GrayscaleTiffTileLoader<T>(directory + filename, 1);
+                fi::FastImage<T> *fi = fovsCache->getFOVReader(filename);
+                std::cout << "Fast Image Get: " << fi << std::endl;
 
-                auto *fi = new fi::FastImage<T>(tileLoader, 0);
-                fi->getFastImageOptions()->setNumberOfViewParallel(nbOfTileToLoad);
-                fi->configureAndRun();
+//                auto it = fovsCache.find(filename);
+
+//                if(it == fovsCache.end()) {
+//                    fi::ATileLoader<T> *tileLoader = new fi::GrayscaleTiffTileLoader<T>(directory + filename, 1);
+//                    fi = new fi::FastImage<T>(tileLoader, 0);
+//                    fi->getFastImageOptions()->setNumberOfViewParallel(nbOfTileToLoad);
+//                    fi->configureAndRun();
+//                    fovsCache[filename] = fi;
+//                }
+//                else{
+//                   fi = it->second;
+//                }
 
                 //request all tiles for this partial FOV
                 for(auto i=startRow; i <= endRow; i++ ){
@@ -191,8 +204,11 @@ public:
                         pview->releaseMemory();
 
                     }
+
                 } //DONE copying the relevant portion of the FOV in this pyramid tile
 
+            //auto count = --fovsUsageCount[fov->getPath()];
+              fovsCache->releaseFOVReader(fi, fov->getPath());
 
                 //TODO REMOVE. FOR DEBUGGING MIST DATASET
 //            if(col == 16){
@@ -205,9 +221,14 @@ public:
 //                    ++counter;
 //                }
 
-                //TODO CHECK we should eventually cache the fast image instances since they are used for each overlap.
-                //depending on the overlap factor, some performance should be expected.
-                delete fi;
+//            if(count == 0) {
+//                //TODO CHECK we should eventually cache the fast image instances since they are used for each overlap.
+//                //depending on the overlap factor, some performance should be expected.
+//                std::cout << "delete " << fov->getPath() << std::endl;
+//      //          delete fi;
+//            }
+
+
 
         } //DONE generating the pyramid tile
 
@@ -217,7 +238,7 @@ public:
     }
 
 private:
-
+    FOVCache<T> *fovsCache;
     const std::map<std::pair<size_t, size_t>, std::vector<PartialFov *>> grid;
     const std::string directory;
     const size_t tileWidth;
