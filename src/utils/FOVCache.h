@@ -103,17 +103,18 @@ private:
 
         for (uint32_t row = 0; row < rowMax - rowMin; ++row) {
             for (uint32_t col = 0; col < colMax - colMin; ++col) {
-                dest[(rowMin + row) * _tileWidth + (colMin + col)] =
+                dest[(rowMin + row) * _FOVWidth + (colMin + col)] =
                         (T) ((FileType *) (src))[row * _tileWidth + col];
             }
         }
     }
 
-    void loadPartAndCastFOV(T *region, tdata_t buf, uint32_t rowMin, uint32_t colMin) {
+    void loadPartAndCastFOV(T *region, tdata_t buf, uint32_t rowMin, uint32_t
+    colMin) {
         TIFFReadTile(_tiff,
                      buf,
-                     rowMin,
                      colMin,
+                     rowMin,
                      0,
                      0);
         switch (this->_sampleFormat) {
@@ -165,8 +166,8 @@ private:
     }
 
     T* loadFullFOV(std::string filename){
-
-        auto file = (_directory + filename).c_str();
+        auto fullPath = _directory + filename;
+        auto file = fullPath.c_str();
         _tiff = TIFFOpen(file, "r");
         uint32_t samplePerPixel = 0;
         T *region = nullptr;
@@ -193,57 +194,6 @@ private:
             _TIFFfree(buf);
             TIFFClose(_tiff);
         }
-
-
-
-//            uint32_t roi_x = 0;
-//            uint32_t roi_y = 0;
-//            uint32_t roi_width = width;
-//            uint32_t roi_height = height;
-//
-//            uint32_t rowMax = 0, colMax = 0;
-//
-//            auto begin = std::chrono::high_resolution_clock::now();
-//
-//            tdata_t buf;
-//
-//            tmsize_t tileSize =TIFFTileSize(tif);
-//
-//            assert(sizeof(T) >= _bitsPerSample);
-//
-//            buf = _TIFFmalloc(tileSize);
-//            for (tileY = roi_y; tileY < roi_y + roi_height; tileY += tileHeight){
-//                for (tileX = roi_x; tileX < roi_x + roi_width; tileX += tileWidth) {
-//
-//                    TIFFReadTile(tif, buf, tileX, tileY, 0, 0);
-//
-//                    rowMax = std::min(roi_y + roi_height, height);
-//                    colMax = std::min(roi_x + roi_width, width);
-//
-//                    for(uint32_t row = 0; row < rowMax; ++row){
-//                        for(uint32_t col = 0; col < colMax; ++col) {
-//                            uint32_t index = row * tileWidth + col;
-//                            region[index] = (T) ((uint16_t *) (buf))[index];
-//                        }
-//                    }
-//
-//
-////                        for (uint32_t row = 0; row < tileHeight; ++row) {
-////                            uint32_t y = tileY + row;
-////                            if(y>=height){
-////                                break;
-////                            }
-////                            std::copy_n((T *) buf + row * tileWidth, tileWidth, region + (tileY + row) * width + tileX);
-////                        }
-////                        std::cout << std::endl;
-//                }
-//            }
-
-//            _TIFFfree(buf);
-//            TIFFClose(tif);
-//
-//        }
-
 
         if(! filesystem::exists(filesystem::current_path() / "debugSimpleTile")) {
             filesystem::create_directory(filesystem::current_path() / "debugSimpleTile");
