@@ -272,6 +272,8 @@ public:
         }
 
 
+        std::cout << "read count : " << generator->getFovsCache()->counter << std::endl;
+        std::cout << "total number of  reads necessary : " << gridGenerator->getCounter() << std::endl;
 
         std::cout << "we should be done" << std::endl;
         runtime->waitForRuntime();

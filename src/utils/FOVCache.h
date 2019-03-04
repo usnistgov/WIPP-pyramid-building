@@ -23,6 +23,10 @@ class FOVCache {
 
 public:
 
+
+    std::atomic<uint32_t> counter;
+
+
     FOVCache(std::string directory, std::map<std::string, uint32_t> fovsUsageCount) : _directory(directory), fovsUsageCount(fovsUsageCount) {};
 
     T* getFOV(std::string filename){
@@ -33,7 +37,9 @@ public:
 
         auto it = fovsCache.find(filename);
         if(it == fovsCache.end()) {
+            counter++;
             std::cout << "FOV not already loaded : " << filename << std::endl;
+
             fov = loadFullFOV(filename);
             fovsCache[filename] = fov;
         }
@@ -70,6 +76,8 @@ public:
 
 private:
 
+
+
     std::mutex lockCount;
 
     //TODO CHANGE. We are making a copy! Check how to store a reference.
@@ -80,8 +88,6 @@ private:
     std::map<std::string, T*> fovsCache;
 
     std::mutex lock;
-
-    uint32_t counter = 0;
 
     TIFF*
             _tiff;

@@ -117,6 +117,13 @@ public:
         return new Tile<T>(0, index.first,index.second, pyramidTileWidth, pyramidTileHeight, tile);
     }
 
+
+    //TODO remove for DEBUG ONLY
+    FOVCache<T> *getFovsCache() const {
+        return fovsCache;
+    }
+
+
 private:
     FOVCache<T> *fovsCache;
     const std::map<std::pair<size_t, size_t>, std::vector<PartialFov *>> grid;

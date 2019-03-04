@@ -55,6 +55,8 @@ private:
 
     std::map<std::string, uint32_t> cache;
 
+    uint32_t counter = 0;
+
 
 
 public:
@@ -151,6 +153,8 @@ public:
 
             uint32_t count = ((endCol - startCol) + 1) * (endRow - startRow + 1);
             cache.insert({file, count});
+
+            counter += count;
 
             //compute overlap between an FOV and each pyramid tile.
 
@@ -268,6 +272,10 @@ public:
 
     const std::map<std::string, uint32_t> &getCache() const {
         return cache;
+    }
+
+    uint32_t getCounter() const {
+        return counter;
     }
 
 
