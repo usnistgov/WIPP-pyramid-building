@@ -276,6 +276,8 @@ public:
         std::cout << "we should be done" << std::endl;
         runtime->waitForRuntime();
 
+        std::cout << "fast image instantiation : " << generator->getCounter() << std::endl;
+
         graph->writeDotToFile("graph", DOTGEN_FLAG_SHOW_ALL_THREADING | DOTGEN_COLOR_COMP_TIME);
 
     delete runtime;
