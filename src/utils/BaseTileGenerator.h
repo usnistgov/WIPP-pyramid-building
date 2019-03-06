@@ -105,6 +105,9 @@ public:
                 fi::ATileLoader<T> *tileLoader = new fi::GrayscaleTiffTileLoader<T>(directory + filename, 1);
 
                 auto *fi = new fi::FastImage<T>(tileLoader, 0);
+
+                fi_counter++;
+
                 fi->getFastImageOptions()->setNumberOfViewParallel(nbOfTileToLoad);
                 fi->configureAndRun();
 
@@ -216,8 +219,13 @@ public:
         return new Tile<T>(0, index.first,index.second, pyramidTileWidth, pyramidTileHeight, tile);
     }
 
+    const std::atomic<unsigned int> &getCounter() const {
+        return fi_counter;
+    }
+
 private:
 
+    std::atomic<uint32_t> fi_counter;
     const std::map<std::pair<size_t, size_t>, std::vector<PartialFov *>> grid;
     const std::string directory;
     const size_t tileWidth;
