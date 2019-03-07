@@ -8,3 +8,5 @@ cmake-build-relwithdebinfo
 VagrantFile
 .vagrant
 CMakeFiles/
+
+webapp-test/node_modules
