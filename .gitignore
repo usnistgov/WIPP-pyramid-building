@@ -7,3 +7,5 @@ cmake-build-release
 VagrantFile
 .vagrant
 CMakeFiles/
+
+webapp-test/node_modules

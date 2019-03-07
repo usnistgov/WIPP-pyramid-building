@@ -48,4 +48,16 @@ How do we deal with variability of inputs since we use templates? In production 
 
 ##### Check if need overlap? 
 
-##### Support for non tiled images? (From big dataset)
+##### Support for non tiled images? (from big dataset)
+
+=======
+
+## Next Steps
+
+Accurate benchmarks of memory consumption. (heap track)
+Benchmark disk access.
+Benchmark time spend in reading.
+Make sure we have the minimum amount of objects at some point in time.
+Implement overlap.
+Implement a fast image to access tile at a certain level.
+

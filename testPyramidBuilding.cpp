@@ -208,7 +208,7 @@ int main() {
     std::ostringstream oss;
     oss << "<?xml version=\"1.0\" encoding=\"utf-8\"?><Image TileSize=\"" << pyramidTileSize << "\" Overlap=\"" << overlap
     << "\" Format=\""  << format << "\" xmlns=\"http://schemas.microsoft.com/deepzoom/2008\"><Size Width=\""
-    << gridGenerator->getPyramidBaseWidth() << "\" Height=\"" << gridGenerator->getPyramidBaseHeight() << "\"/></Image>";
+    << gridGenerator->getFullFovWidth() << "\" Height=\"" << gridGenerator->getFullFovHeight() << "\"/></Image>";
 
     std::ofstream outFile;
     outFile.open(pyramidName +".dzi");
