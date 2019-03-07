@@ -96,6 +96,9 @@ public:
 
                 T* image = fovsCache->getFOV(filename);
 
+                std::cout << "fovCacheCount :  " + std::to_string(fovsCache->getCacheCount()) << std::endl;
+            std::cout << " max fovCacheCount :  " + std::to_string(fovsCache->getCacheMaxCount()) << std::endl;
+
                 auto destOffset = tileOverlap.y * pyramidTileWidth + tileOverlap.x;
 
                 for(auto x = overlapFov.x; x < overlapFov.x + overlapFov.width; x++ ){

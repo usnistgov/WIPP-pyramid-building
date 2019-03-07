@@ -23,13 +23,13 @@ class FOVCache {
 
 public:
 
-
-    std::atomic<uint32_t> counter;
+    //number of FOVs
+    std::atomic<uint32_t> readCount;
 
 
     FOVCache(std::string directory, std::map<std::string, uint32_t> fovsUsageCount) : _directory(directory), fovsUsageCount(fovsUsageCount) {};
 
-    T* getFOV(std::string filename){
+    T* getFOV(const std::string &filename){
 
         std::lock_guard<std::mutex> guard(lock);
 
@@ -37,11 +37,11 @@ public:
 
         auto it = fovsCache.find(filename);
         if(it == fovsCache.end()) {
-            counter++;
+            readCount++;
             std::cout << "FOV not already loaded : " << filename << std::endl;
-
             fov = loadFullFOV(filename);
             fovsCache[filename] = fov;
+            if(fovsCache.size() > cacheMaxCount) {cacheMaxCount = fovsCache.size();}
         }
         else{
             std::cout << "FOV already loaded : " << filename <<  std::endl;
@@ -73,10 +73,18 @@ public:
         return count;
     }
 
+    size_t getCacheCount(){
+        return fovsCache.size();
+    }
+
+    size_t getCacheMaxCount(){
+        return cacheMaxCount;
+    }
+
 
 private:
 
-
+    size_t cacheMaxCount;
 
     std::mutex lockCount;
 

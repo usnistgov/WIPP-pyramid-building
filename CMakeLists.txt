@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 #TODO Set this flag only in debug
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pedantic -Wno-reorder -Wno-unused-parameter -ansi" )
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -funwind-tables -g")
+
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(TIFF_INCLUDE_DIR /usr/lib)
@@ -18,6 +20,15 @@ find_package(FastImage REQUIRED)
 include_directories(${HTGS_INCLUDE_DIR})
 include_directories(${FastImage_INCLUDE_DIR})
 link_libraries(${FastImage_LIBRARIES})
+
+find_package(NVTX QUIET)
+
+if(NVTX_FOUND)
+    message(STATUS "FOUND NVTX!")
+    add_definitions(-DUSE_NVTX)
+    include_directories(${NVTX_INCLUDE_DIR})
+    link_libraries(${NVTX_LIBRARIES})
+endif()
 
 find_package(OpenCV 3 REQUIRED)
 link_libraries(${OpenCV_LIBRARIES})
