@@ -138,7 +138,7 @@ public:
     template<typename px_t>
     void _build(){
 
-        size_t nbThreadsPerTask = 2;
+        size_t nbThreadsPerTask = 10;
 
         auto begin = std::chrono::high_resolution_clock::now();
 
@@ -168,7 +168,7 @@ public:
         auto graph = new htgs::TaskGraphConf<TileRequest, Tile<px_t>>();
 
         auto generator = new BaseTileGenerator<px_t>(gridGenerator, this->options->getBlendingMethod());
-        auto baseTileTask = new BaseTileTask<px_t>(10, generator);
+        auto baseTileTask = new BaseTileTask<px_t>(6, generator);
 
         auto bookkeeper = new htgs::Bookkeeper<Tile<px_t>>();
 
