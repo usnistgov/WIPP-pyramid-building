@@ -32,6 +32,20 @@ ImageDepth parseImageDepth(const std::string depth) {
     }
 }
 
+
+BlendingMethod parseBlendingMethod(const std::string blending) {
+    if (blending == "max") {
+        return BlendingMethod::MAX;
+    }
+    else if(blending == "overlay"){
+        return BlendingMethod::OVERLAY;
+    }
+    else {
+        throw TCLAP::ArgException("blending method not recognized. Should  be one of : overlay, max");
+    }
+}
+
+
 int pyramidBuilding(int argc, const char** argv)
 {
 
@@ -58,6 +72,9 @@ int pyramidBuilding(int argc, const char** argv)
         TCLAP::ValueArg<std::string> formatArg("f","format","Image Format",false,"png","string");
         cmd.add( formatArg );
 
+        TCLAP::ValueArg<std::string> blendingArg("b","blending","Blending Method",false,"overlay","string");
+        cmd.add( blendingArg );
+
         cmd.parse( argc, argv );
 
         std::string inputDir = inputDirectoryArg.getValue();
@@ -65,6 +82,7 @@ int pyramidBuilding(int argc, const char** argv)
         std::string pyramidName = nameArg.getValue();
         std::string format = formatArg.getValue();
         std::string depth = depthArg.getValue();
+        std::string blending = blendingArg.getValue();
         //TODO check if TCLAP accept uint32_t
         uint32_t tilesize = tilesizeArg.getValue();
 
@@ -78,8 +96,10 @@ int pyramidBuilding(int argc, const char** argv)
         std::cout << nameArg.getDescription() << ": " << pyramidName << std::endl;
         std::cout << formatArg.getDescription() << ": " << format << std::endl;
         std::cout << depthArg.getDescription() << ": " << depth << std::endl;
+        std::cout << blendingArg.getDescription() << ": " << blending << std::endl;
 
         ImageDepth d = parseImageDepth(depth);
+        BlendingMethod b = parseBlendingMethod(blending);
 
 
         auto *options = new PyramidBuilding::Options();
@@ -88,9 +108,8 @@ int pyramidBuilding(int argc, const char** argv)
         options->setOverlap(0);
         options->setPyramidFormat(PyramidFormat::DEEPZOOM);
         options->setDownsamplingType(DownsamplingType::NEIGHBORS_AVERAGE);
-        options->setBlendingMethod(BlendingMethod::MAX);
+        options->setBlendingMethod(b);
         options->setDepth(d);
-
 
         auto builder = new PyramidBuilding(inputDir,inputVector,options);
         builder->build();

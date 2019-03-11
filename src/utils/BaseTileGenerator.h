@@ -19,6 +19,7 @@
 #include "../api/Datatype.h"
 #include <experimental/filesystem>
 #include "FOVCache.h"
+#include "Blender.h"
 
 #define DEBUG(x) do { std::cerr << x << std::endl; } while (0)
 
@@ -46,6 +47,8 @@ public:
                     fullFovWidth(reader->getFullFovWidth()), fullFovHeight(reader->getFullFovHeight()),
                     maxGridCol(reader->getGridMaxCol()), maxGridRow(reader->getGridMaxRow()), blendingMethod(blendingMethod), fovWidth(reader->getFovWidth()), fovHeight(reader->getFovHeight()) {
         fovsCache = new FOVCache<T>(reader->getImageDirectoryPath(), reader->getCache());
+        blender = new Blender<T>(blendingMethod);
+
     }
 
     /**
@@ -106,7 +109,8 @@ public:
                         auto srcIndex = y * fovWidth + x;
                         auto destIndex = destOffset + (y - overlapFov.y) * pyramidTileWidth + (x - overlapFov.x);
                         assert( 0 <= destIndex && destIndex < pyramidTileWidth * pyramidTileHeight);
-                        tile[destIndex] = image[srcIndex];
+                        blender->blend(tile, destIndex, image[srcIndex]);
+               //         tile[destIndex] = image[srcIndex];
                     }
                 }
 
@@ -141,6 +145,7 @@ private:
     const BlendingMethod blendingMethod;
     const size_t fovWidth;
     const size_t fovHeight;
+    Blender<T> *blender;
 
 
 };
