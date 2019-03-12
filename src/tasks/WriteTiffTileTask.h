@@ -136,7 +136,11 @@ public:
 //            throw std::runtime_error("tiff directory #" + std::to_string(level) + " does not exist");
 //        }
 
-        auto dir = TIFFSetDirectory(_tiff, (uint16_t)level);
+        auto dir = TIFFSetDirectory(_tiff, level);
+
+        if(dir != 1){
+            std::cerr << "error while trying to access tiff directory " << level << std::endl;
+        }
 //
 //        if(level > 0){
 //
@@ -151,6 +155,8 @@ public:
 //        TIFF* tiff = this->layers->at(level);
         TIFF* tiff = _tiff;
 
+
+        std::cout << "printing tile in directory : " << std::to_string(dir) << std::endl;
 
        // TIFFSetDirectory(tiff, level);
 
@@ -173,7 +179,7 @@ public:
 
         TIFFFlush(tiff);
 
-        TIFFWriteCustomDirectory(_tiff, &offsets->at(level) );
+      //  TIFFWriteCustomDirectory(_tiff, &offsets->at(level) );
 
         if(data->getRow() == info->getGridMaxRow(level) && data->getCol() == info->getGridMaxCol(level)){
             TIFFCheckpointDirectory(_tiff);
