@@ -73,7 +73,7 @@ public:
 //        }
 
         layers = new std::vector<TIFF*>(info->getNumLevel());
-
+        offsets = new std::vector<uint64_t>(info->getNumLevel());
 
         for(size_t l = 0;  l< info->getNumLevel(); l++){
             auto fullPath = path / (pyramidName + "_" + std::to_string(l) + ".tif");
@@ -91,14 +91,22 @@ public:
             TIFFSetField(tiff, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
             TIFFSetField(tiff, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
 
-            if(l > 0){
-//                TIFFSetField(tiff, TIFFTAG_SUBFILETYPE, FILETYPE_REDUCEDIMAGE );
-            }
             if(l == 0){
                 _tiff = tiff;
             }
 
-         //   TIFFCreateDirectory(_tiff);
+
+
+            TIFFCheckpointDirectory(_tiff);
+            auto dirNum = TIFFCurrentDirectory(_tiff);
+            TIFFCreateDirectory(_tiff);
+
+            if(l < info->getNumLevel()){
+                offsets->at(l) = 0;
+                TIFFSetField(_tiff, TIFFTAG_GPSIFD, 0 );
+            }
+
+            assert(dirNum == l);
 
             layers->at(l) = tiff;
         }
@@ -128,7 +136,7 @@ public:
 //            throw std::runtime_error("tiff directory #" + std::to_string(level) + " does not exist");
 //        }
 
-//        auto dir = TIFFSetDirectory(_tiff, (uint16_t)level);
+        auto dir = TIFFSetDirectory(_tiff, (uint16_t)level);
 //
 //        if(level > 0){
 //
@@ -140,8 +148,8 @@ public:
 //        }
 
 
-        TIFF* tiff = this->layers->at(level);
-
+//        TIFF* tiff = this->layers->at(level);
+        TIFF* tiff = _tiff;
 
 
        // TIFFSetDirectory(tiff, level);
@@ -163,7 +171,13 @@ public:
             TIFFWriteTile(tiff, (tdata_t)tile, (uint32)x, (uint32)y, 0, 0);
         }
 
-       // TIFFFlush(tiff);
+        TIFFFlush(tiff);
+
+        TIFFWriteCustomDirectory(_tiff, &offsets->at(level) );
+
+        if(data->getRow() == info->getGridMaxRow(level) && data->getCol() == info->getGridMaxCol(level)){
+            TIFFCheckpointDirectory(_tiff);
+        }
 
 
 
@@ -193,6 +207,7 @@ private:
     const ImageDepth imageDepth;
     const GridGenerator *info;
     std::vector<TIFF*> *layers;
+    std::vector<uint64_t> *offsets;
     TIFF* _tiff;
 
 
