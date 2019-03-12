@@ -55,6 +55,7 @@ private:
 
     std::map<std::string, uint32_t> cache;
 
+    size_t numLevel = 0;
     uint32_t counter = 0;
 
 
@@ -212,6 +213,10 @@ public:
                 }
             }
 
+
+            auto maxDim = std::max(gridMaxRow + 1,gridMaxCol + 1);
+            numLevel = static_cast<size_t>(ceil(log2(maxDim)) + 1);
+
         }
     }
 
@@ -224,6 +229,8 @@ public:
           elt.second.clear();
       }
     }
+
+
 
 
     const std::map<std::pair<size_t, size_t>, std::vector<PartialFov *>> &getGrid() const {
@@ -254,12 +261,25 @@ public:
         return fullFovHeight;
     }
 
-    size_t getGridMaxRow() const {
-        return gridMaxRow;
+
+    size_t getFullFovWidthAtLevel(size_t level) const{
+        auto levelWidth = static_cast<size_t>(ceil((double)fullFovWidth / pow(2, level)));
+        return levelWidth;
     }
 
-    size_t getGridMaxCol() const {
-        return gridMaxCol;
+
+    size_t getFullFovHeightAtLevel(size_t level) const{
+        auto levelHeight = static_cast<size_t>(ceil((double)fullFovHeight / pow(2, level)));
+        return levelHeight;
+    }
+
+
+    size_t getGridMaxRow(size_t level = 0) const {
+        return static_cast<size_t>(ceil(getFullFovHeightAtLevel(level) / pyramidTileSize));
+    }
+
+    size_t getGridMaxCol(size_t level = 0) const {
+        return static_cast<size_t>(ceil(getFullFovWidthAtLevel(level) / pyramidTileSize));
     }
 
     const std::string &getImageDirectoryPath() const {
@@ -277,6 +297,12 @@ public:
     uint32_t getCounter() const {
         return counter;
     }
+
+    size_t getNumLevel() const {
+        return numLevel;
+    }
+
+
 
 
 };

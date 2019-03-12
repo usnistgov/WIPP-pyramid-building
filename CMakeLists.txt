@@ -53,6 +53,6 @@ add_executable(testbasePerfMultiThreadHTGS testBasePerfMultiThreadHTGS.cpp ${ALL
 add_executable(testbasePerfMultiThread testBasePerfMultiThread.cpp ${ALL_SRCS} ${SOURCES} testBasePerf.h)
 add_executable(testbasePerf testBasePerf.cpp ${ALL_SRCS} ${SOURCES} testBasePerf.h)
 add_executable(stitching testStitchingVectorParser.cpp ${ALL_SRCS} ${SOURCES})
-add_executable(libtiff testLibtiff.cpp ${ALL_SRCS} ${SOURCES} src/utils/StitchedFOVTileLoader.h)
+add_executable(libtiff testLibtiff.cpp ${ALL_SRCS} ${SOURCES} src/utils/StitchedFOVTileLoader.h src/tasks/WriteTiffTileTask.h)
 add_executable(pyramidBuilding testPyramidBuilding.cpp ${ALL_SRCS} ${SOURCES})
 add_executable(pyramidBuildingCLITest PyramidBuildingCLITest.cpp ${ALL_SRCS} ${SOURCES})
