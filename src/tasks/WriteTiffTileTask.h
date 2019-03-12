@@ -58,65 +58,32 @@ public:
                 break;
         }
 
-//        if (_tiff != nullptr) {
-//            TIFFSetField(_tiff, TIFFTAG_IMAGEWIDTH, info->getFullFovWidth());
-//            TIFFSetField(_tiff, TIFFTAG_IMAGELENGTH, info->getFullFovHeight());
-//            TIFFSetField(_tiff, TIFFTAG_TILELENGTH, info->getPyramidTileSize());
-//            TIFFSetField(_tiff, TIFFTAG_TILEWIDTH, info->getPyramidTileSize());
-//            TIFFSetField(_tiff, TIFFTAG_BITSPERSAMPLE,bitsPerSample);
-//            TIFFSetField(_tiff, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
-//            TIFFSetField(_tiff, TIFFTAG_ROWSPERSTRIP, 1);
-//            TIFFSetField(_tiff, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-//            TIFFSetField(_tiff, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
-//            TIFFSetField(_tiff, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
-//            TIFFSetField(_tiff, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
-//        }
-
-        layers = new std::vector<TIFF*>(info->getNumLevel());
         offsets = new std::vector<uint64_t>(info->getNumLevel());
 
         for(size_t l = 0;  l< info->getNumLevel(); l++){
             auto fullPath = path / (pyramidName + "_" + std::to_string(l) + ".tif");
             auto file = fullPath.c_str();
-            auto tiff = TIFFOpen(file, "w");
-            TIFFSetField(tiff, TIFFTAG_IMAGEWIDTH, info->getFullFovWidthAtLevel(l));
-            TIFFSetField(tiff, TIFFTAG_IMAGELENGTH, info->getFullFovHeightAtLevel(l));
-            TIFFSetField(tiff, TIFFTAG_TILELENGTH, info->getPyramidTileSize());
-            TIFFSetField(tiff, TIFFTAG_TILEWIDTH, info->getPyramidTileSize());
-            TIFFSetField(tiff, TIFFTAG_BITSPERSAMPLE,bitsPerSample);
-            TIFFSetField(tiff, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
-            TIFFSetField(tiff, TIFFTAG_ROWSPERSTRIP, 1);
-            TIFFSetField(tiff, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-            TIFFSetField(tiff, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
-            TIFFSetField(tiff, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
-            TIFFSetField(tiff, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
 
             if(l == 0){
-                _tiff = tiff;
+                _tiff = TIFFOpen(file, "w");
             }
 
+            TIFFSetField(_tiff, TIFFTAG_IMAGEWIDTH, info->getFullFovWidthAtLevel(l));
+            TIFFSetField(_tiff, TIFFTAG_IMAGELENGTH, info->getFullFovHeightAtLevel(l));
+            TIFFSetField(_tiff, TIFFTAG_TILELENGTH, info->getPyramidTileSize());
+            TIFFSetField(_tiff, TIFFTAG_TILEWIDTH, info->getPyramidTileSize());
+            TIFFSetField(_tiff, TIFFTAG_BITSPERSAMPLE,bitsPerSample);
+            TIFFSetField(_tiff, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
+            TIFFSetField(_tiff, TIFFTAG_ROWSPERSTRIP, 1);
+            TIFFSetField(_tiff, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+            TIFFSetField(_tiff, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
+            TIFFSetField(_tiff, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+            TIFFSetField(_tiff, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
 
-
-            TIFFCheckpointDirectory(_tiff);
-            auto dirNum = TIFFCurrentDirectory(_tiff);
-            TIFFCreateDirectory(_tiff);
-
-            if(l < info->getNumLevel()){
-                offsets->at(l) = 0;
-                TIFFSetField(_tiff, TIFFTAG_GPSIFD, 0 );
-            }
-
-            assert(dirNum == l);
-
-            layers->at(l) = tiff;
+            auto _buf = new T[info->getFullFovWidthAtLevel(l) * info->getFullFovHeightAtLevel(l)];
+            TIFFWriteTile(_tiff, (tdata_t)_buf, 0, 0, 0, 0);
+            TIFFWriteDirectory(_tiff);
         }
-
-        int dircount = 0;
-        do {
-            dircount++;
-        } while (TIFFReadDirectory(layers->at(0)));
-        printf("%d directories in %s\n", dircount, pyramidName.c_str());
-
     }
 
 
@@ -130,36 +97,14 @@ public:
         size_t originalHeight = data->get_height();
         size_t originalWidth = data->get_width();
 
-
-//        auto dir = TIFFSetDirectory(_tiff, level);
-//        if(dir == 0){
-//            throw std::runtime_error("tiff directory #" + std::to_string(level) + " does not exist");
-//        }
-
-        auto dir = TIFFSetDirectory(_tiff, level);
+        auto dir = TIFFSetDirectory(_tiff, (uint16_t)level);
 
         if(dir != 1){
             std::cerr << "error while trying to access tiff directory " << level << std::endl;
         }
-//
-//        if(level > 0){
-//
-//            //return;
-//        }
-
-//        if(level == 0 || level > 1){
-//            return;
-//        }
-
-
-//        TIFF* tiff = this->layers->at(level);
         TIFF* tiff = _tiff;
 
-
         std::cout << "printing tile in directory : " << std::to_string(dir) << std::endl;
-
-       // TIFFSetDirectory(tiff, level);
-
 
         T* tile = nullptr;
 
@@ -177,25 +122,18 @@ public:
             TIFFWriteTile(tiff, (tdata_t)tile, (uint32)x, (uint32)y, 0, 0);
         }
 
-        TIFFFlush(tiff);
-
-      //  TIFFWriteCustomDirectory(_tiff, &offsets->at(level) );
+        TIFFRewriteDirectory(_tiff);
 
         if(data->getRow() == info->getGridMaxRow(level) && data->getCol() == info->getGridMaxCol(level)){
             TIFFCheckpointDirectory(_tiff);
         }
-
-
-
 
         this->addResult(data);
     }
 
     /// \brief Close the tiff file
     void shutdown() override {
-        for(auto l = 0;  l< info->getNumLevel(); l++){
-            TIFFClose(layers->at(l));
-        }
+        TIFFClose(_tiff);
     }
 
     /// \brief Get the writer name
