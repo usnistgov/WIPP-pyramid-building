@@ -94,15 +94,20 @@ public:
             if(l > 0){
 //                TIFFSetField(tiff, TIFFTAG_SUBFILETYPE, FILETYPE_REDUCEDIMAGE );
             }
+            if(l == 0){
+                _tiff = tiff;
+            }
+
+         //   TIFFCreateDirectory(_tiff);
 
             layers->at(l) = tiff;
         }
-//
-//        int dircount = 0;
-//        do {
-//            dircount++;
-//        } while (TIFFReadDirectory(_tiff));
-//        printf("%d directories in %s\n", dircount, pyramidName.c_str());
+
+        int dircount = 0;
+        do {
+            dircount++;
+        } while (TIFFReadDirectory(layers->at(0)));
+        printf("%d directories in %s\n", dircount, pyramidName.c_str());
 
     }
 
@@ -135,10 +140,11 @@ public:
 //        }
 
 
-        TIFF* tiff = this->layers->at(0);
+        TIFF* tiff = this->layers->at(level);
 
 
-        TIFFSetDirectory(tiff, level);
+
+       // TIFFSetDirectory(tiff, level);
 
 
         T* tile = nullptr;
@@ -157,7 +163,7 @@ public:
             TIFFWriteTile(tiff, (tdata_t)tile, (uint32)x, (uint32)y, 0, 0);
         }
 
-        TIFFWriteDirectory(tiff);
+       // TIFFFlush(tiff);
 
 
 
@@ -187,6 +193,7 @@ private:
     const ImageDepth imageDepth;
     const GridGenerator *info;
     std::vector<TIFF*> *layers;
+    TIFF* _tiff;
 
 
 };
