@@ -83,7 +83,7 @@ public:
 
     /// \brief Get the writer name
     /// \return Writer name
-    std::string getName() override { return "PngTileWriteTask"; }
+    std::string getName() override { return "DeepZoomWriteTask"; }
 
     ITask<Tile<T>, Tile<T>> *copy() override {
         return new WriteDeepZoomTileTask(this->getNumThreads(), this->_pathOut, this->nbPyramidLevel, this->imageDepth);

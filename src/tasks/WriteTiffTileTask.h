@@ -138,7 +138,7 @@ public:
 
     /// \brief Get the writer name
     /// \return Writer name
-    std::string getName() override { return "TiledTiffWriter"; }
+    std::string getName() override { return "PyramidalTiledTiffWriter"; }
 
     ITask<Tile<T>, Tile<T>> *copy() override {
         return new WriteTiffTileTask(this->getNumThreads(), this->_pathOut, this->pyramidName, this->imageDepth, this->info);
