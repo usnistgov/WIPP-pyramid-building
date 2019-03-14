@@ -3,7 +3,10 @@ build
 build-ubuntu
 cmake-build-debug
 cmake-build-release
+cmake-build-relwithdebinfo
 *.log
 VagrantFile
 .vagrant
 CMakeFiles/
+
+webapp-test/node_modules

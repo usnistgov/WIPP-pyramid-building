@@ -18,6 +18,8 @@
 #include "../data/Tile.h"
 #include "../api/Datatype.h"
 #include <experimental/filesystem>
+#include "FOVCache.h"
+#include "Blender.h"
 
 #define DEBUG(x) do { std::cerr << x << std::endl; } while (0)
 
@@ -43,7 +45,11 @@ public:
     BaseTileGenerator(GridGenerator *reader, BlendingMethod blendingMethod): grid(reader->getGrid()), directory(reader->getImageDirectoryPath()), tileWidth(
             reader->getFovTileWidth()), tileHeight(reader->getFovTileHeight()), pyramidTileSize(reader->getPyramidTileSize()),
                     fullFovWidth(reader->getFullFovWidth()), fullFovHeight(reader->getFullFovHeight()),
-                    maxGridCol(reader->getGridMaxCol()), maxGridRow(reader->getGridMaxRow()), blendingMethod(blendingMethod) {}
+                    maxGridCol(reader->getGridMaxCol()), maxGridRow(reader->getGridMaxRow()), blendingMethod(blendingMethod), fovWidth(reader->getFovWidth()), fovHeight(reader->getFovHeight()) {
+        fovsCache = new FOVCache<T>(reader->getImageDirectoryPath(), reader->getCache());
+        blender = new Blender<T>(blendingMethod);
+
+    }
 
     /**
      * Generate a pyramid base level tile at a specific coordinates.
@@ -61,9 +67,9 @@ public:
         size_t pyramidTileHeight = (index.first != maxGridRow) ? pyramidTileSize : fullFovHeight - row * pyramidTileSize;
         T* tile = new T[ pyramidTileWidth * pyramidTileHeight ]();  //the pyramid tile we will be filling from partial FOVs.
 
+
+
         auto it = grid.find(index);
-
-
 
         //Dealing with corner case.
         //It should never happen with real data, but we might have missing tiles or have so much overlap between FOVs that
@@ -75,7 +81,6 @@ public:
 
         std::vector<PartialFov *> fovs = it->second;
 
-        uint32_t counter = 0;
 
         //iterating over each partial FOV.
         for(auto it2 = fovs.begin(); it2 != fovs.end(); ++it2) {
@@ -90,127 +95,27 @@ public:
             }
 
                 auto overlapFov = fov->getFovCoordOverlap();
+                auto tileOverlap = fov->getTileOverlap();
 
-                //coordinates in the grid of FOV tiles to load
-                size_t startRow, startCol, endRow, endCol;
-                startCol = overlapFov.x /  tileWidth;
-                startRow = overlapFov.y / tileHeight;
-                //TODO CHECK if -1 is correct
-                endCol = ( overlapFov.x + overlapFov.width - 1 ) / tileWidth;
-                endRow = ( overlapFov.y + overlapFov.height - 1 ) / tileHeight;
+                T* image = fovsCache->getFOV(filename);
 
-                //nb of tiles to load - we load all tiles in parallel
-                auto nbOfTileToLoad = (endCol - startCol + 1) * (endRow - startRow + 1);
+                std::cout << "fovCacheCount :  " + std::to_string(fovsCache->getCacheCount()) << std::endl;
+            std::cout << " max fovCacheCount :  " + std::to_string(fovsCache->getCacheMaxCount()) << std::endl;
 
-                fi::ATileLoader<T> *tileLoader = new fi::GrayscaleTiffTileLoader<T>(directory + filename, 1);
+                auto destOffset = tileOverlap.y * pyramidTileWidth + tileOverlap.x;
 
-                auto *fi = new fi::FastImage<T>(tileLoader, 0);
-
-                fi_counter++;
-
-                fi->getFastImageOptions()->setNumberOfViewParallel(nbOfTileToLoad);
-                fi->configureAndRun();
-
-                //request all tiles for this partial FOV
-                for(auto i=startRow; i <= endRow; i++ ){
-                    for (auto j=startCol; j <= endCol; ++j){
-                        //TODO CHECK if we should keep using size_t. Here FAST IMAGE uses uint32.
-                        fi->requestTile(i,j,false,0);
+                for(auto x = overlapFov.x; x < overlapFov.x + overlapFov.width; x++ ){
+                    for(auto y = overlapFov.y; y < overlapFov.y + overlapFov.height; y++){
+                        auto srcIndex = y * fovWidth + x;
+                        auto destIndex = destOffset + (y - overlapFov.y) * pyramidTileWidth + (x - overlapFov.x);
+                        assert( 0 <= destIndex && destIndex < pyramidTileWidth * pyramidTileHeight);
+                        blender->blend(tile, destIndex, image[srcIndex]);
+               //         tile[destIndex] = image[srcIndex];
                     }
                 }
-                fi->finishedRequestingTiles();
 
-                size_t xOriginGlobal, yOriginGlobal, xOrigin,yOrigin,width,height;
+            fovsCache->releaseFOV(fov->getPath());
 
-                //processing each tile
-                while(fi->isGraphProcessingTiles()) {
-
-                    auto pview = fi->getAvailableViewBlocking();
-
-                    if(pview != nullptr){
-
-                        auto view = pview->get();
-                        //tile origin in FOV global coordinates
-                        size_t tileOriginX = view->getGlobalXOffset();
-                        size_t tileOriginY = view->getGlobalYOffset();
-
-                        //start index in FOV global coordinates (top left corner of the rectangle to copy)
-                        xOriginGlobal = std::max<size_t>(tileOriginX, overlapFov.x);
-                        yOriginGlobal = std::max<size_t>(tileOriginY, overlapFov.y);
-
-                        //start index in local coordinates (top left corner of the ROI rectangle in the current FOV tile)
-                        xOrigin = xOriginGlobal - tileOriginX;
-                        yOrigin = yOriginGlobal - tileOriginY;
-
-                        //nb of pixels left in the ROI at this point
-                        width = overlapFov.width - (xOriginGlobal - overlapFov.x);
-                        height = overlapFov.height - (yOriginGlobal - overlapFov.y);
-
-                        //how many fit in this tile? (width and height of the ROI rectangle)
-                        auto endX = std::min(width + xOrigin, tileWidth);
-                        auto endY = std::min(height + yOrigin, tileHeight);
-
-                        //get all pixels for this ROI
-                        for(auto j = yOrigin; j < endY ; j++){
-                            for(auto i = xOrigin; i < endX ; i++){
-                                auto val = view->getPixel(j,i);
-                                //FOVOverlap coordinates (those are not the global coordinates, but relative to the partial FOV)
-                                auto xInFOVOverlap = tileOriginX + i - overlapFov.x;
-                                auto yInFOVOverlap = tileOriginY + j - overlapFov.y;
-
-                                //TileOverlap coordinates
-                                auto overlapTile = fov->getTileOverlap();
-
-                                auto xInTile = overlapTile.x + xInFOVOverlap;
-                                auto yInTile = overlapTile.y + yInFOVOverlap;
-
-                                //to get the final tile, we report the coordinates of the pixel obtained in the FOVOverlap coordinates
-                                //into the the tileOverlap coordinates.
-                                auto index1D = yInTile * pyramidTileWidth + xInTile;
-
-                                assert( 0 <= index1D && index1D < pyramidTileWidth * pyramidTileHeight);
-
-                                //        std::cout << index1D << ": " << val << std::endl;
-
-//                                if(tile[index1D] != 0){
-//                                    std::cout << "overwriting at index " << index1D << " old value : " << tile[index1D] << " with value : " << val << std:: endl;
-//                                }
-
-                                //TODO Rather inject a blending strategy?
-                                switch(blendingMethod) {
-                                    case BlendingMethod::MAX:
-                                        if (val > tile[index1D]) {
-                                            tile[index1D] = val;
-                                        }
-                                        break;
-                                    case BlendingMethod::OVERLAY:
-                                    default:
-                                        tile[index1D] = val;
-                                        break;
-                                }
-                            }
-                        } //DONE copying the relevant portion of one tile of the FOV in this pyramid tile
-
-                        pview->releaseMemory();
-
-                    }
-                } //DONE copying the relevant portion of the FOV in this pyramid tile
-
-
-                //TODO REMOVE. FOR DEBUGGING MIST DATASET
-//            if(col == 16){
-//            if(! filesystem::exists(filesystem::current_path() / "debugBaseTile")) {
-//                filesystem::create_directory(filesystem::current_path() / "debugBaseTile");
-//            }
-//                    cv::Mat image(pyramidTileHeight, pyramidTileWidth, CV_8UC1, tile);
-//                    std::string fullImagePath = "/home/gerardin/Documents/pyramidBuilding/cmake-build-debug/debugBaseTile/" + std::to_string(col) + "_" + std::to_string(row) + "_" + std::to_string(counter) + ".png";
-//                    cv::imwrite(fullImagePath, image);
-//                    ++counter;
-//                }
-
-                //TODO CHECK we should eventually cache the fast image instances since they are used for each overlap.
-                //depending on the overlap factor, some performance should be expected.
-                delete fi;
 
         } //DONE generating the pyramid tile
 
@@ -219,13 +124,15 @@ public:
         return new Tile<T>(0, index.first,index.second, pyramidTileWidth, pyramidTileHeight, tile);
     }
 
-    const std::atomic<unsigned int> &getCounter() const {
-        return fi_counter;
+
+    //TODO remove for DEBUG ONLY
+    FOVCache<T> *getFovsCache() const {
+        return fovsCache;
     }
 
-private:
 
-    std::atomic<uint32_t> fi_counter;
+private:
+    FOVCache<T> *fovsCache;
     const std::map<std::pair<size_t, size_t>, std::vector<PartialFov *>> grid;
     const std::string directory;
     const size_t tileWidth;
@@ -236,6 +143,9 @@ private:
     const size_t maxGridRow;
     const size_t maxGridCol;
     const BlendingMethod blendingMethod;
+    const size_t fovWidth;
+    const size_t fovHeight;
+    Blender<T> *blender;
 
 
 };

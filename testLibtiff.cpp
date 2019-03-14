@@ -53,10 +53,15 @@ int main()
 
     if (tif) {
 
-        uint32_t roi_x = 500;
-        uint32_t roi_y = 500;
-        uint32_t roi_width = 200;
-        uint32_t roi_height = 500;
+//        uint32_t roi_x = 500;
+//        uint32_t roi_y = 500;
+//        uint32_t roi_width = 200;
+//        uint32_t roi_height = 500;
+
+        uint32_t roi_x = 0;
+        uint32_t roi_y = 0;
+        uint32_t roi_width = width;
+        uint32_t roi_height = height;
 
         auto begin = std::chrono::high_resolution_clock::now();
 

@@ -1,0 +1,14 @@
+{
+  "name": "webapp-test",
+  "version": "1.0.0",
+  "description": "test deepzoom",
+  "main": "index.html",
+  "scripts": {
+    "test": "http-server .. -c-1 -o"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "http-server": "^0.11.1"
+  }
+}

@@ -34,6 +34,7 @@
 #include "../tasks/WriteDeepZoomTileTask.h"
 #include "../rules/DeepZoomDownsamplingRule.h"
 #include "./Datatype.h"
+#include "../tasks/WriteTiffTileTask.h"
 #include <string>
 #include <sstream>
 
@@ -138,7 +139,7 @@ public:
     template<typename px_t>
     void _build(){
 
-        size_t nbThreadsPerTask = 1;
+        size_t nbThreadsPerTask = 10;
 
         auto begin = std::chrono::high_resolution_clock::now();
 
@@ -152,9 +153,9 @@ public:
 
         auto grid = gridGenerator->getGrid();
 
-
-        size_t numTileRow = gridGenerator->getGridMaxRow() + 1;
-        size_t numTileCol = gridGenerator->getGridMaxCol() + 1;
+        auto test = gridGenerator->getGridMaxRow(0);
+        size_t numTileRow = gridGenerator->getGridMaxRow(0) + 1;
+        size_t numTileCol = gridGenerator->getGridMaxCol(0) + 1;
 
 
         size_t fullFovWidth = gridGenerator->getFullFovWidth();
@@ -168,7 +169,7 @@ public:
         auto graph = new htgs::TaskGraphConf<TileRequest, Tile<px_t>>();
 
         auto generator = new BaseTileGenerator<px_t>(gridGenerator, this->options->getBlendingMethod());
-        auto baseTileTask = new BaseTileTask<px_t>(nbThreadsPerTask, generator);
+        auto baseTileTask = new BaseTileTask<px_t>(6, generator);
 
         auto bookkeeper = new htgs::Bookkeeper<Tile<px_t>>();
 
@@ -183,6 +184,7 @@ public:
         if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
             writeTask = new WriteDeepZoomTileTask<px_t>(nbThreadsPerTask, pyramidName + "_files", deepZoomLevel, this->options->getDepth());
         }
+
         graph->setGraphConsumerTask(baseTileTask);
 
         //incoming edges from the bookeeper
@@ -201,7 +203,11 @@ public:
                                writeTask); //generating extra tiles up to 1x1 pixel to satisfy deepzoom format
         }
 
+        auto tiledTiffWriteTask = new WriteTiffTileTask<px_t>(1,pyramidName, pyramidName, options->getDepth(), gridGenerator);
+
         graph->addRuleEdge(bookkeeper, writeRule, writeTask); //exiting the graph;
+        graph->addRuleEdge(bookkeeper, writeRule, tiledTiffWriteTask);
+
 
         //output task
         graph->addGraphProducerTask(writeTask);
@@ -272,13 +278,13 @@ public:
         }
 
 
+        std::cout << "read count : " << generator->getFovsCache()->readCount << std::endl;
+        std::cout << "total number of  reads necessary : " << gridGenerator->getCounter() << std::endl;
 
         std::cout << "we should be done" << std::endl;
         runtime->waitForRuntime();
 
-        std::cout << "fast image instantiation : " << generator->getCounter() << std::endl;
-
-        graph->writeDotToFile("graph", DOTGEN_FLAG_SHOW_ALL_THREADING | DOTGEN_COLOR_COMP_TIME);
+        graph->writeDotToFile("graph", DOTGEN_COLOR_COMP_TIME);
 
     delete runtime;
     delete gridGenerator;

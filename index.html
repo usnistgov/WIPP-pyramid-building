@@ -1,0 +1,9 @@
+<div id="openseadragon1" style="width: 800px; height: 600px;"></div>
+<script src="webapp-test/openseadragon.min.js"></script>
+<script type="text/javascript">
+    var viewer = OpenSeadragon({
+        id: "openseadragon1",
+        prefixUrl: "webapp-test/images/",
+        tileSources: "/cmake-build-release/output.dzi"
+    });
+</script>

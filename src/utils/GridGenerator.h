@@ -53,6 +53,11 @@ private:
     size_t gridMaxRow = 0;
     size_t gridMaxCol = 0;
 
+    std::map<std::string, uint32_t> cache;
+
+    size_t numLevel = 0;
+    uint32_t counter = 0;
+
 
 
 public:
@@ -147,6 +152,11 @@ public:
             endCol = (fovGlobalX + fovWidth - 1) / tileSize; // -1 because we need the pixel col index
             endRow = (fovGlobalY + fovHeight - 1) / tileSize;
 
+            uint32_t count = ((endCol - startCol) + 1) * (endRow - startRow + 1);
+            cache.insert({file, count});
+
+            counter += count;
+
             //compute overlap between an FOV and each pyramid tile.
 
             for(size_t j = startRow; j <= endRow ; j++) {
@@ -173,7 +183,7 @@ public:
                     fovRelativeY = intersection.y - fovGlobalY;
                     cv::Rect overlapInFovRef = cv::Rect(fovRelativeX, fovRelativeY, intersection.width, intersection.height);
 
-                    auto *partialFov = new PartialFov(file, fovGlobalX,fovGlobalY, overlapInTileRef, intersection, overlapInFovRef);
+                    auto *partialFov = new PartialFov(file, fovGlobalX,fovGlobalY, overlapInTileRef, intersection, overlapInFovRef, count);
 
                     assert(overlapInTileRef.width == overlapInFovRef.width);
                     assert(overlapInTileRef.height == overlapInFovRef.height);
@@ -203,6 +213,10 @@ public:
                 }
             }
 
+
+            auto maxDim = std::max(gridMaxRow + 1,gridMaxCol + 1);
+            numLevel = static_cast<size_t>(ceil(log2(maxDim)) + 1);
+
         }
     }
 
@@ -215,6 +229,8 @@ public:
           elt.second.clear();
       }
     }
+
+
 
 
     const std::map<std::pair<size_t, size_t>, std::vector<PartialFov *>> &getGrid() const {
@@ -245,12 +261,25 @@ public:
         return fullFovHeight;
     }
 
-    size_t getGridMaxRow() const {
-        return gridMaxRow;
+
+    size_t getFullFovWidthAtLevel(size_t level) const{
+        auto levelWidth = static_cast<size_t>(ceil((double)fullFovWidth / pow(2, level)));
+        return levelWidth;
     }
 
-    size_t getGridMaxCol() const {
-        return gridMaxCol;
+
+    size_t getFullFovHeightAtLevel(size_t level) const{
+        auto levelHeight = static_cast<size_t>(ceil((double)fullFovHeight / pow(2, level)));
+        return levelHeight;
+    }
+
+
+    size_t getGridMaxRow(size_t level = 0) const {
+        return static_cast<size_t>(ceil(getFullFovHeightAtLevel(level) / pyramidTileSize));
+    }
+
+    size_t getGridMaxCol(size_t level = 0) const {
+        return static_cast<size_t>(ceil(getFullFovWidthAtLevel(level) / pyramidTileSize));
     }
 
     const std::string &getImageDirectoryPath() const {
@@ -260,6 +289,19 @@ public:
     size_t getPyramidTileSize() const {
         return pyramidTileSize;
     }
+
+    const std::map<std::string, uint32_t> &getCache() const {
+        return cache;
+    }
+
+    uint32_t getCounter() const {
+        return counter;
+    }
+
+    size_t getNumLevel() const {
+        return numLevel;
+    }
+
 
 
 

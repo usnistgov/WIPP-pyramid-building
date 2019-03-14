@@ -1,6 +1,11 @@
 # TODOS
 
+
+
+
 ## Checks
+
+Check google style guide and comply.
 
 ### Requirements for C++ version?
 c++17 has file system managemnent in std. Otherwise, needs to use boosts?
@@ -22,6 +27,8 @@ FastImage uses uint32, openCV uses uint32
 ##### The execution may fail if the output directory does not exist.
 ##### Check inputs : if bad path, it does not detect it a return
 
+Refactor mains into google tests.
+Using google logs for outputs.
 
 ## Refactor 
 
@@ -30,22 +37,53 @@ FastImage uses uint32, openCV uses uint32
 
 ## Features
 
-##### Blending of original tiles
-Original code used last-tile-win strategy when partial FOVs overlap for base tile creation.
-We kept it this way.
-
-##### Minimizing the number of fast image instance initialized.
-For each tile at level 0, we instantiate n FastImage, one for each overlapping FOV and desrtoyed them afterwards.
-We could limit that by counting the number of tiles where a FOV appears and tie the lifecycle of a fast image instance to this usage count.
-When this usage count drop to zero, we can destroy the fast image instance.
-
-##### Dealing with conversion
-What image format should we support?
-We need to build some flexibility in the code to perform conversion.
-How do we deal with variability of inputs since we use templates? In production we need to run pre-compiled code.
-
 ##### Stripe example : 1pixel stripes are averaged and disappear!
+Bilinear downsampling could fix this for P. it is probably unecessary.
 
 ##### Check if need overlap? 
+First tests seem to show we don't need to generate 1pixel overlap.
+More tests on more browsers are necessary.
 
-##### Support for non tiled images? (From big dataset)
+##### Support for non tiled images? (from big dataset)
+It could be necessary but apparently P. set tiled tiff as a requirement to biologists
+so we should be clear.
+Maybe implement a tiff reader and benchmark.
+
+##### Support for large images
+P. says we need support for large images so let's keep FI implementation.
+We can decide dynamically based on output which BaseTileGenerator algorithm we need. 
+
+=======
+
+## Next Steps
+
+
+Presentation
+
+Accurate benchmarks of memory consumption. (heap track)
+Benchmark disk access.
+Benchmark time spend in reading.
+Make sure we have the minimum amount of objects at some point in time.
+
+
+Packaging
+
+Generate a docker image and a plugin description.
+req : any x86 intel instructions on linux distrib
+install dependencies and compile code directly.
+Will make for a fatter image but easier to produce.
+
+
+Benchmarking
+Try different traversals. Probably very minor but let's try.
+Try 10% overlap dataset + Keana Scott nanofibers 40K * 50K 10% overlap.
+
+============
+
+Claims
+
+with HTGS impact of running a lots of threads is mitigated (if inputs are throttled) so it becomes a none issue.
+-> easier to dimension the system. (however ex of problem : pyramidalTiledTiffWrite must be single threaded).
+
+
+
