@@ -1,0 +1,44 @@
+{
+  "name": "PyramidBuildingPlugin",
+  "version": "1.0.0-beta",
+  "title": "PyramidBuilding plugin",
+  "description": "Efficient pyramid building (C++)",
+  "containerId": "pyramid-building:1.0.0",
+
+  "inputs": [
+    {
+      "name": "images",
+      "type": "collection",
+      "options": {
+        "format": "tiledtiff"
+      },
+      "description": "Collections of partial Fields Of View (FOVs)."
+    },
+    {
+      "name": "stitchingVector",
+      "type": "stitchingVector",
+      "description": "Stitching vector that describes partial FOV positions in the full image."
+    }
+  ],
+  "outputs": [
+    {
+      "name": "output",
+      "type": "pyramid",
+      "options": {
+        "format": "deepZoom"
+      },
+      "description": "Output Pyramid in DeepZoom format."
+    }
+  ],
+  "ui": [
+    {
+      "key": "inputs.images",
+      "title": "Image Collection: ",
+      "description": "Pick a collection..."
+    },
+    {
+      "key": "inputs.stitchingVector",
+      "title": "stitching Vector"
+    }
+  ]
+}

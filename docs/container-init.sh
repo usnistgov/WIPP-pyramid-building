@@ -57,7 +57,13 @@ cmake ..
 make main
 
 # We will mount the host input dir in this directory.
-mkdir /tmp/inputs
+INPUTS=/tmp/inputs
+OUTPUTS=/tmp/outputs
+mkdir $INPUTS  #make sure the user running the algorithm can read
+mkdir $OUTPUTS #make sure the user running the algorithm can read/write
+
+#=========
+#Below are extra steps we will need to run container with an unprivileged user.
 
 #Create a user and a group wipp with UID/GID of 1000:1000
 MAIN_GROUP=wipp
@@ -70,6 +76,9 @@ groupadd ${MAIN_GROUP} -g ${MAIN_GID} \
    && adduser ${MAIN_USER} sudo \
    && yes zaq123 | passwd ${MAIN_USER}
 
+# TODO REMOVE probably unnecessary since the mount process overwrite these.
+chown MAIN_USER:MAIN_GROUP $INPUTS
+chown MAIN_USER:MAIN_GROUP $OUTPUTS
 
 #All install command done with this user
 su wipp

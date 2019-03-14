@@ -7,6 +7,9 @@
 #include <algorithm>
 #include <tclap/CmdLine.h>
 #include "src/api/CommandLineCli.h"
+#include <experimental/filesystem>
+
+using namespace std::experimental;
 
 int main(int argc, const char** argv)
 {
@@ -47,17 +50,20 @@ int main(int argc, const char** argv)
 //    std::string directory = "/home/gerardin/Documents/images/dataset6/images/";
 //    uint32_t tilesize = 1024;
 
+    std::string output = filesystem::current_path().string();
+
     std::string vector_option = "-v " + vector;
     std::string tilesize_option = "-t " + std::to_string(tilesize);
 
     std::vector<const char*> new_argv(argv, argv + argc);
 
     new_argv.push_back(directory.c_str());
+    new_argv.push_back(output.c_str());
     new_argv.push_back(vector_option.c_str());
     new_argv.push_back(tilesize_option.c_str());
     new_argv.push_back(nullptr); //no more arguments
     argv = new_argv.data();
-    argc = argc + 3;
+    argc = argc + 4;
 
     pyramidBuilding(argc, argv);
 }

@@ -37,6 +37,9 @@
 #include "../tasks/WriteTiffTileTask.h"
 #include <string>
 #include <sstream>
+#include <experimental/filesystem>
+
+using namespace std::experimental;
 
 //HTGS Graph
 //Create tileRequest
@@ -121,7 +124,11 @@ public:
 
     };
 
-    PyramidBuilding(std::string inputDirectory, std::string stitching_vector, Options* options) : _inputDir(inputDirectory), _inputVector(stitching_vector), options(options) {};
+    PyramidBuilding(std::string inputDirectory,
+                    std::string stitching_vector,
+                    std::string outputDirectory,
+                    Options* options) :
+    _inputDir(inputDirectory), _inputVector(stitching_vector), _outputDir(outputDirectory), options(options) {};
 
     void build() {
 
@@ -182,7 +189,8 @@ public:
         htgs::ITask< Tile<px_t>, Tile<px_t>> *writeTask = nullptr;
 
         if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
-            writeTask = new WriteDeepZoomTileTask<px_t>(nbThreadsPerTask, pyramidName + "_files", deepZoomLevel, this->options->getDepth());
+            auto outputPath = filesystem::path(_outputDir) / (pyramidName + "_files");
+            writeTask = new WriteDeepZoomTileTask<px_t>(nbThreadsPerTask, outputPath, deepZoomLevel, this->options->getDepth());
         }
 
         graph->setGraphConsumerTask(baseTileTask);
@@ -272,7 +280,7 @@ public:
                 << "\"/></Image>";
 
             std::ofstream outFile;
-            outFile.open(pyramidName + ".dzi");
+            outFile.open(filesystem::path(_outputDir) / (pyramidName + ".dzi"));
             outFile << oss.str();
             outFile.close();
         }
@@ -300,6 +308,7 @@ public:
 protected:
     std::string _inputDir;
     std::string _inputVector;
+    std::string _outputDir;
     Options* options;
 
 

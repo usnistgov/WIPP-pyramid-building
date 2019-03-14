@@ -12,3 +12,7 @@ We would then be able to mount this directory and run the algorithm as intended.
 from the container-init.sh script
 
 ## Trim down version by just copying the compiled sources.
+
+## Document usage/parameters.
+
+## Add parameters to descriptor

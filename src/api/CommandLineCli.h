@@ -55,6 +55,9 @@ int pyramidBuilding(int argc, const char** argv)
         TCLAP::UnlabeledValueArg<std::string>  inputDirectoryArg( "directory", "input images directory", true, "","nameString"  );
         cmd.add( inputDirectoryArg );
 
+        TCLAP::UnlabeledValueArg<std::string>  outputDirectoryArg( "output", "output directory", true, "","nameString"  );
+        cmd.add( outputDirectoryArg );
+
         TCLAP::ValueArg<std::string>  inputVectorArg( "v", "vector", "stitching vector (global positions)", true, "","nameString"  );
         cmd.add(inputVectorArg);
 
@@ -78,6 +81,7 @@ int pyramidBuilding(int argc, const char** argv)
         cmd.parse( argc, argv );
 
         std::string inputDir = inputDirectoryArg.getValue();
+        std::string outputDir = outputDirectoryArg.getValue();
         std::string inputVector = inputVectorArg.getValue();
         std::string pyramidName = nameArg.getValue();
         std::string format = formatArg.getValue();
@@ -91,6 +95,7 @@ int pyramidBuilding(int argc, const char** argv)
         }
 
         std::cout << inputDirectoryArg.getDescription() << ": " << inputDir << std::endl;
+        std::cout << outputDirectoryArg.getDescription() << ": " << outputDir << std::endl;
         std::cout << inputVectorArg.getDescription() << ": "  << inputVector << std::endl;
         std::cout << tilesizeArg.getDescription() << ": "  << tilesize << std::endl;
         std::cout << nameArg.getDescription() << ": " << pyramidName << std::endl;
@@ -111,7 +116,7 @@ int pyramidBuilding(int argc, const char** argv)
         options->setBlendingMethod(b);
         options->setDepth(d);
 
-        auto builder = new PyramidBuilding(inputDir,inputVector,options);
+        auto builder = new PyramidBuilding(inputDir,inputVector,outputDir, options);
         builder->build();
 
 
