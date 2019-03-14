@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.7)
 project(pyramidBuilding CXX)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -30,9 +30,12 @@ if(NVTX_FOUND)
     link_libraries(${NVTX_LIBRARIES})
 endif()
 
+# TODO CHANGE? SHOULD KEEP THIS DEPENDENCY? REMOVE IT? SWITCH TO OPENCV2?
 find_package(OpenCV 3 REQUIRED)
 link_libraries(${OpenCV_LIBRARIES})
 message("OpenCV Version: ${OpenCV_VERSION}")
+
+#TODO FIX tclap is also a dependency (NOT DECLARED YET)
 
 if(APPLE)
     link_directories(/usr/local/Cellar/llvm/7.0.1/lib/)
@@ -54,5 +57,5 @@ add_executable(testbasePerfMultiThread testBasePerfMultiThread.cpp ${ALL_SRCS} $
 add_executable(testbasePerf testBasePerf.cpp ${ALL_SRCS} ${SOURCES} testBasePerf.h)
 add_executable(stitching testStitchingVectorParser.cpp ${ALL_SRCS} ${SOURCES})
 add_executable(libtiff testLibtiff.cpp ${ALL_SRCS} ${SOURCES} src/utils/StitchedFOVTileLoader.h src/tasks/WriteTiffTileTask.h)
-add_executable(pyramidBuilding testPyramidBuilding.cpp ${ALL_SRCS} ${SOURCES})
+add_executable(main main.cpp ${ALL_SRCS} ${SOURCES})
 add_executable(pyramidBuildingCLITest PyramidBuildingCLITest.cpp ${ALL_SRCS} ${SOURCES})
