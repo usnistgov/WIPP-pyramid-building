@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #make sure libs are up -to-date
 apt-get update
 apt-get install cmake
@@ -53,8 +54,10 @@ git clone https://gitlab.nist.gov/gitlab/gerardin/pyramid-building.git
 cd pyramid-building
 mkdir build && cd build
 cmake ..
-make pyramidBuildingCLITest
+make main
 
+# We will mount the host input dir in this directory.
+mkdir /tmp/inputs
 
 #Create a user and a group wipp with UID/GID of 1000:1000
 MAIN_GROUP=wipp
