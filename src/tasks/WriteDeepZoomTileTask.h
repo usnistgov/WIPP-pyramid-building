@@ -34,11 +34,11 @@ public:
         filesystem::path path = _pathOut;
 
         if(! filesystem::exists(path)) {
-                filesystem::create_directory(path);
+                filesystem::create_directories(path);
         }
 
         for(int i= 0; i < nbPyramidLevel; i++){
-            filesystem::create_directory(path / std::to_string(i) );
+            filesystem::create_directories(path / std::to_string(i) );
         }
 
     }

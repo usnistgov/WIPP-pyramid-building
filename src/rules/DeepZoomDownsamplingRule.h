@@ -15,7 +15,16 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include "../api/Datatype.h"
+#include <experimental/filesystem>
 
+using namespace std::experimental;
+/***
+ * This task is executed only once when a data is received fulfilling the condition (level == this->numLevel -1).
+ * The reason is that deepzoom expects extra pyramid levels.
+ * Deepzoom needs the downsampling to continue until a 1x1 pixel tile is generated.
+ * We downsample the top level tile, halving its dimension and adding a new level then repeat the process until we generate a 1x1 tile.
+ * @tparam T The depth of the output image.
+ */
 template <class T>
 class DeepZoomDownsamplingRule : public htgs::IRule<Tile<T>, Tile<T>> {
 
@@ -48,12 +57,12 @@ public:
             for(int i = (int)this->numLevel; i < maxDeepZoomLevel; i++){
 
                 int l = this->maxDeepZoomLevel - 1 - i;
-                std::string level = std::to_string(l);
+                std::string level_string = std::to_string(l);
 
                 filesystem::path path = _pathOut;
-                auto dirPath = path / level;
+                auto dirPath = path / level_string;
                 if(! filesystem::exists(dirPath)) {
-                    filesystem::create_directory(dirPath);
+                    filesystem::create_directories(dirPath);
                 }
 
                 if(l > 1){

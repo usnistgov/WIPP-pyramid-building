@@ -205,8 +205,9 @@ public:
         //TODO CHECK for now we link to the writeTask but do not use it. We could.
         // If large latency in write, it could be worthwhile. Otherwise thread management will dominate.
         if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
+            auto outputPath = filesystem::path(_outputDir) / (pyramidName + "_files");
             auto deepzoomDownsamplingRule = new DeepZoomDownsamplingRule<px_t>(numTileCol, numTileRow, deepZoomLevel,
-                                                                               pyramidName + "_files", this->options->getDepth());
+                                                                               outputPath, this->options->getDepth());
             graph->addRuleEdge(bookkeeper, deepzoomDownsamplingRule,
                                writeTask); //generating extra tiles up to 1x1 pixel to satisfy deepzoom format
         }

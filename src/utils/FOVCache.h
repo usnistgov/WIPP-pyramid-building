@@ -143,6 +143,7 @@ private:
                     case 64:loadTile<uint64_t>(buf, region, rowMin, colMin);
                         break;
                     default:
+                        std::cerr << "bitsPerSample" << this->_bitsPerSample << "is unknown or unsupported" << std::endl;
                         exit(3);
                 }
                 break;
@@ -157,6 +158,7 @@ private:
                     case 64:loadTile<int64_t>(buf, region, rowMin, colMin);
                         break;
                     default:
+                        std::cerr << "bitsPerSample" << this->_bitsPerSample << "is unknown or unsupported" << std::endl;
                         exit(3);
                 }
                 break;
@@ -171,10 +173,12 @@ private:
                     case 64:loadTile<double>(buf, region, rowMin, colMin);
                         break;
                     default:
+                        std::cerr << "bitsPerSample" << this->_bitsPerSample << "is unknown or unsupported" << std::endl;
                         exit(3);
                 }
                 break;
             default:
+                std::cerr << "sampleFormat" << this->_sampleFormat << "is unknown or unsupported" << std::endl;
                 exit(2);
         }
     }
