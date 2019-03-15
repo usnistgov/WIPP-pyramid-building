@@ -10,4 +10,4 @@ VagrantFile
 CMakeFiles/
 
 webapp-test/node_modules
-output
+outputs

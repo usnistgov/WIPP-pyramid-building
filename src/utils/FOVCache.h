@@ -100,14 +100,15 @@ private:
     TIFF*
             _tiff;
 
+    short _bitsPerSample = 0,
+          _samplePerPixel = 0,
+          _sampleFormat = 0;
 
     uint32_t
-            _bitsPerSample,
-            _sampleFormat,
-            _tileHeight,
-            _tileWidth,
-            _FOVHeight,
-            _FOVWidth;
+            _tileHeight = 0,
+            _tileWidth = 0,
+            _FOVHeight = 0,
+            _FOVWidth = 0;
 
     template<typename FileType>
     void loadTile(tdata_t src, T *dest, uint32_t rowMin, uint32_t colMin) {
@@ -187,7 +188,6 @@ private:
         auto fullPath = _directory + filename;
         auto file = fullPath.c_str();
         _tiff = TIFFOpen(file, "r");
-        uint32_t samplePerPixel = 0;
         T *region = nullptr;
         if (_tiff) {
             // Load/parse header
@@ -195,7 +195,7 @@ private:
             TIFFGetField(_tiff, TIFFTAG_IMAGELENGTH, &_FOVHeight);
             TIFFGetField(_tiff, TIFFTAG_TILEWIDTH, &_tileWidth);
             TIFFGetField(_tiff, TIFFTAG_TILELENGTH, &_tileHeight);
-            TIFFGetField(_tiff, TIFFTAG_SAMPLESPERPIXEL, &samplePerPixel);
+            TIFFGetField(_tiff, TIFFTAG_SAMPLESPERPIXEL, &_samplePerPixel);
             TIFFGetField(_tiff, TIFFTAG_BITSPERSAMPLE, &_bitsPerSample);
             TIFFGetField(_tiff, TIFFTAG_SAMPLEFORMAT, &_sampleFormat);
 
