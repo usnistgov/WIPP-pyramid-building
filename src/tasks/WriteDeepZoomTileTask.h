@@ -38,7 +38,9 @@ public:
         }
 
         for(int i= 0; i < nbPyramidLevel; i++){
-            filesystem::create_directories(path / std::to_string(i) );
+            if(! filesystem::exists(path / std::to_string(i))) {
+                filesystem::create_directories(path / std::to_string(i));
+            }
         }
 
     }

@@ -61,7 +61,7 @@ public:
         offsets = new std::vector<uint64_t>(info->getNumLevel());
 
         for(size_t l = 0;  l< info->getNumLevel(); l++){
-            auto fullPath = path / (pyramidName + "_" + std::to_string(l) + ".tif");
+            auto fullPath = path / (pyramidName + ".tif");
             auto file = fullPath.c_str();
 
             if(l == 0){

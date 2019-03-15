@@ -212,7 +212,7 @@ public:
                                writeTask); //generating extra tiles up to 1x1 pixel to satisfy deepzoom format
         }
 
-        auto tiledTiffWriteTask = new WriteTiffTileTask<px_t>(1,pyramidName, pyramidName, options->getDepth(), gridGenerator);
+        auto tiledTiffWriteTask = new WriteTiffTileTask<px_t>(1,_outputDir, pyramidName, options->getDepth(), gridGenerator);
 
         graph->addRuleEdge(bookkeeper, writeRule, writeTask); //exiting the graph;
         graph->addRuleEdge(bookkeeper, writeRule, tiledTiffWriteTask);
