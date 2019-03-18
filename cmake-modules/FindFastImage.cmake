@@ -22,17 +22,6 @@ include(CheckCXXCompilerFlag)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_XX_STANDARD_REQUIRED ON)
 
-# Compiler Test
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-if (NOT COMPILER_SUPPORTS_CXX11)
-    if (FastImage_FIND_REQUIRED)
-        message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler for FastImage.")
-    else ()
-        message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler for FastImage.")
-    endif ()
-    SET(FastImage_FOUND OFF)
-endif ()
-
 #Chech FastImage dependencies
 if (FastImage_FIND_QUIETLY)
     find_package(HTGS QUIET)

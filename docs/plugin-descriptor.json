@@ -12,33 +12,79 @@
       "options": {
         "format": "tiledtiff"
       },
-      "description": "Collections of partial Fields Of View (FOVs)."
+      "description": "Images : Collections of partial Fields Of View (FOVs)."
     },
     {
-      "name": "stitchingVector",
+      "name": "outputPath",
+      "type": "string",
+      "description": "Output Path : where the pyramid should be created."
+    },
+    {
+      "name": "vector",
       "type": "stitchingVector",
-      "description": "Stitching vector that describes partial FOV positions in the full image."
+      "description": "Stitching Vector : describes partial FOV positions in the full image."
+    },
+    {
+      "name": "depth",
+      "type": "string",
+      "description": "Image Depth : The format is which each pixel is encoded in the output."
+    },
+    {
+      "name": "tileSize",
+      "type": "number",
+      "description": "TileSize : The width/length (in pixel) of the square tiles we generate in output."
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "description": "Pyramid Name : the name of the pyramid we generate in output."
+    },
+    {
+      "name": "blendingMethod",
+      "type": "string",
+      "description": "Blending Method : strategy to handle the blending of overlapping tiles."
     }
+
   ],
   "outputs": [
     {
       "name": "output",
       "type": "pyramid",
       "options": {
-        "format": "deepZoom"
+        "format": "Output : deepZoom pyramid of png format."
       },
       "description": "Output Pyramid in DeepZoom format."
     }
   ],
   "ui": [
     {
+      "key": "inputs.name",
+      "title": "Pyramid Name"
+    },
+    {
       "key": "inputs.images",
       "title": "Image Collection: ",
       "description": "Pick a collection..."
     },
     {
-      "key": "inputs.stitchingVector",
-      "title": "stitching Vector"
+      "key": "inputs.vector",
+      "title": "Stitching Vector"
+    },
+    {
+      "key": "inputs.outputPath",
+      "title": "Output Path"
+    },
+    {
+      "key": "inputs.tileSize",
+      "title": "Tile Size"
+    },
+    {
+      "key": "inputs.depth",
+      "title": "Image Depth"
+    },
+    {
+      "key": "inputs.blendingMethod",
+      "title": "Blending Method"
     }
   ]
 }
