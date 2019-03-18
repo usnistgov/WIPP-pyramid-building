@@ -9,39 +9,46 @@
     {
       "name": "images",
       "type": "collection",
+      "required": "true",
       "options": {
         "format": "tiledtiff"
       },
       "description": "Images : Collections of partial Fields Of View (FOVs)."
     },
     {
-      "name": "outputPath",
+      "name": "output",
       "type": "string",
+      "required": "true",
       "description": "Output Path : where the pyramid should be created."
     },
     {
       "name": "vector",
       "type": "stitchingVector",
+      "required": "true",
       "description": "Stitching Vector : describes partial FOV positions in the full image."
     },
     {
       "name": "depth",
       "type": "string",
+      "required": "false",
       "description": "Image Depth : The format is which each pixel is encoded in the output."
     },
     {
-      "name": "tileSize",
+      "name": "tilesize",
       "type": "number",
+      "required": "false",
       "description": "TileSize : The width/length (in pixel) of the square tiles we generate in output."
     },
     {
       "name": "name",
       "type": "string",
+      "required": "false",
       "description": "Pyramid Name : the name of the pyramid we generate in output."
     },
     {
-      "name": "blendingMethod",
+      "name": "blending",
       "type": "string",
+      "required": "false",
       "description": "Blending Method : strategy to handle the blending of overlapping tiles."
     }
 
@@ -63,19 +70,18 @@
     },
     {
       "key": "inputs.images",
-      "title": "Image Collection: ",
-      "description": "Pick a collection..."
+      "title": "Image Directory"
     },
     {
       "key": "inputs.vector",
       "title": "Stitching Vector"
     },
     {
-      "key": "inputs.outputPath",
-      "title": "Output Path"
+      "key": "inputs.output",
+      "title": "Output Directory"
     },
     {
-      "key": "inputs.tileSize",
+      "key": "inputs.tilesize",
       "title": "Tile Size"
     },
     {
@@ -83,7 +89,7 @@
       "title": "Image Depth"
     },
     {
-      "key": "inputs.blendingMethod",
+      "key": "inputs.blending",
       "title": "Blending Method"
     }
   ]

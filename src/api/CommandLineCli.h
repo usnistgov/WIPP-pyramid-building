@@ -52,14 +52,14 @@ int pyramidBuilding(int argc, const char** argv)
     try {
         TCLAP::CmdLine cmd("Pyramid Building", ' ', "1.0");
 
-        TCLAP::UnlabeledValueArg<std::string>  inputDirectoryArg( "directory", "input images directory", true, "","nameString"  );
+        TCLAP::ValueArg<std::string>  inputDirectoryArg("i","images", "input images directory", true, "","nameString"  );
         cmd.add( inputDirectoryArg );
-
-        TCLAP::UnlabeledValueArg<std::string>  outputDirectoryArg( "output", "output directory", true, "","nameString"  );
-        cmd.add( outputDirectoryArg );
 
         TCLAP::ValueArg<std::string>  inputVectorArg( "v", "vector", "stitching vector (global positions)", true, "","nameString"  );
         cmd.add(inputVectorArg);
+
+        TCLAP::ValueArg<std::string>  outputDirectoryArg("o", "output", "output directory", true, "","nameString"  );
+        cmd.add( outputDirectoryArg );
 
         //TODO CHECK. Let PyramidBuilding take care of defaults?
         TCLAP::ValueArg<int> tilesizeArg("t","tilesize","Tile Size",false, 256, "int");

@@ -31,7 +31,7 @@ int main(int argc, const char** argv)
 //    uint32_t tilesize = 256;
 
     std::string vector = "/Users/gerardin/Documents/projects/pyramidio/pyramidio/src/test/resources/dataset2/stitching_vector/tiled-pc/img-global-positions-1.txt";
-    std::string directory = "/Users/gerardin/Documents/projects/pyramidio/pyramidio/src/test/resources/dataset2/images/tiled-pc/";
+    std::string inputDirectory = "/Users/gerardin/Documents/projects/pyramidio/pyramidio/src/test/resources/dataset2/images/tiled-pc/";
     uint32_t tilesize = 1024;
 
 //    std::string vector = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset03/stitching_vector/img-global-positions-1.txt";
@@ -50,14 +50,16 @@ int main(int argc, const char** argv)
 //    std::string directory = "/home/gerardin/Documents/images/dataset6/images/";
 //    uint32_t tilesize = 1024;
 
-    std::string output = filesystem::current_path().string();
+    std::string outputDirectory = filesystem::current_path().string();
 
+    std::string images = "-i " + inputDirectory;
+    std::string output = "-o " + outputDirectory;
     std::string vector_option = "-v " + vector;
     std::string tilesize_option = "-t " + std::to_string(tilesize);
 
     std::vector<const char*> new_argv(argv, argv + argc);
 
-    new_argv.push_back(directory.c_str());
+    new_argv.push_back(images.c_str());
     new_argv.push_back(output.c_str());
     new_argv.push_back(vector_option.c_str());
     new_argv.push_back(tilesize_option.c_str());
