@@ -100,11 +100,11 @@ public:
         auto dir = TIFFSetDirectory(_tiff, (uint16_t)level);
 
         if(dir != 1){
-            std::cerr << "error while trying to access tiff directory " << level << std::endl;
+            DLOG(FATAL) << "error while trying to access tiff directory " << level << std::endl;
         }
         TIFF* tiff = _tiff;
 
-        std::cout << "printing tile in directory : " << std::to_string(dir) << std::endl;
+        VLOG(3) << "printing tile in directory : " << std::to_string(dir) << std::endl;
 
         T* tile = nullptr;
 

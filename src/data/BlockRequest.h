@@ -40,7 +40,7 @@ public:
                 blockType = BlockType::Full;
                 break;
             default:
-                std::cerr << "fatal error. Unknown block Request Type." << std::endl;
+                DLOG(FATAL) << "fatal error. Unknown block Request Type." << std::endl;
                 exit(1);
         }
     }

@@ -25,20 +25,20 @@ public:
 
     //TODO MOVE TO UTILS. C++ WAY?
     void print(std::string title, T* data, size_t w, size_t h){
-        std::cout << title << std::endl;
+        VLOG(2) << title << std::endl;
         for (size_t i = 0; i < h; ++i){
             for(size_t j = 0; j < w; ++j){
-                std::cout << std::setw(3) << (int)(data[i * w + j]) << " ";
+                VLOG(2) << std::setw(3) << (int)(data[i * w + j]) << " ";
             }
-            std::cout << std::endl;
+            VLOG(2) << std::endl;
         }
-        std::cout << std::endl;
+        VLOG(2) << std::endl;
     }
 
     void executeTask(std::shared_ptr<BlockRequest<T>> data) override {
         auto block = data->getBlock();
 
-        std::cout << "Create Tile Task - " << *data.get() << std::endl;
+        VLOG(2) << "Create Tile Task - " << *data.get() << std::endl;
 
         size_t level = block[0]->getLevel() + 1;
         size_t row = block[0]->getRow() / 2;
@@ -101,7 +101,7 @@ public:
                 downsampleData = generateDownsampleData(newTileData, width, height);
                 break;
             default:
-                std::cerr << "block was malformed. Size : " << block.size() << std::endl;
+                DLOG(FATAL) << "block was malformed. Size : " << block.size() << std::endl;
                 exit(1);
         }
 

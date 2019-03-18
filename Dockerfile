@@ -35,6 +35,10 @@ cd opencv-3.4.5 ;\
 pwd;\
 mkdir build && cd build ;\
 cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local .. ;\
+#TODO try to reduce opencv size but fails so far
+#cmake -D BUILD_LIST=core,imgproc,imgcodecs  -D CMAKE_BUILD_TYPE=Release \
+#-D BUILD_EXAMPLES=OFF -D BUILD_opencv_apps=OFF -D BUILD_DOCS=OFF \
+#-D BUILD_PERF_TESTS=OFF -D BUILD_TESTS=OFF  -D CMAKE_INSTALL_PREFIX=/usr/local .. ;\
 make -j7 ;\
 make install ;\
 \

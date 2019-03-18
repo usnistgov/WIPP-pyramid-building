@@ -18,7 +18,7 @@ void task(std::string msg){
     auto fovReader = new FOVReader<uint16_t>();
     fovReader->readAndForgetFOV(msg.c_str());
     delete fovReader;
-    std::cout << msg << std::endl;
+    VLOG(2) << msg << std::endl;
 
 }
 
@@ -46,9 +46,9 @@ int main()
     std::queue<std::string> threads;
 
     for (const auto & entry : filesystem::directory_iterator(directory)) {
-        std::cout << entry.path() << std::endl;
+        VLOG(2) << entry.path() << std::endl;
         std::string file = entry.path().string();
-        std::cout << file << std::endl;
+        VLOG(2) << file << std::endl;
 
     // fovReader->readFOV(file.c_str());
         auto inputFile = directory + entry.path().filename().string();
@@ -73,7 +73,7 @@ int main()
     }
 
     auto end = std::chrono::high_resolution_clock::now();
-    std::cout << "Execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " mS" << std::endl;
+    VLOG(2) << "Execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " mS" << std::endl;
 
 
     return 0;
@@ -101,9 +101,9 @@ int main2(){
     std::vector<std::thread> threads(5000);
 
     for (const auto & entry : filesystem::directory_iterator(directory)) {
-        std::cout << entry.path() << std::endl;
+        VLOG(2) << entry.path() << std::endl;
         std::string file = entry.path().string();
-        std::cout << file << std::endl;
+        VLOG(2) << file << std::endl;
 
         // fovReader->readFOV(file.c_str());
         auto outputFile = filesystem::current_path() / "testPerfOutput/" / entry.path().filename();
@@ -125,7 +125,7 @@ int main2(){
     delete fovReader;
 
     auto end = std::chrono::high_resolution_clock::now();
-    std::cout << "Execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " mS" << std::endl;
+    VLOG(2) << "Execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " mS" << std::endl;
 
 
     return 0;

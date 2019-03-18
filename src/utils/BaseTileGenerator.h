@@ -21,7 +21,7 @@
 #include "FOVCache.h"
 #include "Blender.h"
 
-#define DEBUG(x) do { std::cerr << x << std::endl; } while (0)
+#define DEBUG(x) do { DLOG(FATAL) << x << std::endl; } while (0)
 
 using namespace std::experimental;
 
@@ -58,7 +58,7 @@ public:
      */
     Tile<T>* generateTile(std::pair<size_t, size_t> index){
 
-        std::cout << "generating base tile at index (" << index.first << "," << index.second << ")" << std::endl;
+        VLOG(2) << "generating base tile at index (" << index.first << "," << index.second << ")" << std::endl;
 
         auto row = index.first;
         auto col = index.second;
@@ -75,7 +75,7 @@ public:
         //It should never happen with real data, but we might have missing tiles or have so much overlap between FOVs that
         //some gap appears in the image. If this is the case, we generate an empty tile.
         if(it == grid.end()){
-            DEBUG("A gap was found in the grid of tiles at (" + std::to_string(index.first) + "," + std::to_string(index.second) + "). Generating a empty tile.");
+            DLOG(WARNING) << "A gap was found in the grid of tiles at (" + std::to_string(index.first) + "," + std::to_string(index.second) + "). Generating a empty tile." << std::endl;
             return new Tile<T>(0, index.first,index.second, pyramidTileWidth, pyramidTileHeight, tile);
         }
 
@@ -90,7 +90,7 @@ public:
             auto extension = Helper::getExtension(filename);
 
             if(extension != "tiff" && extension != "tif") {
-                std::cerr << "File Format not recognized !" << std::endl;
+                DLOG(FATAL) << "File Format not recognized !" << std::endl;
                 exit(1);
             }
 
@@ -99,8 +99,8 @@ public:
 
                 T* image = fovsCache->getFOV(filename);
 
-                std::cout << "fovCacheCount :  " + std::to_string(fovsCache->getCacheCount()) << std::endl;
-            std::cout << " max fovCacheCount :  " + std::to_string(fovsCache->getCacheMaxCount()) << std::endl;
+                VLOG(3) << "fovCacheCount :  " + std::to_string(fovsCache->getCacheCount()) << std::endl;
+            VLOG(3) << " max fovCacheCount :  " + std::to_string(fovsCache->getCacheMaxCount()) << std::endl;
 
                 auto destOffset = tileOverlap.y * pyramidTileWidth + tileOverlap.x;
 
@@ -119,7 +119,7 @@ public:
 
         } //DONE generating the pyramid tile
 
-        std::cout << "base tile generated at index (" << index.first << "," << index.second << ")" << std::endl;
+        VLOG(2) << "Base tile generated (" << index.first << "," << index.second << ")" << std::endl;
 
         return new Tile<T>(0, index.first,index.second, pyramidTileWidth, pyramidTileHeight, tile);
     }

@@ -12,14 +12,6 @@
 #include <iostream>
 #include <FastImage/api/FastImage.h>
 #include <FastImage/TileLoaders/GrayscaleTiffTileLoader.h>
-#include "../utils/Helper.h"
-#include "../rules/WriteTileRule.h"
-#include "../tasks/Write8UPngTileTask.h"
-#include "../rules/PyramidRule.h"
-#include "../tasks/CreateTileTask.h"
-#include "../tasks/BaseTileTask.h"
-#include "../utils/MatrixAllocator.h"
-#include "../data/Tile.h"
 #include <htgs/log/TaskGraphSignalHandler.hpp>
 #define uint64 uint64_hack_
 #define int64 int64_hack_
@@ -27,6 +19,11 @@
 #undef uint64
 #undef int64
 #include <assert.h>
+#include <string>
+#include <sstream>
+#include <experimental/filesystem>
+#include <glog/logging.h>
+
 #include "../data/TileRequest.h"
 #include "../utils/SingleTiledTiffWriter.h"
 #include "../utils/GridGenerator.h"
@@ -35,9 +32,14 @@
 #include "../rules/DeepZoomDownsamplingRule.h"
 #include "./Datatype.h"
 #include "../tasks/WriteTiffTileTask.h"
-#include <string>
-#include <sstream>
-#include <experimental/filesystem>
+#include "../utils/Helper.h"
+#include "../rules/WriteTileRule.h"
+#include "../tasks/Write8UPngTileTask.h"
+#include "../rules/PyramidRule.h"
+#include "../tasks/CreateTileTask.h"
+#include "../tasks/BaseTileTask.h"
+#include "../utils/MatrixAllocator.h"
+#include "../data/Tile.h"
 
 using namespace std::experimental;
 
@@ -146,6 +148,8 @@ public:
     template<typename px_t>
     void _build(){
 
+        VLOG(1) << "generating pyramid...";
+
         size_t nbThreadsPerTask = 10;
 
         auto begin = std::chrono::high_resolution_clock::now();
@@ -237,24 +241,24 @@ public:
     for(size_t j = 0; j < numberBlockHeight; j++){
             for(size_t i = 0; i < numberBlockWidth; i++){
                 if(2*i < numTileCol && 2*j < numTileRow) {
-                    std::cout << 2*j << "," << 2*i << std::endl;
+                    VLOG(2) << "requesting tile (" << 2*j << "," << 2*i << ")" << std::endl;
                     auto tileRequest = new TileRequest(2 * j, 2 * i);
                     graph->produceData(tileRequest);
                 }
                 if(2*i+1 < numTileCol) {
-                    std::cout << 2 * j << "," << 2 * i + 1 << std::endl;
+                    VLOG(2) << "requesting tile ("  << 2 * j << "," << 2 * i + 1 << ")" << std::endl;
                     auto tileRequest = new TileRequest(2 * j, 2 * i + 1);
                     graph->produceData(tileRequest);
                 }
 
                 if(2*j+1 < numTileRow) {
-                    std::cout << 2 * j + 1 << "," << 2 * i << std::endl;
+                    VLOG(2) << "requesting tile ("  << 2 * j + 1 << "," << 2 * i << ")" << std::endl;
                     auto tileRequest = new TileRequest(2 * j + 1, 2 * i);
                     graph->produceData(tileRequest);
                 }
 
                 if(2*j+1 < numTileRow && 2*i+1 < numTileCol) {
-                    std::cout << 2 * j + 1 << "," << 2 * i + 1 << std::endl;
+                    VLOG(2) << "requesting tile ("  << 2 * j + 1 << "," << 2 * i + 1 << ")" << std::endl;
                     auto tileRequest = new TileRequest(2 * j + 1, 2 * i + 1);
                     graph->produceData(tileRequest);
                 }
@@ -264,20 +268,12 @@ public:
 
         graph->finishedProducingData();
 
-    while(!graph->isOutputTerminated()){
-            auto r = graph->consumeData();
-            if(r == nullptr){
-                break;
-            }
-            //  std::cout << "output : " << r->getLevel() << ": " << r->getRow() << "," << r->getCol() << std::endl;
-        }
-
         if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
             std::ostringstream oss;
-            oss << "<?xml version=\"1.0\" encoding=\"utf-8\"?><Image TileSize=\"" << pyramidTileSize << "\" Overlap=\""
+            oss << R"(<?xml version="1.0" encoding="utf-8"?><Image TileSize=")" << pyramidTileSize << "\" Overlap=\""
                 << overlap
-                << "\" Format=\"" << format << "\" xmlns=\"http://schemas.microsoft.com/deepzoom/2008\"><Size Width=\""
-                << gridGenerator->getFullFovWidth() << "\" Height=\"" << gridGenerator->getFullFovHeight()
+                << "\" Format=\"" << format << R"(" xmlns="http://schemas.microsoft.com/deepzoom/2008"><Size Width=")"
+                    << gridGenerator->getFullFovWidth() << "\" Height=\"" << gridGenerator->getFullFovHeight()
                 << "\"/></Image>";
 
             std::ofstream outFile;
@@ -287,11 +283,12 @@ public:
         }
 
 
-        std::cout << "read count : " << generator->getFovsCache()->readCount << std::endl;
-        std::cout << "total number of  reads necessary : " << gridGenerator->getCounter() << std::endl;
+        VLOG(3) << "read count : " << generator->getFovsCache()->readCount << std::endl;
+        VLOG(3) << "total number of  reads necessary : " << gridGenerator->getCounter() << std::endl;
 
-        std::cout << "we should be done" << std::endl;
         runtime->waitForRuntime();
+
+        VLOG(1) << "done generating pyramid." << std::endl;
 
         graph->writeDotToFile("graph", DOTGEN_COLOR_COMP_TIME);
 
@@ -300,7 +297,7 @@ public:
     delete generator;
 
         auto end = std::chrono::high_resolution_clock::now();
-        std::cout << "Execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " mS" << std::endl;
+        VLOG(1) << "Execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " mS" << std::endl;
 
         }
 

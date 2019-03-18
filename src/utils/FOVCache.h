@@ -9,11 +9,14 @@
 #include <string>
 #include <map>
 #include <mutex>
-#include <FastImage/api/FastImage.h>
-#include <FastImage/TileLoaders/GrayscaleTiffTileLoader.h>
+#include <glog/logging.h>
+#include <tiffio.h>
+
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgcodecs.hpp>
+
 #include <experimental/filesystem>
+
 
 using namespace std::experimental;
 
@@ -38,13 +41,13 @@ public:
         auto it = fovsCache.find(filename);
         if(it == fovsCache.end()) {
             readCount++;
-            std::cout << "FOV not already loaded : " << filename << std::endl;
+            VLOG(3) << "FOV not already loaded : " << filename << std::endl;
             fov = loadFullFOV(filename);
             fovsCache[filename] = fov;
             if(fovsCache.size() > cacheMaxCount) {cacheMaxCount = fovsCache.size();}
         }
         else{
-            std::cout << "FOV already loaded : " << filename <<  std::endl;
+            VLOG(3) << "FOV already loaded : " << filename <<  std::endl;
             fov = it->second;
         }
 
@@ -58,12 +61,10 @@ public:
         auto count = --fovsUsageCount[filename];
 
         if(count == 0) {
-            //TODO CHECK we should eventually cache the fast image instances since they are used for each overlap.
-            //depending on the overlap factor, some performance should be expected.
-            std::cout << "delete " << filename << std::endl;
+            VLOG(3) << "delete " << filename << std::endl;
             auto it = fovsCache.find(filename);
             if(it == fovsCache.end()) {
-                std::cout << "error in cache implementation " << filename << std::endl;
+                LOG(FATAL) << "error in cache implementation " << filename << std::endl;
                 exit(1);
             }
             delete it->second;
@@ -84,7 +85,7 @@ public:
 
 private:
 
-    size_t cacheMaxCount;
+    size_t cacheMaxCount = 0;
 
     std::mutex lockCount;
 
@@ -144,7 +145,7 @@ private:
                     case 64:loadTile<uint64_t>(buf, region, rowMin, colMin);
                         break;
                     default:
-                        std::cerr << "bitsPerSample" << this->_bitsPerSample << "is unknown or unsupported" << std::endl;
+                        LOG(FATAL) << "bitsPerSample" << this->_bitsPerSample << "is unknown or unsupported" << std::endl;
                         exit(3);
                 }
                 break;
@@ -159,7 +160,7 @@ private:
                     case 64:loadTile<int64_t>(buf, region, rowMin, colMin);
                         break;
                     default:
-                        std::cerr << "bitsPerSample" << this->_bitsPerSample << "is unknown or unsupported" << std::endl;
+                        LOG(FATAL) << "bitsPerSample" << this->_bitsPerSample << "is unknown or unsupported" << std::endl;
                         exit(3);
                 }
                 break;
@@ -174,12 +175,12 @@ private:
                     case 64:loadTile<double>(buf, region, rowMin, colMin);
                         break;
                     default:
-                        std::cerr << "bitsPerSample" << this->_bitsPerSample << "is unknown or unsupported" << std::endl;
+                        LOG(FATAL) << "bitsPerSample" << this->_bitsPerSample << "is unknown or unsupported" << std::endl;
                         exit(3);
                 }
                 break;
             default:
-                std::cerr << "sampleFormat" << this->_sampleFormat << "is unknown or unsupported" << std::endl;
+                LOG(FATAL) << "sampleFormat" << this->_sampleFormat << "is unknown or unsupported" << std::endl;
                 exit(2);
         }
     }
@@ -191,6 +192,7 @@ private:
         T *region = nullptr;
         if (_tiff) {
             // Load/parse header
+            // For full reference, see https://www.awaresystems.be/imaging/tiff/tifftags.html
             TIFFGetField(_tiff, TIFFTAG_IMAGEWIDTH, &_FOVWidth);
             TIFFGetField(_tiff, TIFFTAG_IMAGELENGTH, &_FOVHeight);
             TIFFGetField(_tiff, TIFFTAG_TILEWIDTH, &_tileWidth);
@@ -199,7 +201,6 @@ private:
             TIFFGetField(_tiff, TIFFTAG_BITSPERSAMPLE, &_bitsPerSample);
             TIFFGetField(_tiff, TIFFTAG_SAMPLEFORMAT, &_sampleFormat);
 
-            //https://www.awaresystems.be/imaging/tiff/tifftags/sampleformat.html
             region = new T[ _FOVWidth * _FOVHeight ]();
             void* buf = _TIFFmalloc(TIFFTileSize(_tiff));
 
@@ -212,14 +213,6 @@ private:
             _TIFFfree(buf);
             TIFFClose(_tiff);
         }
-
-//        if(! filesystem::exists(filesystem::current_path() / "debugSimpleTile")) {
-//            filesystem::create_directory(filesystem::current_path() / "debugSimpleTile");
-//        }
-//        cv::Mat image(_FOVHeight, _FOVWidth, CV_16UC1, region);
-//     //   counter++;
-//        std::string fullImagePath = filesystem::current_path().string() +  "/debugSimpleTile/" + std::to_string(counter) + ".png";
-//        cv::imwrite(fullImagePath, image);
 
         return region;
 

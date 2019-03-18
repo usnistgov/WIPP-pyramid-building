@@ -25,7 +25,7 @@
 #include <string>
 #include <sstream>
 
-#define DEBUG(x) do { std::cerr << x << std::endl; } while (0)
+#define DEBUG(x) do { DLOG(FATAL) << x << std::endl; } while (0)
 
 typedef uint8_t px_t;
 int main() {
@@ -163,24 +163,24 @@ int main() {
     for(size_t j = 0; j < numberBlockHeight; j++){
         for(size_t i = 0; i < numberBlockWidth; i++){
             if(2*i < numTileCol && 2*j < numTileRow) {
-                std::cout << 2*j << "," << 2*i << std::endl;
+                VLOG(2) << 2*j << "," << 2*i << std::endl;
                 auto tileRequest = new TileRequest(2 * j, 2 * i);
                 graph->produceData(tileRequest);
             }
             if(2*i+1 < numTileCol) {
-                std::cout << 2 * j << "," << 2 * i + 1 << std::endl;
+                VLOG(2) << 2 * j << "," << 2 * i + 1 << std::endl;
                 auto tileRequest = new TileRequest(2 * j, 2 * i + 1);
                 graph->produceData(tileRequest);
             }
 
             if(2*j+1 < numTileRow) {
-                std::cout << 2 * j + 1 << "," << 2 * i << std::endl;
+                VLOG(2) << 2 * j + 1 << "," << 2 * i << std::endl;
                 auto tileRequest = new TileRequest(2 * j + 1, 2 * i);
                 graph->produceData(tileRequest);
             }
 
             if(2*j+1 < numTileRow && 2*i+1 < numTileCol) {
-                std::cout << 2 * j + 1 << "," << 2 * i + 1 << std::endl;
+                VLOG(2) << 2 * j + 1 << "," << 2 * i + 1 << std::endl;
                 auto tileRequest = new TileRequest(2 * j + 1, 2 * i + 1);
                 graph->produceData(tileRequest);
             }
@@ -200,7 +200,7 @@ int main() {
         if(r == nullptr){
             break;
         }
-      //  std::cout << "output : " << r->getLevel() << ": " << r->getRow() << "," << r->getCol() << std::endl;
+      //  VLOG(2) << "output : " << r->getLevel() << ": " << r->getRow() << "," << r->getCol() << std::endl;
     }
 
     //'<?xml version="1.0" encoding="utf-8"?><Image TileSize="254" Overlap="1" Format="jpg" xmlns="http://schemas.microsoft.com/deepzoom/2008"><Size Width="13920" Height="10200"/></Image>';
@@ -217,7 +217,7 @@ int main() {
 
 
 
-    std::cout << "we should be done" << std::endl;
+    VLOG(2) << "we should be done" << std::endl;
     runtime->waitForRuntime();
 
     graph->writeDotToFile("graph", DOTGEN_FLAG_SHOW_ALL_THREADING | DOTGEN_COLOR_COMP_TIME);
@@ -227,7 +227,7 @@ int main() {
     delete generator;
 
     auto end = std::chrono::high_resolution_clock::now();
-    std::cout << "Execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " mS" << std::endl;
+    VLOG(2) << "Execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " mS" << std::endl;
 
 }
 

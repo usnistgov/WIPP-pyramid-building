@@ -28,14 +28,14 @@ public:
     fi::FastImage<T> * getFOVReader(std::string filename){
 
         std::lock_guard<std::mutex> guard(lock);
-        std::cout << "Inside Lock Getting FI: " << filename << std::endl;
+        VLOG(2) << "Inside Lock Getting FI: " << filename << std::endl;
 
 
         fi::FastImage<T> *fi = nullptr;
 
         auto it = fovsCache.find(filename);
         if(it == fovsCache.end()) {
-            std::cout << "FI not already loaded" << std::endl;
+            VLOG(2) << "FI not already loaded" << std::endl;
             fi::ATileLoader<T> *tileLoader = new fi::GrayscaleTiffTileLoader<T>(_directory + filename, 1);
             fi = new fi::FastImage<T>(tileLoader, 0);
             fi->getFastImageOptions()->setNumberOfViewParallel(2500);
@@ -44,7 +44,7 @@ public:
         }
         else{
 
-            std::cout << "FI already loaded" << std::endl;
+            VLOG(2) << "FI already loaded" << std::endl;
             fi = it->second;
         }
 
@@ -60,7 +60,7 @@ public:
         if(count == 0) {
             //TODO CHECK we should eventually cache the fast image instances since they are used for each overlap.
             //depending on the overlap factor, some performance should be expected.
-            std::cout << "delete " << filename << std::endl;
+            VLOG(2) << "delete " << filename << std::endl;
             delete fi;
             fovsCache[filename] = nullptr;
         }

@@ -41,7 +41,7 @@ public:
                     TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
             }
             else {
-                    std::cerr << "The File " << output << " can't be opened." << std::endl;
+                    DLOG(FATAL) << "The File " << output << " can't be opened." << std::endl;
                     exit(1);
             }
     };

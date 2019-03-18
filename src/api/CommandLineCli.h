@@ -8,7 +8,10 @@
 #include <string>
 #include <iostream>
 #include <algorithm>
+#include <glog/logging.h>
+
 #include <tclap/CmdLine.h>
+
 #include "PyramidBuilding.h"
 
 
@@ -48,6 +51,8 @@ BlendingMethod parseBlendingMethod(const std::string blending) {
 
 int pyramidBuilding(int argc, const char** argv)
 {
+
+    google::InitGoogleLogging(argv[0]);
 
     try {
         TCLAP::CmdLine cmd("Pyramid Building", ' ', "1.0");
@@ -94,14 +99,14 @@ int pyramidBuilding(int argc, const char** argv)
             inputDir += "/";
         }
 
-        std::cout << inputDirectoryArg.getDescription() << ": " << inputDir << std::endl;
-        std::cout << outputDirectoryArg.getDescription() << ": " << outputDir << std::endl;
-        std::cout << inputVectorArg.getDescription() << ": "  << inputVector << std::endl;
-        std::cout << tilesizeArg.getDescription() << ": "  << tilesize << std::endl;
-        std::cout << nameArg.getDescription() << ": " << pyramidName << std::endl;
-        std::cout << formatArg.getDescription() << ": " << format << std::endl;
-        std::cout << depthArg.getDescription() << ": " << depth << std::endl;
-        std::cout << blendingArg.getDescription() << ": " << blending << std::endl;
+        VLOG(1) << inputDirectoryArg.getDescription() << ": " << inputDir << std::endl;
+        VLOG(1) << outputDirectoryArg.getDescription() << ": " << outputDir << std::endl;
+        VLOG(1) << inputVectorArg.getDescription() << ": "  << inputVector << std::endl;
+        VLOG(1) << tilesizeArg.getDescription() << ": "  << tilesize << std::endl;
+        VLOG(1) << nameArg.getDescription() << ": " << pyramidName << std::endl;
+        VLOG(1) << formatArg.getDescription() << ": " << format << std::endl;
+        VLOG(1) << depthArg.getDescription() << ": " << depth << std::endl;
+        VLOG(1) << blendingArg.getDescription() << ": " << blending << std::endl;
 
         ImageDepth d = parseImageDepth(depth);
         BlendingMethod b = parseBlendingMethod(blending);
@@ -121,8 +126,8 @@ int pyramidBuilding(int argc, const char** argv)
 
 
     } catch (TCLAP::ArgException &e)  // catch any exceptions
-    { std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl;
-        exit(1);
+    {
+        DLOG(FATAL) << "error: " << e.error() << " for arg " << e.argId() << std::endl;
     }
 
     exit(0);

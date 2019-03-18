@@ -60,16 +60,16 @@ public:
     void executeTask(std::shared_ptr<InputFile> data) override {
         auto fovReader = new FOVReader<T>();
         filesystem::path inputFile = data->getInputFile();
-        std::cout << "reading: " << data->getInputFile().string() << std::endl;
+        VLOG(2) << "reading: " << data->getInputFile().string() << std::endl;
         T* imageData = fovReader->readFOV(inputFile.c_str());
         delete fovReader;
-        std::cout << data->getInputFile().string() << std::endl;
+        VLOG(2) << data->getInputFile().string() << std::endl;
 
         if(imageData!= nullptr) {
             this->addResult(new ImageData<T>(imageData, inputFile));
         }
         else{
-            std::cout << "not a valid image : " << data->getInputFile().string();
+            VLOG(2) << "not a valid image : " << data->getInputFile().string();
         }
     }
 
@@ -92,7 +92,7 @@ public:
     void executeTask(std::shared_ptr<ImageData<T>> data) override {
         auto fovReader = new FOVReader<T>();
         auto outputPathFile = outputPath / ( data->getInputFile().filename().string() + ".png");
-        std::cout << "writing " + data->getInputFile().string() << " to " << outputPathFile.string()  << std::endl;
+        VLOG(2) << "writing " + data->getInputFile().string() << " to " << outputPathFile.string()  << std::endl;
         fovReader->writeFOV(data->getData(), outputPathFile);
         delete fovReader;
         this->addResult(data);

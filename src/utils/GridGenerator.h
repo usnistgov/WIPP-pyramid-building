@@ -19,10 +19,12 @@
 
 #include <opencv/cv.h>
 #include <map>
+#include <assert.h>
+#include <glog/logging.h>
 
 #include "../data/PartialFov.h"
 #include "../api/Datatype.h"
-#include <assert.h>
+
 
 //TODO CHECK Following the previous Java implementation, we expect all FOVs to have the same size and the same tile size.
 //Lifiting this assumption would mean we would need to open each file to get each FOV size.
@@ -91,6 +93,9 @@ public:
         //parse stitching vector
         std::string line;
         std::string pair;
+
+        VLOG(2) << "parsing stitching vector...";
+
         while (std::getline(infile, line)) {
             std::istringstream iss(line);
             if(line == ""){
@@ -101,7 +106,7 @@ public:
                 std::string key, val;
                 std::istringstream iss2(pair);
                 while( std::getline(std::getline(iss2 >> std::ws , key, ':') >> std::ws, val)) {
-                    std::cout << key << "||||||" << val << std::endl;
+                    VLOG(3) << key << ": " << val << std::endl;
 
                     if(key  == "position") {
                         std::regex rgx("\\(([0-9]+), ([0-9]+)\\)");

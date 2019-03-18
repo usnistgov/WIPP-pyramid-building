@@ -37,7 +37,7 @@ int main()
     uint32_t counter =0;
 
     for (const auto & entry : filesystem::directory_iterator(directory)) {
-        std::cout << "input path: " << entry.path().string() << std::endl;
+        VLOG(2) << "input path: " << entry.path().string() << std::endl;
         graph->produceData(new InputFile(entry.path()));
     }
 
@@ -59,7 +59,7 @@ int main()
 
 
     auto end = std::chrono::high_resolution_clock::now();
-    std::cout << "Execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " mS" << std::endl;
+    VLOG(2) << "Execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " mS" << std::endl;
 
 
     return 0;

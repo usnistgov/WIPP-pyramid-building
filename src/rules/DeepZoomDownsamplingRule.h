@@ -164,14 +164,14 @@ private:
 
 
     void print(std::string title, T* data, size_t w, size_t h){
-        std::cout << title << std::endl;
+        VLOG(2) << title << std::endl;
         for (size_t i = 0; i < h; ++i){
             for(size_t j = 0; j < w; ++j){
-                std::cout << std::setw(3) << (int)(data[i * w + j]) << " ";
+                VLOG(2) << std::setw(3) << (int)(data[i * w + j]) << " ";
             }
-            std::cout << std::endl;
+            VLOG(2) << std::endl;
         }
-        std::cout << std::endl;
+        VLOG(2) << std::endl;
     }
 
     size_t numTileCol = 0;

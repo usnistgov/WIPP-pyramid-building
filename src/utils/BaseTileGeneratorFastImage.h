@@ -19,7 +19,7 @@
 #include "../api/Datatype.h"
 #include <experimental/filesystem>
 
-#define DEBUG(x) do { std::cerr << x << std::endl; } while (0)
+#define DEBUG(x) do { DLOG(FATAL) << x << std::endl; } while (0)
 
 using namespace std::experimental;
 
@@ -52,7 +52,7 @@ public:
      */
     Tile<T>* generateTile(std::pair<size_t, size_t> index){
 
-        std::cout << "generating base tile at index (" << index.first << "," << index.second << ")" << std::endl;
+        VLOG(2) << "generating base tile at index (" << index.first << "," << index.second << ")" << std::endl;
 
         auto row = index.first;
         auto col = index.second;
@@ -85,7 +85,7 @@ public:
             auto extension = Helper::getExtension(filename);
 
             if(extension != "tiff" && extension != "tif") {
-                std::cerr << "File Format not recognized !" << std::endl;
+                DLOG(FATAL) << "File Format not recognized !" << std::endl;
                 exit(1);
             }
 
@@ -167,10 +167,10 @@ public:
 
                                 assert( 0 <= index1D && index1D < pyramidTileWidth * pyramidTileHeight);
 
-                                //        std::cout << index1D << ": " << val << std::endl;
+                                //        VLOG(2) << index1D << ": " << val << std::endl;
 
 //                                if(tile[index1D] != 0){
-//                                    std::cout << "overwriting at index " << index1D << " old value : " << tile[index1D] << " with value : " << val << std:: endl;
+//                                    VLOG(2) << "overwriting at index " << index1D << " old value : " << tile[index1D] << " with value : " << val << std:: endl;
 //                                }
 
                                 //TODO Rather inject a blending strategy?
@@ -211,7 +211,7 @@ public:
 
         } //DONE generating the pyramid tile
 
-        std::cout << "base tile generated at index (" << index.first << "," << index.second << ")" << std::endl;
+        VLOG(2) << "base tile generated at index (" << index.first << "," << index.second << ")" << std::endl;
 
         return new Tile<T>(0, index.first,index.second, pyramidTileWidth, pyramidTileHeight, tile);
     }

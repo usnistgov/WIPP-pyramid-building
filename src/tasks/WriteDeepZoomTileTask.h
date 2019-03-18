@@ -59,6 +59,8 @@ public:
         auto outputFilename =  std::to_string(data->getCol()) + "_" + std::to_string(data->getRow()) + ".png";
         auto fullImagePath = dirPath / outputFilename;
 
+        VLOG(2) << "write tile (" << data->getRow() << "," << data->getCol()  << ") at level " << data->getLevel() << " (deepzoom level " << level << ")"  << std::endl;
+
         //TODO CHECK how to clean up? Plus need to be factored
         switch(imageDepth){
 

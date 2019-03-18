@@ -44,10 +44,12 @@ else(APPLE)
     link_libraries(stdc++fs)
 endif(APPLE)
 
+link_libraries(glog)
+
 add_definitions(-DPROFILE)
 
-add_subdirectory(src)
-add_subdirectory(test)
+#add_subdirectory(src)
+#add_subdirectory(test)
 
 #set(ALL_SRCS CACHE INTERNAL "sources" FORCE)
 set(SOURCES src/api/PyramidBuilding.h src/api/CommandLineCli.h src/utils/Helper.cpp src/data/BlockType.cpp src/rules/PyramidRule.h src/tasks/WriteTileTask.h src/utils/SingleTiledTiffWriter.h src/tasks/Write32UTiffTileWriter.h src/tasks/WriteDeepZoomTileTask.h src/rules/DeepZoomDownsamplingRule.h)
@@ -59,3 +61,6 @@ set(SOURCES src/api/PyramidBuilding.h src/api/CommandLineCli.h src/utils/Helper.
 #add_executable(libtiff testLibtiff.cpp ${ALL_SRCS} ${SOURCES} src/utils/StitchedFOVTileLoader.h src/tasks/WriteTiffTileTask.h)
 add_executable(main main.cpp ${ALL_SRCS} ${SOURCES})
 add_executable(pyramidBuildingCLITest PyramidBuildingCLITest.cpp ${ALL_SRCS} ${SOURCES})
+
+target_include_directories(main PUBLIC src)
+target_include_directories(pyramidBuildingCLITest PUBLIC src)

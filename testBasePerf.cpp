@@ -30,9 +30,9 @@ int main()
 
 
     for (const auto & entry : filesystem::directory_iterator(directory)) {
-        std::cout << entry.path() << std::endl;
+        VLOG(2) << entry.path() << std::endl;
         std::string file = entry.path().string();
-        std::cout << file << std::endl;
+        VLOG(2) << file << std::endl;
 
     // fovReader->readFOV(file.c_str());
         auto outputFile = filesystem::current_path() / "testPerfOutput/" / entry.path().filename();
@@ -42,7 +42,7 @@ int main()
     delete fovReader;
 
     auto end = std::chrono::high_resolution_clock::now();
-    std::cout << "Execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " mS" << std::endl;
+    VLOG(2) << "Execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " mS" << std::endl;
 
 
     return 0;

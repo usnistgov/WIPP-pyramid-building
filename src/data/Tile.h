@@ -5,10 +5,13 @@
 #ifndef PYRAMIDBUILDING_TILE_H
 #define PYRAMIDBUILDING_TILE_H
 
+
+#include <glog/logging.h>
 #include <htgs/api/IData.hpp>
 #include <htgs/types/Types.hpp>
 #include <FastImage/api/View.h>
 #include <htgs/api/MemoryData.hpp>
+
 
 template <class T>
 class Tile : public htgs::IData {
@@ -53,7 +56,7 @@ public :
     ~Tile(){
         delete[] _data;
         _data = nullptr;
-        std::cout << "I am dead! " << getRow() << "," << getCol() <<"," << getLevel() << std::endl;
+        VLOG(3) << "I am dead! " << getRow() << "," << getCol() <<"," << getLevel() << std::endl;
     }
 
 

@@ -66,14 +66,6 @@ Benchmark time spend in reading.
 Make sure we have the minimum amount of objects at some point in time.
 
 
-Packaging
-
-Generate a docker image and a plugin description.
-req : any x86 intel instructions on linux distrib
-install dependencies and compile code directly.
-Will make for a fatter image but easier to produce.
-
-
 Benchmarking
 Try different traversals. Probably very minor but let's try.
 Try 10% overlap dataset + Keana Scott nanofibers 40K * 50K 10% overlap.

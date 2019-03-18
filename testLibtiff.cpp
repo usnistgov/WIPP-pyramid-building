@@ -75,19 +75,19 @@ int main()
 //                for (uint32_t row = 0; row < tileHeight; ++row) {
 //                    for (uint32_t col = 0; col < tileWidth; ++col) {
 //                        //  std::copy_n((int8_t *) buf, tileWidth * tileHeight, region + tileY * tileWidth);
-//                      //  std::cout << std::setw(5) << (uint32_t)((uint8_t*)buf)[row * tileWidth + col] << " ";
+//                      //  VLOG(2) << std::setw(5) << (uint32_t)((uint8_t*)buf)[row * tileWidth + col] << " ";
 //                        uint32_t y = tileY + row;
 //                        uint32_t x = tileX + col;
 //                        uint32_t index = y * width + (tileX + col);
 //                        uint8_t value = ((uint8_t*)buf)[row * tileWidth + col];
-//                 //       std::cout << index << ":" << (uint32_t)  value << std::endl;
+//                 //       VLOG(2) << index << ":" << (uint32_t)  value << std::endl;
 //                        if(y<height && x < width) { //those values are not defined for tiles at the border (tile's dimensions are fixed).
 //                            region[index] = value;
 //                        }
 //                    }
-//                    std::cout << "\n";
+//                    VLOG(2) << "\n";
 //                }
-//                std::cout << std::endl;
+//                VLOG(2) << std::endl;
 //            }
 //        }
 
@@ -106,7 +106,7 @@ int main()
                     }
                     std::copy_n((int8_t *) buf + row * tileWidth, tileWidth, region + (tileY + row) * width + tileX);
                 }
-                std::cout << std::endl;
+                VLOG(2) << std::endl;
             }
         }
 
@@ -121,7 +121,7 @@ int main()
         double diskDuration = (std::chrono::duration_cast<std::chrono::nanoseconds>(
                 end - begin).count());
 
-        std::cout << "array copy time : " << diskDuration;
+        VLOG(2) << "array copy time : " << diskDuration;
     }
 
 
