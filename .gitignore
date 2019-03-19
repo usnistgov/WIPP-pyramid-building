@@ -11,3 +11,5 @@ CMakeFiles/
 
 webapp-test/node_modules
 outputs
+
+benchmarks/results
