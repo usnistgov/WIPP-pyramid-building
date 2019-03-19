@@ -227,8 +227,12 @@ public:
 
         auto *runtime = new htgs::TaskGraphRuntime(graph);
 
-        htgs::TaskGraphSignalHandler::registerTaskGraph(graph);
-        htgs::TaskGraphSignalHandler::registerSignal(SIGTERM);
+        #ifdef NDEBUG
+        #else
+            htgs::TaskGraphSignalHandler::registerTaskGraph(graph);
+            htgs::TaskGraphSignalHandler::registerSignal(SIGTERM);
+        #endif
+
 
         runtime->executeRuntime();
 
@@ -290,7 +294,11 @@ public:
 
         VLOG(1) << "done generating pyramid." << std::endl;
 
-        graph->writeDotToFile("graph", DOTGEN_COLOR_COMP_TIME);
+        #ifdef NDEBUG
+        #else
+            graph->writeDotToFile("graph", DOTGEN_COLOR_COMP_TIME);
+        #endif
+
 
     delete runtime;
     delete gridGenerator;
