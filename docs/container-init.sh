@@ -47,6 +47,15 @@ make
 make install
 
 
+#install glog
+git clone https://github.com/google/glog.git
+cd glog
+./autogen.sh
+./configure
+make
+make install
+
+
 # TODO CHANGE - THIS IS A PRIVATE REPO FOR NOW. 
 # THIS NEED TO BE REPLACED BY A DOCKER COPY OR A PUBLIC GITHUB LIB
 cd /tmp
