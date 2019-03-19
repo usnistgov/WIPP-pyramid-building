@@ -89,9 +89,13 @@ fi
 export GLOG_logtostderr=1;
 export GLOG_v=0
 
+EXEC_PATH=/home/gerardin/Documents/pyramidio-java/pyramidio/target
+
+#java -jar pyramidio-1.1.1-SNAPSHOT-jar-with-dependencies.jar /home/gerardin/Documents/images/dataset7/tiled-images /home/gerardin/Documents/images/dataset7/img-global-positions-0.txt /home/gerardin/Documents/pyramidio-java/outputs
+
 DATASET_NAME=${1}
 RUNS=${2-1}
-OUTPUT_DIR=results
+OUTPUT_DIR=/home/gerardin/Documents/pyramidBuilding/benchmarks/results
 
 mkdir -p results
 
@@ -106,6 +110,7 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
             echo "not a linux OS - cannot clear cache";
         fi
 
+echo "ok? $RUNS"
 
 for ((i = 1; i <= $RUNS; i++))
     do
@@ -113,5 +118,9 @@ for ((i = 1; i <= $RUNS; i++))
 #                        sudo bash -c "sync; echo 1 > /proc/sys/vm/drop_caches"
 #            fi
 
-             { time ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
+                cd ${EXEC_PATH}
+                 echo `pwd`
+             { time  java -jar pyramidio-1.1.1-SNAPSHOT-jar-with-dependencies.jar $images $vector $output -t $tilesize ; } 2>> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
 done
+
+echo "done"

@@ -46,8 +46,13 @@ int main(int argc, const char** argv)
 //    std::string inputDirectory = "/home/gerardin/Documents/images/dataset5/images/";
 //    uint32_t tilesize = 1024;
 
-    std::string vector = "/home/gerardin/Documents/images/dataset6/img-global-positions-0.txt";
-    std::string inputDirectory = "/home/gerardin/Documents/images/dataset6/tiled-images/";
+//    std::string vector = "/home/gerardin/Documents/images/dataset6/img-global-positions-0.txt";
+//    std::string inputDirectory = "/home/gerardin/Documents/images/dataset6/tiled-images/";
+//    uint32_t tilesize = 1024;
+
+
+    std::string vector = "/home/gerardin/Documents/images/dataset7/img-global-positions-0.txt";
+    std::string inputDirectory = "/home/gerardin/Documents/images/dataset7/tiled-images/";
     uint32_t tilesize = 1024;
 
     std::string outputDirectory = filesystem::current_path().string();
