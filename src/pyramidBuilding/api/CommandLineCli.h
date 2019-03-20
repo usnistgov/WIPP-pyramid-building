@@ -55,21 +55,20 @@ namespace pb {
             TCLAP::CmdLine cmd("Pyramid Building", ' ', "1.0");
 
             TCLAP::ValueArg<std::string> inputDirectoryArg("i", "images", "input images directory", true, "",
-                                                           "nameString");
+                                                           "filePath");
             cmd.add(inputDirectoryArg);
 
             TCLAP::ValueArg<std::string> inputVectorArg("v", "vector", "stitching vector (global positions)", true, "",
-                                                        "nameString");
+                                                        "filePath");
             cmd.add(inputVectorArg);
 
-            TCLAP::ValueArg<std::string> outputDirectoryArg("o", "output", "output directory", true, "", "nameString");
+            TCLAP::ValueArg<std::string> outputDirectoryArg("o", "output", "output directory", true, "outputs", "filePath");
             cmd.add(outputDirectoryArg);
 
-            //TODO CHECK. Let PyramidBuilding take care of defaults?
-            TCLAP::ValueArg<int> tilesizeArg("t", "tilesize", "Tile Size", false, 256, "int");
+            TCLAP::ValueArg<uint32_t> tilesizeArg("t", "tilesize", "Tile Size", false, 1024, "uint32_t");
             cmd.add(tilesizeArg);
 
-            TCLAP::ValueArg<std::string> nameArg("n", "name", "Pyramid Name", false, "output", "string");
+            TCLAP::ValueArg<std::string> nameArg("n", "name", "Pyramid Name", false, "pyramid", "filename");
             cmd.add(nameArg);
 
             TCLAP::ValueArg<std::string> depthArg("d", "depth", "Image Depth", false, "16U", "string");
@@ -91,7 +90,6 @@ namespace pb {
             std::string format = formatArg.getValue();
             std::string depth = depthArg.getValue();
             std::string blending = blendingArg.getValue();
-            //TODO check if TCLAP accept uint32_t
             uint32_t tilesize = tilesizeArg.getValue();
 
             if (!hasEnding(inputDir, "/")) {

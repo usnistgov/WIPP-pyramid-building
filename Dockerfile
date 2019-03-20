@@ -66,7 +66,7 @@ ADD ./src /tmp/pyramid-building/test
 ADD ./cmake-modules /tmp/pyramid-building/cmake-modules
 ADD CMakeLists.txt /tmp/pyramid-building/CMakeLists.txt
 ADD main.cpp /tmp/pyramid-building/main.cpp
-ADD PyramidBuildingCLITest.cpp /tmp/pyramid-building/PyramidBuildingCLITest.cpp
+ADD test/PyramidBuildingCLITest.cpp /tmp/pyramid-building/PyramidBuildingCLITest.cpp
 
 RUN cd /tmp/pyramid-building/ ;\
 mkdir build && cd build ;\
