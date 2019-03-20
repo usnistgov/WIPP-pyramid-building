@@ -52,7 +52,7 @@ add_definitions(-DPROFILE)
 #add_subdirectory(test)
 
 #set(ALL_SRCS CACHE INTERNAL "sources" FORCE)
-set(SOURCES src/api/PyramidBuilding.h src/api/CommandLineCli.h src/utils/Helper.cpp src/data/BlockType.cpp src/rules/PyramidRule.h src/tasks/WriteTileTask.h src/utils/SingleTiledTiffWriter.h src/tasks/Write32UTiffTileWriter.h src/tasks/WriteDeepZoomTileTask.h src/rules/DeepZoomDownsamplingRule.h)
+set(SOURCES src/pyramidBuilding/api/PyramidBuilding.h src/pyramidBuilding/api/CommandLineCli.h src/pyramidBuilding/utils/Helper.cpp src/pyramidBuilding/data/BlockType.cpp src/pyramidBuilding/rules/PyramidRule.h src/pyramidBuilding/utils/SingleTiledTiffWriter.h src/pyramidBuilding/tasks/WriteDeepZoomTileTask.h src/pyramidBuilding/rules/DeepZoomDownsamplingRule.h)
 
 #add_executable(testbasePerfMultiThreadHTGS testBasePerfMultiThreadHTGS.cpp ${ALL_SRCS} ${SOURCES} testBasePerf.h SimpleReadAndWriteGraph.h)
 #add_executable(testbasePerfMultiThread testBasePerfMultiThread.cpp ${ALL_SRCS} ${SOURCES} testBasePerf.h)
