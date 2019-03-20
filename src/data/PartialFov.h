@@ -13,12 +13,12 @@ class PartialFov {
 public:
 
     PartialFov(const std::string &path, size_t x, size_t y, const cv::Rect &tileOverlap,
-        const cv::Rect &globalCoordinatesTileOverlap, const cv::Rect &FovCoordOverlap, uint32_t count) : path(path), x(x), y(y),
+        const cv::Rect &globalCoordinatesTileOverlap, const cv::Rect &FovCoordOverlap) : path(path), x(x), y(y),
                                                                                          tileOverlap(tileOverlap),
                                                                                          globalCoordinatesTileOverlap(
                                                                                                  globalCoordinatesTileOverlap),
                                                                                          FovCoordOverlap(
-                                                                                                 FovCoordOverlap), count(count) {}
+                                                                                                 FovCoordOverlap) {}
 
 
     const std::string &getPath() const {
@@ -53,7 +53,6 @@ private:
     cv::Rect tileOverlap;
     cv::Rect globalCoordinatesTileOverlap;
     cv::Rect FovCoordOverlap;
-    uint32_t count;
 
 };
 

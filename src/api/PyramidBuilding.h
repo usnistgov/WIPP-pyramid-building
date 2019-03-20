@@ -164,7 +164,6 @@ public:
 
         auto grid = gridGenerator->getGrid();
 
-        auto test = gridGenerator->getGridMaxRow(0);
         size_t numTileRow = gridGenerator->getGridMaxRow(0) + 1;
         size_t numTileCol = gridGenerator->getGridMaxCol(0) + 1;
 

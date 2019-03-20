@@ -15,13 +15,11 @@ class BlockRequest : public htgs::IData {
 
 public:
     BlockRequest(const std::vector<std::shared_ptr<Tile<T>>> &block) : block(block) {
-        if(block.size() <= 0){
-            //CHECK HOW TO DO IN C++
-            //assert error
-        }
-        //More test could happen : tiles are adjacent at the same level...
-        //For now we will expect correctness.
-        auto t = block[0];
+
+        assert(block.size() <= 0);
+        //More test could happen : tiles are adjacent and at the same level...
+
+        auto t = block[0]; //top left tile gives us the block coordinates
         row = t->getRow() / 2;
         col = t->getCol() / 2;
         level = t->getLevel();
@@ -54,23 +52,17 @@ public:
         return level;
     }
 
-    /// \brief Output operator stream to print a TileRequest
-    /// \param os Stream to put the tileRequest information
-    /// \param data The TileRequest to print
+    /// \brief Output operator stream to print a BlockRequest
+    /// \param os Stream BlockRequest information will be pushed to
+    /// \param block The BlockRequest to print
     /// \return the output stream with the information
     /// \note Used for debugging only
     friend std::ostream &operator<<(std::ostream &os, const BlockRequest &block) {
-        // auto info = printf("Block Info - Level: %d. Index: (%d , %d). Type: %s" , block.level, block.row, block.col, blockTypeToString(block.blockType));
-//        auto info = std::string("Block - Level: ") + block.level + " Index: (" + block.row + "," + block.col + ")" + "Type: " +  blockTypeToString(block.blockType);
-//        os << info << std:endl;
         os << "Tile - Level: " << block.level + 1 << " from: Block - Level: " << block.level << " Index: (" << block.row << "," << block.col << ")" << "Type: " << blockTypeToString(block.blockType) << std::endl;
         return os;
     }
 
 private:
-
-
-
     std::vector<std::shared_ptr<Tile<T>>> block;
     size_t row;
     size_t col;

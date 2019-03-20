@@ -12,7 +12,9 @@
 #include <FastImage/api/View.h>
 #include <htgs/api/MemoryData.hpp>
 
-
+/**
+ * @class <pyramidBuilding/data/Tile>
+ */
 template <class T>
 class Tile : public htgs::IData {
 

@@ -94,7 +94,6 @@ public:
         size_t y = data->getRow() * tileSize;
         size_t level = data->getLevel();
 
-        size_t originalHeight = data->get_height();
         size_t originalWidth = data->get_width();
 
         auto dir = TIFFSetDirectory(_tiff, (uint16_t)level);

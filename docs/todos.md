@@ -7,11 +7,6 @@
 
 Check google style guide and comply.
 
-### Requirements for C++ version?
-c++17 has file system managemnent in std. Otherwise, needs to use boosts?
-
-### How to add debugging statement only in debu?
-Pragmas?
 
 ### size_t for all indices.
 Is that too much? Realistically what is the max 1Dindex value we can reach?
@@ -24,11 +19,12 @@ FastImage uses uint32, openCV uses uint32
 
 ## Cleanup
 
+Memory leaks
+
 ##### The execution may fail if the output directory does not exist.
 ##### Check inputs : if bad path, it does not detect it a return
 
 Refactor mains into google tests.
-Using google logs for outputs.
 
 ## Refactor 
 
@@ -68,7 +64,6 @@ Make sure we have the minimum amount of objects at some point in time.
 
 Benchmarking
 Try different traversals. Probably very minor but let's try.
-Try 10% overlap dataset + Keana Scott nanofibers 40K * 50K 10% overlap.
 
 ============
 
