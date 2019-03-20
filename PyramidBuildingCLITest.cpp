@@ -72,5 +72,5 @@ int main(int argc, const char** argv)
     argv = new_argv.data();
     argc = argc + 4;
 
-    pyramidBuilding(argc, argv);
+    pb::pyramidBuilding(argc, argv);
 }

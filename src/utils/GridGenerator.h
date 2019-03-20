@@ -73,14 +73,11 @@ public:
      * @param pyramidTileSize size of pyramid tile.
      */
     GridGenerator(const std::string &imageDirectoryPath,
-                            const std::string &stitchingVectorPath, size_t pyramidTileSize) :
+                            const std::string &stitchingVectorPath, size_t tileSize) :
                                                                       imageDirectoryPath(imageDirectoryPath),
                                                                       stitchingVectorPath(stitchingVectorPath),
-                                                                      pyramidTileSize(pyramidTileSize) {
-        //inputs
-        //TODO CHECK THAT THE FILE EXISTS (otherwise it will silently break)
+                                                                      pyramidTileSize(tileSize) {
         std::ifstream infile(stitchingVectorPath);
-        size_t tileSize = pyramidTileSize;
 
         //partial images (fovs)
         size_t fovGlobalX = 0;
@@ -223,6 +220,8 @@ public:
             numLevel = static_cast<size_t>(ceil(log2(maxDim)) + 1);
 
         }
+
+        infile.close();
     }
 
 

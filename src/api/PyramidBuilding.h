@@ -145,6 +145,8 @@ public:
     }
 
 
+private:
+
     template<typename px_t>
     void _build(){
 
@@ -308,10 +310,6 @@ public:
         VLOG(1) << "Execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " mS" << std::endl;
 
         }
-
-
-
-protected:
     std::string _inputDir;
     std::string _inputVector;
     std::string _outputDir;

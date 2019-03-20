@@ -5,5 +5,5 @@
 
 int main(int argc, const char** argv)
 {
-    pyramidBuilding(argc, argv);
+    pb::pyramidBuilding(argc, argv);
 }

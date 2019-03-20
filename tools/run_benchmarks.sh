@@ -93,6 +93,7 @@ DATASET_NAME=${1}
 RUNS=${2-1}
 OUTPUT_DIR=results
 
+
 mkdir -p results
 
 date=$(date +"%m_%d_%Y_%T")
@@ -113,5 +114,6 @@ for ((i = 1; i <= $RUNS; i++))
 #                        sudo bash -c "sync; echo 1 > /proc/sys/vm/drop_caches"
 #            fi
 
-             { time ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
+#            { time ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
+            { heaptrack ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
 done
