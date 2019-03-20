@@ -157,6 +157,8 @@ namespace pb {
         }
 
 
+    private :
+
         template<typename px_t>
         void _build(){
 
@@ -320,9 +322,6 @@ namespace pb {
 
             }
 
-
-
-    protected:
         std::string _inputDir;
         std::string _inputVector;
         std::string _outputDir;

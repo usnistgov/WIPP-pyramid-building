@@ -225,6 +225,8 @@ namespace pb {
                 numLevel = static_cast<size_t>(ceil(log2(maxDim)) + 1);
 
             }
+
+            infile.close();
         }
 
 

@@ -25,24 +25,24 @@ namespace pb {
         }
     }
 
-    ImageDepth parseImageDepth(const std::string depth) {
+    ImageDepth parseImageDepth(const std::string &depth) {
         if (depth == "16U") {
             return ImageDepth::_16U;
         } else if (depth == "8U") {
             return ImageDepth::_8U;
         } else {
-            throw TCLAP::ArgException("image depth not recognized. Should  be one of : 8U, 16U");
+            throw std::invalid_argument("image depth not recognized. Should  be one of : 8U, 16U");
         }
     }
 
 
-    BlendingMethod parseBlendingMethod(const std::string blending) {
+    BlendingMethod parseBlendingMethod(const std::string &blending) {
         if (blending == "max") {
             return BlendingMethod::MAX;
         } else if (blending == "overlay") {
             return BlendingMethod::OVERLAY;
         } else {
-            throw TCLAP::ArgException("blending method not recognized. Should  be one of : overlay, max");
+            throw std::invalid_argument("blending method not recognized. Should  be one of : overlay, max");
         }
     }
 
@@ -128,7 +128,6 @@ namespace pb {
         }
 
         exit(0);
-
 
     }
 
