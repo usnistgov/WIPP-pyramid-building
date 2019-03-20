@@ -17,6 +17,7 @@
 #include "GridGenerator.h"
 #include "../data/Tile.h"
 #include "../api/Datatype.h"
+#include "BaseTileGenerator.h"
 #include <experimental/filesystem>
 
 namespace pb {
@@ -32,7 +33,7 @@ using namespace std::experimental;
  * We can then used this information to generate each tile.
  */
 template <class T>
-class BaseTileGeneratorFastImage {
+class BaseTileGeneratorFastImage : public BaseTileGenerator<T> {
 
 public:
 
@@ -50,7 +51,7 @@ public:
      * @param index (row,col) of the tile to generate.
      * @return
      */
-    Tile<T>* generateTile(std::pair<size_t, size_t> index){
+    Tile<T>* generateTile(std::pair<size_t, size_t> index) override {
 
         VLOG(2) << "generating base tile at index (" << index.first << "," << index.second << ")" << std::endl;
 
@@ -63,19 +64,16 @@ public:
 
         auto it = grid.find(index);
 
-
-
         //Dealing with corner case.
         //It should never happen with real data, but we might have missing tiles or have so much overlap between FOVs that
         //some gap appears in the image. If this is the case, we generate an empty tile.
-        if(it == grid.end()){
-            DEBUG("A gap was found in the grid of tiles at (" + std::to_string(index.first) + "," + std::to_string(index.second) + "). Generating a empty tile.");
-            return new Tile<T>(0, index.first,index.second, pyramidTileWidth, pyramidTileHeight, tile);
+        if (it == grid.end()) {
+            DLOG(WARNING) << "A gap was found in the grid of tiles at (" + std::to_string(index.first) + "," +
+                             std::to_string(index.second) + "). Generating a empty tile." << std::endl;
+            return new Tile<T>(0, index.first, index.second, pyramidTileWidth, pyramidTileHeight, tile);
         }
 
         std::vector<PartialFov *> fovs = it->second;
-
-        uint32_t counter = 0;
 
         //iterating over each partial FOV.
         for(auto it2 = fovs.begin(); it2 != fovs.end(); ++it2) {
@@ -167,12 +165,6 @@ public:
 
                                 assert( 0 <= index1D && index1D < pyramidTileWidth * pyramidTileHeight);
 
-                                //        VLOG(2) << index1D << ": " << val << std::endl;
-
-//                                if(tile[index1D] != 0){
-//                                    VLOG(2) << "overwriting at index " << index1D << " old value : " << tile[index1D] << " with value : " << val << std:: endl;
-//                                }
-
                                 //TODO Rather inject a blending strategy?
                                 switch(blendingMethod) {
                                     case BlendingMethod::MAX:
@@ -193,20 +185,6 @@ public:
                     }
                 } //DONE copying the relevant portion of the FOV in this pyramid tile
 
-
-                //TODO REMOVE. FOR DEBUGGING MIST DATASET
-//            if(col == 16){
-//            if(! filesystem::exists(filesystem::current_path() / "debugBaseTile")) {
-//                filesystem::create_directory(filesystem::current_path() / "debugBaseTile");
-//            }
-//                    cv::Mat image(pyramidTileHeight, pyramidTileWidth, CV_8UC1, tile);
-//                    std::string fullImagePath = "/home/gerardin/Documents/pyramidBuilding/cmake-build-debug/debugBaseTile/" + std::to_string(col) + "_" + std::to_string(row) + "_" + std::to_string(counter) + ".png";
-//                    cv::imwrite(fullImagePath, image);
-//                    ++counter;
-//                }
-
-                //TODO CHECK we should eventually cache the fast image instances since they are used for each overlap.
-                //depending on the overlap factor, some performance should be expected.
                 delete fi;
 
         } //DONE generating the pyramid tile

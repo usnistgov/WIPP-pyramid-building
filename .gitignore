@@ -14,3 +14,5 @@ outputs
 
 benchmarks/results
 benchmarks/heaptrack.*
+
+**/color-compute-time-graph

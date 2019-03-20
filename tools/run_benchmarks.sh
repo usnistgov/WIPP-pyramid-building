@@ -92,9 +92,11 @@ export GLOG_v=0
 DATASET_NAME=${1}
 RUNS=${2-1}
 OUTPUT_DIR=results
+MASSIF_DIR=massif
 
 
 mkdir -p results
+mkdir -p results/massif
 
 date=$(date +"%m_%d_%Y_%T")
 
@@ -115,5 +117,8 @@ for ((i = 1; i <= $RUNS; i++))
 #            fi
 
 #            { time ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
-            { heaptrack ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
+            { heaptrack ../cmake-build-debug/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
+# "valgrind --tool=massif --stacks=yes --massif-out-file="
+#            { valgrind --tool=massif --stacks=yes --massif-out-file=$OUTPUT_DIR/$MASSIF_DIR/${DATASET_NAME}_${date}.txt ../cmake-build-debug/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
+
 done

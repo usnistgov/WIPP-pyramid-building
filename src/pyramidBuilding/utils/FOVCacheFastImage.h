@@ -16,6 +16,7 @@
 #include <mutex>
 #include <FastImage/api/FastImage.h>
 #include <FastImage/TileLoaders/GrayscaleTiffTileLoader.h>
+#include <glog/logging.h>
 
 namespace pb {
 

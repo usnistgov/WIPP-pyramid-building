@@ -23,11 +23,12 @@
 #include <sstream>
 #include <experimental/filesystem>
 #include <glog/logging.h>
+#include <pyramidBuilding/utils/BaseTileGeneratorFastImage.h>
 
 #include "pyramidBuilding/data/TileRequest.h"
 #include "pyramidBuilding/utils/SingleTiledTiffWriter.h"
 #include "pyramidBuilding/utils/GridGenerator.h"
-#include "pyramidBuilding/utils/BaseTileGenerator.h"
+#include "pyramidBuilding/utils/BaseTileGeneratorLibTiff.h"
 #include "pyramidBuilding/tasks/WriteDeepZoomTileTask.h"
 #include "pyramidBuilding/rules/DeepZoomDownsamplingRule.h"
 #include "./Datatype.h"
@@ -192,7 +193,7 @@ namespace pb {
 
             auto graph = new htgs::TaskGraphConf<TileRequest, Tile<px_t>>();
 
-            auto generator = new BaseTileGenerator<px_t>(gridGenerator, this->options->getBlendingMethod());
+            auto generator = new BaseTileGeneratorFastImage<px_t>(gridGenerator, this->options->getBlendingMethod());
             auto baseTileTask = new BaseTileTask<px_t>(6, generator);
 
             auto bookkeeper = new htgs::Bookkeeper<Tile<px_t>>();
@@ -299,8 +300,8 @@ namespace pb {
                 outFile.close();
             }
 
-
-            VLOG(3) << "read count : " << generator->getFovsCache()->readCount << std::endl;
+//TODO REMOVE only when caching is enabled
+//            VLOG(3) << "read count : " << generator->getFovsCache()->readCount << std::endl;
             VLOG(3) << "total number of  reads necessary : " << gridGenerator->getCounter() << std::endl;
 
             runtime->waitForRuntime();

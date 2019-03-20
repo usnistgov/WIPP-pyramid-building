@@ -33,6 +33,20 @@ public:
 
     FOVCache(std::string directory, std::map<std::string, uint32_t> fovsUsageCount) : _directory(directory), fovsUsageCount(fovsUsageCount) {};
 
+    ~FOVCache() {
+
+        assert(fovsCache.size() == 0);
+        assert(fovsUsageCount.size() == 0);
+
+        for (auto it = fovsCache.begin(); it!=fovsCache.end(); ++it) {
+            fovsCache.erase(it);
+        }
+
+        for (auto it = fovsUsageCount.begin(); it!=fovsUsageCount.end(); ++it) {
+            fovsUsageCount.erase(it);
+        }
+    }
+
     T* getFOV(const std::string &filename){
 
         std::lock_guard<std::mutex> guard(lock);
@@ -70,6 +84,13 @@ public:
             }
             delete it->second;
             fovsCache.erase(it);
+
+            auto it2 = fovsUsageCount.find(filename);
+            if(it2 == fovsUsageCount.end()) {
+                LOG(FATAL) << "error in cache implementation " << filename << std::endl;
+                exit(1);
+            }
+            fovsUsageCount.erase(it2);
         }
 
         return count;
@@ -99,8 +120,8 @@ private:
 
     std::mutex lock;
 
-    TIFF*
-            _tiff;
+    //TODO refactor into referenceTiff and read metadata only once
+    TIFF* _tiff;
 
     short _bitsPerSample = 0,
           _samplePerPixel = 0,
@@ -210,13 +231,10 @@ private:
                     loadPartAndCastFOV(region, buf, posRow, posCol);
                 }
             }
-
             _TIFFfree(buf);
             TIFFClose(_tiff);
         }
-
         return region;
-
     }
 };
 

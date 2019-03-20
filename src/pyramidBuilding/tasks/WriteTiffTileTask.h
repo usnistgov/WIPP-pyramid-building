@@ -81,8 +81,9 @@ public:
             TIFFSetField(_tiff, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
             TIFFSetField(_tiff, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
 
-            auto _buf = new T[info->getFullFovWidthAtLevel(l) * info->getFullFovHeightAtLevel(l)];
-            TIFFWriteTile(_tiff, (tdata_t)_buf, 0, 0, 0, 0);
+            auto buf = new T[info->getFullFovWidthAtLevel(l) * info->getFullFovHeightAtLevel(l)];
+            TIFFWriteTile(_tiff, (tdata_t)buf, 0, 0, 0, 0);
+            delete[] buf;
             TIFFWriteDirectory(_tiff);
         }
     }
