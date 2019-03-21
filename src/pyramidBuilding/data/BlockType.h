@@ -16,8 +16,20 @@ namespace pb {
         Full //regular block
     };
 
-    std::string blockTypeToString(BlockType type);
-
+    std::string blockTypeToString(BlockType type) {
+        switch (type) {
+            case BlockType::Single:
+                return "Single";
+            case BlockType::Vertical:
+                return "Block of 2 - Vertical";
+            case BlockType::Horizontal:
+                return "Block of 2 - Horizontal";
+            case BlockType::Full:
+                return " Block of 4 - Full";
+            default:
+                return "block error";
+        }
+    }
 }
 
 #endif //PYRAMIDBUILDING_BLOCKTYPE_H
