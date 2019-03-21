@@ -6,7 +6,7 @@
 #define PYRAMIDBUILDING_BLENDER_H
 
 #include <cstddef>
-#include "../api/Datatype.h"
+#include "pyramidBuilding/api/OptionsType.h"
 
 namespace pb {
 

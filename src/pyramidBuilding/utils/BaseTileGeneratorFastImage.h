@@ -9,16 +9,17 @@
 #include <iostream>
 #include <map>
 #include <assert.h>
-#include "SingleTiledTiffWriter.h"
-#include "../data/PartialFov.h"
-#include "Helper.h"
 #include <FastImage/api/FastImage.h>
 #include <FastImage/TileLoaders/GrayscaleTiffTileLoader.h>
+#include <experimental/filesystem>
+#include "../data/PartialFov.h"
+#include "Helper.h"
 #include "GridGenerator.h"
 #include "../data/Tile.h"
-#include "../api/Datatype.h"
+#include "pyramidBuilding/api/OptionsType.h"
 #include "BaseTileGenerator.h"
-#include <experimental/filesystem>
+#include "Blender.h"
+
 
 namespace pb {
 
@@ -44,7 +45,9 @@ public:
     BaseTileGeneratorFastImage(GridGenerator *reader, BlendingMethod blendingMethod): grid(reader->getGrid()), directory(reader->getImageDirectoryPath()), tileWidth(
             reader->getFovTileWidth()), tileHeight(reader->getFovTileHeight()), pyramidTileSize(reader->getPyramidTileSize()),
                     fullFovWidth(reader->getFullFovWidth()), fullFovHeight(reader->getFullFovHeight()),
-                    maxGridCol(reader->getGridMaxCol()), maxGridRow(reader->getGridMaxRow()), blendingMethod(blendingMethod) {}
+                    maxGridCol(reader->getGridMaxCol()), maxGridRow(reader->getGridMaxRow()) {
+        blender = new Blender<T>(blendingMethod);
+    }
 
     /**
      * Generate a pyramid base level tile at a specific coordinates.
@@ -80,7 +83,7 @@ public:
 
             auto fov = *it2;
             auto filename = fov->getPath();
-            auto extension = Helper::getExtension(filename);
+            auto extension = getFileExtension(filename);
 
             if(extension != "tiff" && extension != "tif") {
                 DLOG(FATAL) << "File Format not recognized !" << std::endl;
@@ -165,18 +168,7 @@ public:
 
                                 assert( 0 <= index1D && index1D < pyramidTileWidth * pyramidTileHeight);
 
-                                //TODO Rather inject a blending strategy?
-                                switch(blendingMethod) {
-                                    case BlendingMethod::MAX:
-                                        if (val > tile[index1D]) {
-                                            tile[index1D] = val;
-                                        }
-                                        break;
-                                    case BlendingMethod::OVERLAY:
-                                    default:
-                                        tile[index1D] = val;
-                                        break;
-                                }
+                                blender->blend(tile,index1D,val);
                             }
                         } //DONE copying the relevant portion of one tile of the FOV in this pyramid tile
 
@@ -205,7 +197,7 @@ private:
     const size_t fullFovHeight;
     const size_t maxGridRow;
     const size_t maxGridCol;
-    const BlendingMethod blendingMethod;
+    Blender<T> *blender;
 
 
 };

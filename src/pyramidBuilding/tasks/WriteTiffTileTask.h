@@ -15,7 +15,7 @@
 #include <dirent.h>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgcodecs.hpp>
-#include "../api/Datatype.h"
+#include "pyramidBuilding/api/OptionsType.h"
 #include "pyramidBuilding/utils/GridGenerator.h"
 
 #include <experimental/filesystem>

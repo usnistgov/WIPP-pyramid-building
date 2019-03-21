@@ -9,14 +9,13 @@
 #include <iostream>
 #include <map>
 #include <assert.h>
-#include "SingleTiledTiffWriter.h"
 #include "../data/PartialFov.h"
 #include "Helper.h"
 #include <FastImage/api/FastImage.h>
 #include <FastImage/TileLoaders/GrayscaleTiffTileLoader.h>
 #include "GridGenerator.h"
 #include "../data/Tile.h"
-#include "../api/Datatype.h"
+#include "pyramidBuilding/api/OptionsType.h"
 #include <experimental/filesystem>
 #include "FOVCache.h"
 #include "Blender.h"
@@ -104,7 +103,7 @@ namespace pb {
 
                 auto fov = *it2;
                 auto filename = fov->getPath();
-                auto extension = Helper::getExtension(filename);
+                auto extension = getFileExtension(filename);
 
                 if (extension != "tiff" && extension != "tif") {
                     DLOG(FATAL) << "File Format not recognized !" << std::endl;
@@ -131,7 +130,6 @@ namespace pb {
                 }
 
                 fovsCache->releaseFOV(fov->getPath());
-
 
             } //DONE generating the pyramid tile
 

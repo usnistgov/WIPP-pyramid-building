@@ -23,7 +23,7 @@
 #include <glog/logging.h>
 
 #include "../data/PartialFov.h"
-#include "../api/Datatype.h"
+#include "pyramidBuilding/api/OptionsType.h"
 
 
 namespace pb {

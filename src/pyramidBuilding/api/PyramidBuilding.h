@@ -24,22 +24,22 @@
 #include <experimental/filesystem>
 #include <glog/logging.h>
 #include <pyramidBuilding/utils/BaseTileGeneratorFastImage.h>
+#include <pyramidBuilding/utils/AverageDownsampler.h>
 
 #include "pyramidBuilding/data/TileRequest.h"
-#include "pyramidBuilding/utils/SingleTiledTiffWriter.h"
 #include "pyramidBuilding/utils/GridGenerator.h"
 #include "pyramidBuilding/utils/BaseTileGeneratorLibTiff.h"
 #include "pyramidBuilding/tasks/WriteDeepZoomTileTask.h"
 #include "pyramidBuilding/rules/DeepZoomDownsamplingRule.h"
-#include "./Datatype.h"
+#include "OptionsType.h"
 #include "pyramidBuilding/tasks/WriteTiffTileTask.h"
 #include "pyramidBuilding/utils/Helper.h"
 #include "pyramidBuilding/rules/WriteTileRule.h"
 #include "pyramidBuilding/rules/PyramidRule.h"
 #include "pyramidBuilding/tasks/CreateTileTask.h"
 #include "pyramidBuilding/tasks/BaseTileTask.h"
-#include "pyramidBuilding/utils/MatrixAllocator.h"
 #include "pyramidBuilding/data/Tile.h"
+#include "../utils/AverageDownsampler.h"
 
 namespace pb {
 
@@ -202,7 +202,9 @@ namespace pb {
 
             auto pyramidRule = new PyramidRule<px_t>(numTileCol,numTileRow);
 
-            auto createTileTask = new CreateTileTask<px_t>(nbThreadsPerTask);
+            auto downsampler = new AverageDownsampler<px_t>();
+
+            auto createTileTask = new CreateTileTask<px_t>(nbThreadsPerTask, downsampler);
 
             htgs::ITask< Tile<px_t>, Tile<px_t>> *writeTask = nullptr;
 
@@ -225,7 +227,7 @@ namespace pb {
             if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
                 auto outputPath = filesystem::path(_outputDir) / (pyramidName + "_files");
                 auto deepzoomDownsamplingRule = new DeepZoomDownsamplingRule<px_t>(numTileCol, numTileRow, deepZoomLevel,
-                                                                                   outputPath, this->options->getDepth());
+                                                                                   outputPath, this->options->getDepth(), downsampler);
                 graph->addRuleEdge(bookkeeper, deepzoomDownsamplingRule,
                                    writeTask); //generating extra tiles up to 1x1 pixel to satisfy deepzoom format
             }
@@ -314,9 +316,10 @@ namespace pb {
             #endif
 
 
-        delete runtime;
-        delete gridGenerator;
-        delete generator;
+            delete runtime;
+            delete gridGenerator;
+            delete generator;
+            delete downsampler;
 
             auto end = std::chrono::high_resolution_clock::now();
             VLOG(1) << "Execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " mS" << std::endl;
