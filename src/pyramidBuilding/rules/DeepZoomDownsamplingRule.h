@@ -24,10 +24,15 @@ namespace pb {
     using namespace std::experimental;
 
 /***
- * This task is executed only once when a data is received fulfilling the condition (level == this->numLevel -1).
+ * @class DeepZoomDownsamplingRule DeepZoomDownsamplingRule.h <pyramidBuilding/rules/DeepZoomDownsamplingRule.h>
+ *
+ * @brief generates extra level required by deepzoom.
+ *
+ * @details This task is executed only once when a data is received fulfilling the condition (level == this->numLevel -1).
  * The reason is that deepzoom expects extra pyramid levels.
  * Deepzoom needs the downsampling to continue until a 1x1 pixel tile is generated.
  * We downsample the top level tile, halving its dimension and adding a new level then repeat the process until we generate a 1x1 tile.
+ *
  * @tparam T The depth of the output image.
  */
     template<class T>

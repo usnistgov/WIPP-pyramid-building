@@ -15,6 +15,17 @@
 
 namespace pb {
 
+    /***
+     * @class PyramidRule PyramidRule.h <pyramidBuilding/rules/PyramidRule.h>
+     *
+     * @brief Cache tiles and trigger tile generation at a higher level when available.
+     * @details  Keep tiles in memory until a block is ready and a tile can be generated at the next level.
+     * Regular blocks of tiles have size 4. If the full FOV is not wholly divisible by the tile size,
+     * then we can also produce vertical or horizontal blocks of size 2 or at the bottom right corner we can
+     * produce a block of size 1.
+     *
+     * @tparam T The depth of the output image.
+     */
 template <class T>
 class PyramidRule : public htgs::IRule<Tile<T>, BlockRequest<T>> {
 

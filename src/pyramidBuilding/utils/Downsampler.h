@@ -9,6 +9,11 @@
 
 namespace pb {
 
+    /***
+     * @class Downsampler Downsampler.h <pyramidBuilding/utils/Downsampler.h>
+     * @brief controls how we downsample an image.
+     * @details this class is abstract.
+     */
     template<class T>
     class Downsampler {
 

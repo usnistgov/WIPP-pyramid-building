@@ -10,13 +10,22 @@
 
 namespace pb {
 
+    /**
+     * @class PartialFov PartialFov.h <pyramidBuilding/data/PartialFov.h>
+     * @brief Represents the overlap of a pyramid tile and a Field of View (FOV).
+     * @details The overlap is represented in several coordinates system to enable building blended tiles.
+     */
     class PartialFov {
 
     public:
-
-        PartialFov(const std::string &path, size_t x, size_t y, const cv::Rect &tileOverlap,
-                   const cv::Rect &globalCoordinatesTileOverlap, const cv::Rect &FovCoordOverlap) : path(path), x(x),
-                                                                                                    y(y),
+        /***
+         * @param path to the FOV on disk.
+         * @param tileOverlap overlap of the FOV in the coordinates of a pyramid tile.
+         * @param globalCoordinatesTileOverlap overlap of the FOV in the global coordinates of the full FOV.
+         * @param FovCoordOverlap overlap of the tile in the FOV coordinates.
+         */
+        PartialFov(const std::string &path, const cv::Rect &tileOverlap,
+                   const cv::Rect &globalCoordinatesTileOverlap, const cv::Rect &FovCoordOverlap) : path(path),
                                                                                                     tileOverlap(
                                                                                                             tileOverlap),
                                                                                                     globalCoordinatesTileOverlap(
@@ -27,14 +36,6 @@ namespace pb {
 
         const std::string &getPath() const {
             return path;
-        }
-
-        size_t getX() const {
-            return x;
-        }
-
-        size_t getY() const {
-            return y;
         }
 
         const cv::Rect &getTileOverlap() const {
@@ -52,8 +53,6 @@ namespace pb {
     private:
         //TODO rename to filename
         std::string path;
-        size_t x;
-        size_t y;
         cv::Rect tileOverlap;
         cv::Rect globalCoordinatesTileOverlap;
         cv::Rect FovCoordOverlap;

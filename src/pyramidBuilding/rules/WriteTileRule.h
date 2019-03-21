@@ -11,37 +11,34 @@
 
 namespace pb {
 
+    /***
+     * @class WriteTiledRule WriteTiledRule.h <pyramidBuilding/rules/WriteTiledRule.h>
+     *
+     * @brief Control when to write a tile on disk.
+     * @details
+     *
+     * @tparam T The depth of the output image.
+     */
     template<class T>
-    class WriteTileRule : public htgs::IRule<Tile < T>, Tile<T>>
+    class WriteTileRule : public htgs::IRule<Tile < T>, Tile<T>> {
 
-{
-    public:
+        public:
+            explicit WriteTileRule(size_t level = 0) : level(level) {};
 
-    explicit WriteTileRule(size_t level = 0) : level(level) {};
-
-    void applyRule(std::shared_ptr<Tile < T>>
-
-    data,
-    size_t pipelineId
-    ) override {
-
-    size_t l = data->getLevel();
-    if (l >= level) {
-    this->
-    addResult(data);
-}
-}
+            void applyRule(std::shared_ptr<Tile < T>>data,size_t pipelineId) override {
+                size_t l = data->getLevel();
+                if (l >= level) {
+                    this->addResult(data);
+                }
+            }
 
 
-std::string getName()
+            std::string getName() override {
+                return "Write Tile Rule";
+            }
 
-override {
-return "Write Rule";
-}
-
-private:
-size_t level;
-
+        private:
+         size_t level;
 };
 
 }

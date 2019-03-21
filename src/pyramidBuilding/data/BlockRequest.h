@@ -12,11 +12,18 @@
 
 namespace pb {
 
+    /**
+     * @class BlockRequest BlockRequest.h <pyramidBuilding/data/BlockRequest.h>
+     * @brief Represents a request to generate a new tile from a block of tiles.
+     * @details Regular blocks of tiles have size 4. If the full FOV is not wholly divisible by the tile size,
+     * then we can also produce vertical or horizontal blocks of size 2 or at the bottom right corner we can
+     * produce a block of size 1.
+    */
     template<class T>
     class BlockRequest : public htgs::IData {
 
     public:
-        BlockRequest(const std::vector<std::shared_ptr<Tile < T>>> &block) :
+        BlockRequest(const std::vector<std::shared_ptr<Tile<T>>> &block) :
         block(block) {
 
                 assert(block.size() > 0);
@@ -46,7 +53,7 @@ namespace pb {
                 }
         }
 
-        std::vector<std::shared_ptr<Tile < T>>> & getBlock() {
+        std::vector<std::shared_ptr<Tile<T>>> &getBlock() {
             return block;
         }
 
@@ -67,8 +74,7 @@ namespace pb {
         }
 
     private:
-        std::vector<std::shared_ptr<Tile<T>>>
-        block;
+        std::vector<std::shared_ptr<Tile<T>>> block;
         size_t row;
         size_t col;
         size_t level;

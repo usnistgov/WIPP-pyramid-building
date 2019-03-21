@@ -45,16 +45,25 @@ namespace pb {
 
     using namespace std::experimental;
 
-    //HTGS Graph
-    //Create tileRequest
-    //Task1 : (BlockRequest, Tile) base level tile generation : generate individual pyramid tiles
-    //Task2 : (Tile) Bookeeper : receive the pyramid tile and cache it. Generate request for higher level when it can.
-    //Task3 : (Block, Tile) CreateDownscaledTile : create tile at higher level of the pyramid.
-    //Task 4 : write the Tile;
+    /***
+     *  @class The pyramid building algorithm.
+     *  @brief The HTGS graph that captures the pyramid building algorithm.
+     *  @details
+     *  HTGS Graph
+     *   Create tileRequest
+     *   Task1 : (BlockRequest, Tile) base level tile generation : generate individual pyramid tiles
+     *   Task2 : (Tile) Bookeeper : receive the pyramid tile and cache it. Generate request for higher level when it can.
+     *   Task3 : (Block, Tile) CreateDownscaledTile : create tile at higher level of the pyramid.
+     *   Task 4 : write the Tile;
+     */
     class PyramidBuilding {
 
     public:
 
+        /**
+         * @class Options
+         * @brief internal class that defines all the options to configure the pyramid building.
+         */
         class Options {
 
         public:
@@ -128,6 +137,14 @@ namespace pb {
 
         };
 
+        /***
+         * Pyramid Building
+         * @param inputDirectory the directory where the FOVs are stored.
+         * @param stitching_vector the stitching vector representing the position of each FOV in the global coordinates
+         * of the full FOV.
+         * @param outputDirectory in which the pyramid will be generated.
+         * @param options
+         */
         PyramidBuilding(std::string inputDirectory,
                         std::string stitching_vector,
                         std::string outputDirectory,
@@ -304,7 +321,7 @@ namespace pb {
 
 //TODO REMOVE only when caching is enabled
 //            VLOG(3) << "read count : " << generator->getFovsCache()->readCount << std::endl;
-            VLOG(3) << "total number of  reads necessary : " << gridGenerator->getCounter() << std::endl;
+       //     VLOG(3) << "total number of  reads necessary : " << gridGenerator->getCounter() << std::endl;
 
             runtime->waitForRuntime();
 

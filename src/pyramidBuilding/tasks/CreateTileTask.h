@@ -104,7 +104,6 @@ public:
 
         delete[] newTileData;
 
-
         this->addResult(tile);
     }
 

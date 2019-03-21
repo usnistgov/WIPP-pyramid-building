@@ -190,7 +190,7 @@ namespace pb {
                         fovRelativeY = intersection.y - fovGlobalY;
                         cv::Rect overlapInFovRef = cv::Rect(fovRelativeX, fovRelativeY, intersection.width, intersection.height);
 
-                        auto *partialFov = new PartialFov(file, fovGlobalX,fovGlobalY, overlapInTileRef, intersection, overlapInFovRef);
+                        auto *partialFov = new PartialFov(file, overlapInTileRef, intersection, overlapInFovRef);
 
                         assert(overlapInTileRef.width == overlapInFovRef.width);
                         assert(overlapInTileRef.height == overlapInFovRef.height);
