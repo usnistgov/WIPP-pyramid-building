@@ -14,10 +14,10 @@ namespace pb {
     class Blender {
 
     private:
-        BlendingMethod blendingMethod;
+        const BlendingMethod blendingMethod;
 
     public:
-        Blender(BlendingMethod blendingMethod) : blendingMethod(blendingMethod) {}
+        Blender(BlendingMethod const &blendingMethod) : blendingMethod(blendingMethod) {}
 
         void blend(T *tile, size_t index, T val) {
             switch (blendingMethod) {

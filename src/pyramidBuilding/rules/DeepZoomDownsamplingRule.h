@@ -73,10 +73,10 @@ namespace pb {
 
                     if (l > 1) {
                         T *downsampledData = generateDownsampleData(newTileData, width, height);
+                        delete newTileData;
                         newTileData = downsampledData;
                     }
 
-                    //TODO CHECK conversion. Using size_t we ended up with problems since we had whole division behavior.Check the rest of the code.
                     width = static_cast<size_t>(ceil((double) width / 2));
                     height = static_cast<size_t>(ceil((double) height / 2));
 
@@ -119,8 +119,6 @@ namespace pb {
 
         T *generateDownsampleData(T *newTileData, size_t width, size_t height) {
 
-            //TODO check this kind of conversion throughout
-            //in particular : when we have size_t as inputs, how do we ensure there is no overflow
             auto downsampleWidth = static_cast<size_t>(ceil((double) width / 2));
             auto downsampleHeight = static_cast<size_t>(ceil((double) height / 2));
 
