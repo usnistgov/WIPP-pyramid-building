@@ -82,7 +82,7 @@ public:
                 LOG(FATAL) << "error in cache implementation " << filename << std::endl;
                 exit(1);
             }
-            delete it->second;
+            delete [] it->second;
             fovsCache.erase(it);
 
             auto it2 = fovsUsageCount.find(filename);

@@ -64,9 +64,16 @@ namespace pb {
 
             if (level == this->numLevel - 1) {
 
-                T *newTileData = data->getData();
+                T* originalData = data->getData();
+
                 size_t width = data->get_width();
                 size_t height = data->get_height();
+
+                T* newTileData = new T[width * height];
+
+                for(uint32_t i = 0; i < (width * height); i++){
+                    newTileData[i] = originalData[i];
+                }
 
                 //TODO level should be int
                 for (int i = (int) this->numLevel; i < maxDeepZoomLevel; i++) {
@@ -81,9 +88,10 @@ namespace pb {
                     }
 
                     if (l > 1) {
-                        T *downsampledData = downsampler->downsample(newTileData, width, height);
+                        auto res = downsampler->downsample(newTileData, width, height);
+                        //TODO valgrind still detect a leak of a few bytes here
                         delete[] newTileData;
-                        newTileData = downsampledData;
+                        newTileData = res;
                     }
 
                     width = static_cast<size_t>(ceil((double) width / 2));

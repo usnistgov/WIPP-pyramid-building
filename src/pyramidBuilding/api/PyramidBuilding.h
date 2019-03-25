@@ -210,8 +210,8 @@ namespace pb {
 
             auto graph = new htgs::TaskGraphConf<TileRequest, Tile<px_t>>();
 
-            auto generator = new BaseTileGeneratorFastImage<px_t>(gridGenerator, this->options->getBlendingMethod());
-            auto baseTileTask = new BaseTileTask<px_t>(6, generator);
+            auto generator = new BaseTileGeneratorLibTiff<px_t>(gridGenerator, this->options->getBlendingMethod());
+            auto baseTileTask = new BaseTileTask<px_t>(30, generator);
 
             auto bookkeeper = new htgs::Bookkeeper<Tile<px_t>>();
 
@@ -249,10 +249,10 @@ namespace pb {
                                    writeTask); //generating extra tiles up to 1x1 pixel to satisfy deepzoom format
             }
 
-            auto tiledTiffWriteTask = new WriteTiffTileTask<px_t>(1,_outputDir, pyramidName, options->getDepth(), gridGenerator);
+        //    auto tiledTiffWriteTask = new WriteTiffTileTask<px_t>(1,_outputDir, pyramidName, options->getDepth(), gridGenerator);
 
             graph->addRuleEdge(bookkeeper, writeRule, writeTask); //exiting the graph;
-            graph->addRuleEdge(bookkeeper, writeRule, tiledTiffWriteTask);
+        //    graph->addRuleEdge(bookkeeper, writeRule, tiledTiffWriteTask);
 
 
             //output task
@@ -304,6 +304,18 @@ namespace pb {
 
 
             graph->finishedProducingData();
+
+//            while(!graph->isOutputTerminated()){
+//                auto r = graph->consumeData();
+//                if(r == nullptr){
+//                    break;
+//
+//                }
+//
+//                VLOG(3) << "tile output needs to be consumed to release shared pointer!";
+//
+//            }
+
 
             if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
                 std::ostringstream oss;

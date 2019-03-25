@@ -124,6 +124,7 @@ for ((i = 1; i <= $RUNS; i++))
 
                 cd ${EXEC_PATH}
                  echo `pwd`
+#                  { java -jar pyramidio-1.1.1-SNAPSHOT-jar-with-dependencies.jar $images $vector $output -t $tilesize ; }
              { time  java -jar pyramidio-1.1.1-SNAPSHOT-jar-with-dependencies.jar $images $vector $output -t $tilesize ; } 2>> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
 done
 

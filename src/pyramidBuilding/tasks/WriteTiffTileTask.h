@@ -59,7 +59,6 @@ public:
                 break;
         }
 
-        offsets = new std::vector<uint64_t>(info->getNumLevel());
 
         for(size_t l = 0;  l< info->getNumLevel(); l++){
             auto fullPath = path / (pyramidName + ".tif");
@@ -151,8 +150,6 @@ private:
     const std::string _pathOut;
     const ImageDepth imageDepth;
     const GridGenerator *info;
-    std::vector<TIFF*> *layers;
-    std::vector<uint64_t> *offsets;
     TIFF* _tiff;
 
 

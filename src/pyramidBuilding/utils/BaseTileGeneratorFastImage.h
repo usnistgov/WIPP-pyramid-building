@@ -49,6 +49,11 @@ public:
         blender = new Blender<T>(blendingMethod);
     }
 
+
+    ~BaseTileGeneratorFastImage() {
+        delete blender;
+    }
+
     /**
      * Generate a pyramid base level tile at a specific coordinates.
      * @param index (row,col) of the tile to generate.

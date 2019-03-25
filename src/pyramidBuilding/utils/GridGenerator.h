@@ -133,10 +133,15 @@ namespace pb {
                     }
                 }
 
+
                 //we check the first FOV to retrieve its width and height.
                 //TODO CHECK we expect all FOVs to have the same size and the same tile size.
                 if(fovWidth == 0 || fovHeight == 0 || fovTileWidth == 0 || fovTileHeight == 0){
                     TIFF *tiff = TIFFOpen((imageDirectoryPath+file).c_str(), "r");
+                    if(tiff == nullptr){
+                        throw std::runtime_error("unable to open tiff file: " + imageDirectoryPath+file +
+                        ". Please check that the stitching vector matches the image folder.");
+                    }
                     TIFFGetField(tiff,TIFFTAG_IMAGEWIDTH,&fovWidth);
                     TIFFGetField(tiff,TIFFTAG_IMAGELENGTH,&fovHeight);
                     TIFFGetField(tiff, TIFFTAG_TILEWIDTH, &fovTileWidth);

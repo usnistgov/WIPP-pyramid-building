@@ -19,8 +19,8 @@ if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
     exit 1
 fi
 
-OPTIONS=i:v:o:t:d:n:b
-LONGOPTS=images:,vector:,output:,tilesize:,depth:,name:,blending
+OPTIONS=i:v:o:t:d:n:b:k:
+LONGOPTS=images:,vector:,output:,tilesize:,depth:,name:,blending:,benchmark:
 
 # -use ! and PIPESTATUS to get exit code with errexit set
 # -temporarily store output to be able to check for errors
@@ -37,7 +37,7 @@ eval set -- "$PARSED"
 
 echo $PARSED
 
-images="" vector="" output="" tilesize=256 depth="8U" name="output" blending="max"
+images="" vector="" output="" tilesize=256 depth="8U" name="output" blending="max" benchmark="exectime"
 # now enjoy the options in order and nicely split until we see --
 while true; do
     case "$1" in
@@ -67,6 +67,10 @@ while true; do
             ;;
         -b|--blending)
             blending="$2"
+            shift 2
+            ;;
+        -k|--benchmark)
+            benchmark="$2"
             shift 2
             ;;
         --)
@@ -115,9 +119,14 @@ for ((i = 1; i <= $RUNS; i++))
 #            if [[ "$CLEAR_CACHE" == "1" ]]; then
 #                        sudo bash -c "sync; echo 1 > /proc/sys/vm/drop_caches"
 #            fi
-
-#            { time ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
+    if [[ "$benchmark" == "exectime" ]]; then
+            echo "benchmarking execution time..."
+            { time ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
+    else
+            echo "benchmarking memory consumption..."
             { heaptrack ../cmake-build-debug/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
+    fi
+
 # "valgrind --tool=massif --stacks=yes --massif-out-file="
 #            { valgrind --tool=massif --stacks=yes --massif-out-file=$OUTPUT_DIR/$MASSIF_DIR/${DATASET_NAME}_${date}.txt ../cmake-build-debug/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
 
