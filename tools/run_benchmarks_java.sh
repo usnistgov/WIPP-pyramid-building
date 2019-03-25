@@ -81,7 +81,7 @@ while true; do
 done
 
 # handle non-option arguments
-if [[ $# -lt 1 ]]; then
+if [[ $# -ne 4 ]]; then
     echo "$0: Problem parsing command line. Unparsed : $@"
     exit 4
 fi
@@ -89,13 +89,17 @@ fi
 export GLOG_logtostderr=1;
 export GLOG_v=0
 
-EXEC_PATH=/home/gerardin/Documents/pyramidio-java/pyramidio/target
+echo "exec path: " $3
+EXEC_PATH=$3
+EXEC_NAME=pyramidio-1.1.1-SNAPSHOT-jar-with-dependencies.jar
+
+
 
 #java -jar pyramidio-1.1.1-SNAPSHOT-jar-with-dependencies.jar /home/gerardin/Documents/images/dataset7/tiled-images /home/gerardin/Documents/images/dataset7/img-global-positions-0.txt /home/gerardin/Documents/pyramidio-java/outputs
 
 DATASET_NAME=${1}
 RUNS=${2-1}
-OUTPUT_DIR=/home/gerardin/Documents/pyramidBuilding/benchmarks/results
+OUTPUT_DIR=$4
 
 mkdir -p results
 

@@ -21,3 +21,20 @@ then to run the benchmark ```tools/run_benchmarks_java```.
 
 A full example is in ```benchmarks/benchmark-7-java.sh```
 
+
+gnu-getopt is required to run the bash script.
+
+    brew install gnu-getopt
+
+==> Caveats
+gnu-getopt is keg-only, which means it was not symlinked into /usr/local,
+because macOS already provides this software and installing another version in
+parallel can cause all kinds of trouble.
+
+If you need to have gnu-getopt first in your PATH run:
+    
+    echo 'export PATH="/usr/local/opt/gnu-getopt/bin:$PATH"' >> ~/.bash_profile
+
+-----------------
+
+
