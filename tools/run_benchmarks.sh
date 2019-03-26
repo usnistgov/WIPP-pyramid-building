@@ -91,7 +91,7 @@ if [[ $# -lt 1 ]]; then
 fi
 
 export GLOG_logtostderr=1;
-export GLOG_v=0
+export GLOG_v=3
 
 DATASET_NAME=${1}
 RUNS=${2-1}
@@ -121,7 +121,8 @@ for ((i = 1; i <= $RUNS; i++))
 #            fi
     if [[ "$benchmark" == "exectime" ]]; then
             echo "benchmarking execution time..."
-            { time ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
+            ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending;
+#            { time ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
     else
             echo "benchmarking memory consumption..."
             { heaptrack ../cmake-build-debug/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt

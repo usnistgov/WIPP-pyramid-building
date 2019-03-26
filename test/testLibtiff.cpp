@@ -16,19 +16,30 @@
 #undef uint64
 #undef int64
 
+#include <glog/logging.h>
+
 using namespace std::experimental;
 
 int main()
 {
-    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset03/images/";
-    auto filename = "tiled16_tracer.tiff";
+//    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset03/images/";
+//    auto filename = "tiled16_tracer.tiff";
 
 //    std::string directory = "/Users/gerardin/Documents/projects/wipp++/pyramid-building/resources/dataset01/images/";
 //    auto filename = "test01-tiled.tif";
 
-    auto file = (directory + filename).c_str();
-    TIFF* tif = TIFFOpen(file, "r");
+    std::string directory = "/home/gerardin/Documents/pyramidBuilding/resources/dataset1/tiled-images/";
+    std::string filename = "img_r001_c002.ome.tif";
 
+    filesystem::path path(directory);
+
+
+    auto file = (path / filename);
+    TIFF* tif = TIFFOpen(file.c_str(), "r");
+
+    if(tif == nullptr){
+        throw std::runtime_error("cannot open tif");
+    }
     uint32_t width, height, tileWidth, tileHeight, samplePerPixel, bitsPerSample, sampleFormat, tileX, tileY;
 
     // Load/parse header
@@ -69,46 +80,46 @@ int main()
         uint32_t tileSize =TIFFTileSize(tif);
         buf = _TIFFmalloc(tileSize);
 
-//        for (tileY = roi_y; tileY < roi_y + roi_height; tileY += tileHeight){
-//            for (tileX = roi_x; tileX < roi_x + roi_width; tileX += tileWidth) {
-//                TIFFReadTile(tif, buf, tileX, tileY, 0, 0);
-//                for (uint32_t row = 0; row < tileHeight; ++row) {
-//                    for (uint32_t col = 0; col < tileWidth; ++col) {
-//                        //  std::copy_n((int8_t *) buf, tileWidth * tileHeight, region + tileY * tileWidth);
-//                      //  VLOG(2) << std::setw(5) << (uint32_t)((uint8_t*)buf)[row * tileWidth + col] << " ";
-//                        uint32_t y = tileY + row;
-//                        uint32_t x = tileX + col;
-//                        uint32_t index = y * width + (tileX + col);
-//                        uint8_t value = ((uint8_t*)buf)[row * tileWidth + col];
-//                 //       VLOG(2) << index << ":" << (uint32_t)  value << std::endl;
-//                        if(y<height && x < width) { //those values are not defined for tiles at the border (tile's dimensions are fixed).
-//                            region[index] = value;
-//                        }
-//                    }
-//                    VLOG(2) << "\n";
-//                }
-//                VLOG(2) << std::endl;
-//            }
-//        }
-
-
-
-
         for (tileY = roi_y; tileY < roi_y + roi_height; tileY += tileHeight){
             for (tileX = roi_x; tileX < roi_x + roi_width; tileX += tileWidth) {
-
                 TIFFReadTile(tif, buf, tileX, tileY, 0, 0);
-
                 for (uint32_t row = 0; row < tileHeight; ++row) {
-                    uint32_t y = tileY + row;
-                    if(y>=height){
-                        break;
+                    for (uint32_t col = 0; col < tileWidth; ++col) {
+                        //  std::copy_n((int8_t *) buf, tileWidth * tileHeight, region + tileY * tileWidth);
+                      //  VLOG(2) << std::setw(5) << (uint32_t)((uint8_t*)buf)[row * tileWidth + col] << " ";
+                        uint32_t y = tileY + row;
+                        uint32_t x = tileX + col;
+                        uint32_t index = y * width + (tileX + col);
+                        uint8_t value = ((uint8_t*)buf)[row * tileWidth + col];
+                 //       VLOG(2) << index << ":" << (uint32_t)  value << std::endl;
+                        if(y<height && x < width) { //those values are not defined for tiles at the border (tile's dimensions are fixed).
+                            region[index] = value;
+                        }
                     }
-                    std::copy_n((int8_t *) buf + row * tileWidth, tileWidth, region + (tileY + row) * width + tileX);
+                    VLOG(2) << "\n";
                 }
                 VLOG(2) << std::endl;
             }
         }
+
+
+
+
+//        for (tileY = roi_y; tileY < roi_y + roi_height; tileY += tileHeight){
+//            for (tileX = roi_x; tileX < roi_x + roi_width; tileX += tileWidth) {
+//
+//                TIFFReadTile(tif, buf, tileX, tileY, 0, 0);
+//
+//                for (uint32_t row = 0; row < tileHeight; ++row) {
+//                    uint32_t y = tileY + row;
+//                    if(y>=height){
+//                        break;
+//                    }
+//                    std::copy_n((int8_t *) buf + row * tileWidth, tileWidth, region + (tileY + row) * width + tileX);
+//                }
+//                VLOG(2) << std::endl;
+//            }
+//        }
 
         _TIFFfree(buf);
         TIFFClose(tif);

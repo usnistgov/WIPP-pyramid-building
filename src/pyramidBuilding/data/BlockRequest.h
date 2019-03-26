@@ -48,8 +48,7 @@ namespace pb {
                         blockType = BlockType::Full;
                     break;
                     default:
-                        DLOG(FATAL) << "fatal error. Unknown block Request Type." << std::endl;
-                    exit(1);
+                        std::runtime_error("fatal error. Unknown block Request Type.");
                 }
         }
 

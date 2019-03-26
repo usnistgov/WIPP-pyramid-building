@@ -1,9 +1,9 @@
 //
-// Created by gerardin on 3/25/19.
+// Created by Gerardin, Antoine D. (Assoc) on 1/19/19.
 //
 
-#ifndef PYRAMIDBUILDING_BASETILEGENERATORLIBTIFF_H
-#define PYRAMIDBUILDING_BASETILEGENERATORLIBTIFF_H
+#ifndef PYRAMIDBUILDING_BASETILEGENERATORLIBTIFFWITHCACHE_H
+#define PYRAMIDBUILDING_BASETILEGENERATORLIBTIFFWITHCACHE_H
 
 #include <string>
 #include <iostream>
@@ -17,9 +17,9 @@
 #include "../data/Tile.h"
 #include "pyramidBuilding/api/OptionsType.h"
 #include <experimental/filesystem>
+#include "FOVCache.h"
 #include "Blender.h"
 #include "BaseTileGenerator.h"
-#include "TileLoader.h"
 
 namespace pb {
 
@@ -34,7 +34,7 @@ namespace pb {
  * We can then used this information to generate each tile.
  */
     template<class T>
-    class BaseTileGeneratorLibTiff  : public BaseTileGenerator<T>  {
+    class BaseTileGeneratorLibTiffWithCache  : public BaseTileGenerator<T>  {
 
     public:
 
@@ -42,25 +42,25 @@ namespace pb {
          * The pyramid base level tile generator needs information on the general structure of the full FOVs.
          * @param reader the MistStitchedImageReader that contains information on partial FOV overlaps.
          */
-        BaseTileGeneratorLibTiff(GridGenerator *reader, BlendingMethod blendingMethod) : grid(reader->getGrid()), directory(
+        BaseTileGeneratorLibTiffWithCache(GridGenerator *reader, BlendingMethod blendingMethod) : grid(reader->getGrid()), directory(
                 reader->getImageDirectoryPath()), tileWidth(
                 reader->getFovTileWidth()), tileHeight(reader->getFovTileHeight()), pyramidTileSize(
                 reader->getPyramidTileSize()),
-                                                                                                  fullFovWidth(
-                                                                                                          reader->getFullFovWidth()),
-                                                                                                  fullFovHeight(
-                                                                                                          reader->getFullFovHeight()),
-                                                                                                  maxGridCol(reader->getGridMaxCol()),
-                                                                                                  maxGridRow(reader->getGridMaxRow()),
-                                                                                                  blendingMethod(blendingMethod),
-                                                                                                  fovWidth(reader->getFovWidth()),
-                                                                                                  fovHeight(reader->getFovHeight()) {
-            tileLoader = new TileLoader<T>(directory);
+                                                                                  fullFovWidth(
+                                                                                          reader->getFullFovWidth()),
+                                                                                  fullFovHeight(
+                                                                                          reader->getFullFovHeight()),
+                                                                                  maxGridCol(reader->getGridMaxCol()),
+                                                                                  maxGridRow(reader->getGridMaxRow()),
+                                                                                  blendingMethod(blendingMethod),
+                                                                                  fovWidth(reader->getFovWidth()),
+                                                                                  fovHeight(reader->getFovHeight()) {
+            fovsCache = new FOVCache<T>(reader->getImageDirectoryPath(), reader->getCache());
             blender = new Blender<T>(blendingMethod);
         }
 
-        ~BaseTileGeneratorLibTiff() {
-
+        ~BaseTileGeneratorLibTiffWithCache() {
+            delete fovsCache;
             delete blender;
         }
 
@@ -107,28 +107,34 @@ namespace pb {
                 auto extension = getFileExtension(filename);
 
                 if (extension != "tiff" && extension != "tif") {
-                    throw std::runtime_error("File Format not recognized: " + extension);
+                    throw std::runtime_error("File Format not recognized: " + extension );
                 }
 
                 auto overlapFov = fov->getFovCoordOverlap();
                 auto tileOverlap = fov->getTileOverlap();
 
-                T* image = tileLoader->loadFullFOV(filename);
+                T *image = fovsCache->getFOV(filename);
+
+                VLOG(3) << "fovCacheCount :  " + std::to_string(fovsCache->getCacheCount()) << std::endl;
+                VLOG(3) << " max fovCacheCount :  " + std::to_string(fovsCache->getCacheMaxCount()) << std::endl;
 
                 auto destOffset = tileOverlap.y * pyramidTileWidth + tileOverlap.x;
 
-                for (auto x = overlapFov.x; x < overlapFov.x + overlapFov.width; x++) {
-                    for (auto y = overlapFov.y; y < overlapFov.y + overlapFov.height; y++) {
-                        auto srcIndex = y * fovWidth + x;
-                        auto destIndex = destOffset + (y - overlapFov.y) * pyramidTileWidth + (x - overlapFov.x);
-                        assert(0 <= destIndex && destIndex < pyramidTileWidth * pyramidTileHeight);
-                        blender->blend(tile, destIndex, image[srcIndex]);
-                    }
+                for (auto y = overlapFov.y; y < overlapFov.y + overlapFov.height; y++) {
+                    std::copy_n(image + y * fovWidth, overlapFov.width, tile + destOffset + (y - overlapFov.y) * pyramidTileWidth);
                 }
 
-                delete[] image;
 
+//                for (auto x = overlapFov.x; x < overlapFov.x + overlapFov.width; x++) {
+//                    for (auto y = overlapFov.y; y < overlapFov.y + overlapFov.height; y++) {
+//                        auto srcIndex = y * fovWidth + x;
+//                        auto destIndex = destOffset + (y - overlapFov.y) * pyramidTileWidth + (x - overlapFov.x);
+//                        assert(0 <= destIndex && destIndex < pyramidTileWidth * pyramidTileHeight);
+//                        blender->blend(tile, destIndex, image[srcIndex]);
+//                    }
+//                }
 
+                fovsCache->releaseFOV(fov->getPath());
 
             } //DONE generating the pyramid tile
 
@@ -138,8 +144,14 @@ namespace pb {
         }
 
 
+        //TODO remove for DEBUG ONLY
+        FOVCache<T> *getFovsCache() const {
+            return fovsCache;
+        }
+
+
     private:
-        TileLoader<T>* tileLoader;
+        FOVCache<T> *fovsCache;
         const std::map<std::pair<size_t, size_t>, std::vector<PartialFov *>> grid;
         const std::string directory;
         const size_t tileWidth;
@@ -159,4 +171,4 @@ namespace pb {
 
 }
 
-#endif //PYRAMIDBUILDING_BASETILEGENERATORLIBTIFF_H
+#endif //PYRAMIDBUILDING_BASETILEGENERATORLIBTIFFWITHCACHE_H

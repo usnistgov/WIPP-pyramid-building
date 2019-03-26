@@ -7,6 +7,7 @@
 #include <string>
 #include <iostream>
 #include <FastImage/api/FastImage.h>
+#include <glog/logging.h>
 
 
 #include "experimental/filesystem"
@@ -15,7 +16,7 @@
 
 int main()
 {
-    std::string directory = "/home/gerardin/Documents/images/dataset5_big/images/";
+    std::string directory = "/home/gerardin/Documents/images/dataset7/tiled-images/";
 
     auto begin = std::chrono::high_resolution_clock::now();
 
@@ -26,7 +27,7 @@ int main()
     }
 
     auto graph = new htgs::TaskGraphConf<InputFile, ImageData<uint16_t >>();
-    auto readTask = new TestReadTask<uint16_t>(1);
+    auto readTask = new TestReadTask<uint16_t>(20);
     auto writeTask = new TestWriteTask<uint16_t>( outputPath ,10);
     graph->setGraphConsumerTask(readTask);
     graph->addGraphProducerTask(writeTask);
@@ -34,7 +35,6 @@ int main()
     graph->addEdge(readTask,writeTask);
     runtime->executeRuntime();
 
-    uint32_t counter =0;
 
     for (const auto & entry : filesystem::directory_iterator(directory)) {
         VLOG(2) << "input path: " << entry.path().string() << std::endl;

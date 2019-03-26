@@ -16,6 +16,8 @@
 #include <opencv2/imgcodecs.hpp>
 
 #include <experimental/filesystem>
+#include <atomic>
+#include "TileLoader.h"
 
 namespace pb {
 
@@ -29,9 +31,11 @@ public:
 
     //number of FOVs
     std::atomic<uint32_t> readCount;
+    TileLoader<T>* tileLoader;
 
-
-    FOVCache(std::string directory, std::map<std::string, uint32_t> fovsUsageCount) : _directory(directory), fovsUsageCount(fovsUsageCount) {};
+    FOVCache(std::string directory, std::map<std::string, uint32_t> fovsUsageCount) : _directory(directory), fovsUsageCount(fovsUsageCount) {
+        tileLoader = new TileLoader<T>(directory);
+    };
 
     ~FOVCache() {
 
@@ -45,6 +49,8 @@ public:
         for (auto it = fovsUsageCount.begin(); it!=fovsUsageCount.end(); ++it) {
             fovsUsageCount.erase(it);
         }
+
+        delete tileLoader;
     }
 
     T* getFOV(const std::string &filename){
@@ -57,7 +63,7 @@ public:
         if(it == fovsCache.end()) {
             readCount++;
             VLOG(3) << "FOV not already loaded : " << filename << std::endl;
-            fov = loadFullFOV(filename);
+            fov = tileLoader->loadFullFOV(filename);
             fovsCache[filename] = fov;
             if(fovsCache.size() > cacheMaxCount) {cacheMaxCount = fovsCache.size();}
         }
@@ -79,16 +85,14 @@ public:
             VLOG(3) << "delete " << filename << std::endl;
             auto it = fovsCache.find(filename);
             if(it == fovsCache.end()) {
-                LOG(FATAL) << "error in cache implementation " << filename << std::endl;
-                exit(1);
+                std::runtime_error("error in cache implementation " + filename);
             }
             delete [] it->second;
             fovsCache.erase(it);
 
             auto it2 = fovsUsageCount.find(filename);
             if(it2 == fovsUsageCount.end()) {
-                LOG(FATAL) << "error in cache implementation " << filename << std::endl;
-                exit(1);
+                std::runtime_error("error in cache implementation " + filename);
             }
             fovsUsageCount.erase(it2);
         }
@@ -120,122 +124,7 @@ private:
 
     std::mutex lock;
 
-    //TODO refactor into referenceTiff and read metadata only once
-    TIFF* _tiff;
 
-    short _bitsPerSample = 0,
-          _samplePerPixel = 0,
-          _sampleFormat = 0;
-
-    uint32_t
-            _tileHeight = 0,
-            _tileWidth = 0,
-            _FOVHeight = 0,
-            _FOVWidth = 0;
-
-    template<typename FileType>
-    void loadTile(tdata_t src, T *dest, uint32_t rowMin, uint32_t colMin) {
-        uint32_t
-            rowMax = std::min(rowMin + _tileHeight, _FOVHeight),
-            colMax = std::min(colMin + _tileWidth, _FOVWidth);
-
-        for (uint32_t row = 0; row < rowMax - rowMin; ++row) {
-            for (uint32_t col = 0; col < colMax - colMin; ++col) {
-                dest[(rowMin + row) * _FOVWidth + (colMin + col)] =
-                        (T) ((FileType *) (src))[row * _tileWidth + col];
-            }
-        }
-    }
-
-    void loadPartAndCastFOV(T *region, tdata_t buf, uint32_t rowMin, uint32_t
-    colMin) {
-        TIFFReadTile(_tiff,
-                     buf,
-                     colMin,
-                     rowMin,
-                     0,
-                     0);
-        switch (this->_sampleFormat) {
-            case 1 :
-                switch (this->_bitsPerSample) {
-                    case 8:loadTile<uint8_t>(buf, region, rowMin, colMin);
-                        break;
-                    case 16:loadTile<uint16_t>(buf, region, rowMin, colMin);
-                        break;
-                    case 32:loadTile<uint32_t>(buf, region, rowMin, colMin);
-                        break;
-                    case 64:loadTile<uint64_t>(buf, region, rowMin, colMin);
-                        break;
-                    default:
-                        LOG(FATAL) << "bitsPerSample" << this->_bitsPerSample << "is unknown or unsupported" << std::endl;
-                        exit(3);
-                }
-                break;
-            case 2:
-                switch (this->_bitsPerSample) {
-                    case 8:loadTile<int8_t>(buf, region, rowMin, colMin);
-                        break;
-                    case 16:loadTile<int16_t>(buf, region, rowMin, colMin);
-                        break;
-                    case 32:loadTile<int32_t>(buf, region, rowMin, colMin);
-                        break;
-                    case 64:loadTile<int64_t>(buf, region, rowMin, colMin);
-                        break;
-                    default:
-                        LOG(FATAL) << "bitsPerSample" << this->_bitsPerSample << "is unknown or unsupported" << std::endl;
-                        exit(3);
-                }
-                break;
-            case 3:
-                switch (this->_bitsPerSample) {
-                    case 8:loadTile<float>(buf, region, rowMin, colMin);
-                        break;
-                    case 16:loadTile<float>(buf, region, rowMin, colMin);
-                        break;
-                    case 32:loadTile<float>(buf, region, rowMin, colMin);
-                        break;
-                    case 64:loadTile<double>(buf, region, rowMin, colMin);
-                        break;
-                    default:
-                        LOG(FATAL) << "bitsPerSample" << this->_bitsPerSample << "is unknown or unsupported" << std::endl;
-                        exit(3);
-                }
-                break;
-            default:
-                LOG(FATAL) << "sampleFormat" << this->_sampleFormat << "is unknown or unsupported" << std::endl;
-                exit(2);
-        }
-    }
-
-    T* loadFullFOV(std::string filename){
-        auto fullPath = _directory + filename;
-        auto file = fullPath.c_str();
-        _tiff = TIFFOpen(file, "r");
-        T *region = nullptr;
-        if (_tiff) {
-            // Load/parse header
-            // For full reference, see https://www.awaresystems.be/imaging/tiff/tifftags.html
-            TIFFGetField(_tiff, TIFFTAG_IMAGEWIDTH, &_FOVWidth);
-            TIFFGetField(_tiff, TIFFTAG_IMAGELENGTH, &_FOVHeight);
-            TIFFGetField(_tiff, TIFFTAG_TILEWIDTH, &_tileWidth);
-            TIFFGetField(_tiff, TIFFTAG_TILELENGTH, &_tileHeight);
-            TIFFGetField(_tiff, TIFFTAG_SAMPLESPERPIXEL, &_samplePerPixel);
-            TIFFGetField(_tiff, TIFFTAG_BITSPERSAMPLE, &_bitsPerSample);
-            TIFFGetField(_tiff, TIFFTAG_SAMPLEFORMAT, &_sampleFormat);
-
-            region = new T[ _FOVWidth * _FOVHeight ]();
-            void* buf = _TIFFmalloc(TIFFTileSize(_tiff));
-
-            for (uint32_t posRow = 0; posRow < _FOVHeight; posRow += _tileHeight) {
-                for (uint32_t posCol = 0; posCol < _FOVWidth; posCol += _tileWidth) {
-                    loadPartAndCastFOV(region, buf, posRow, posCol);
-                }
-            }
-            _TIFFfree(buf);
-            TIFFClose(_tiff);
-        }
-        return region;
-    }
 };
 
 

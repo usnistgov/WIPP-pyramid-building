@@ -91,8 +91,7 @@ public:
             auto extension = getFileExtension(filename);
 
             if(extension != "tiff" && extension != "tif") {
-                DLOG(FATAL) << "File Format not recognized !" << std::endl;
-                exit(1);
+                std::runtime_error("file format not recognized: " + extension);
             }
 
                 auto overlapFov = fov->getFovCoordOverlap();

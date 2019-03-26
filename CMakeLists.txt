@@ -4,7 +4,7 @@ project(pyramidBuilding CXX)
 set(CMAKE_CXX_STANDARD 17)
 
 #TODO Set this flag only in debug
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pedantic -Wno-reorder -Wno-unused-parameter" )
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pedantic -Wno-reorder -Wno-unused-parameter" )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -funwind-tables -g")
 
@@ -51,6 +51,8 @@ add_definitions(-DPROFILE)
 #add_subdirectory(src)
 #add_subdirectory(test)
 
+add_subdirectory(test)
+
 #set(ALL_SRCS CACHE INTERNAL "sources" FORCE)
 set(SOURCES src/pyramidBuilding/api/PyramidBuilding.h src/pyramidBuilding/api/CommandLineCli.h src/pyramidBuilding/rules/PyramidRule.h src/pyramidBuilding/tasks/WriteDeepZoomTileTask.h src/pyramidBuilding/rules/DeepZoomDownsamplingRule.h src/pyramidBuilding/utils/BaseTileGenerator.h)
 
@@ -59,7 +61,7 @@ set(SOURCES src/pyramidBuilding/api/PyramidBuilding.h src/pyramidBuilding/api/Co
 #add_executable(testbasePerf testBasePerf.cpp ${ALL_SRCS} ${SOURCES} testBasePerf.h)
 #add_executable(stitching testStitchingVectorParser.cpp ${ALL_SRCS} ${SOURCES})
 #add_executable(libtiff testLibtiff.cpp ${ALL_SRCS} ${SOURCES} src/utils/StitchedFOVTileLoader.h src/tasks/WriteTiffTileTask.h)
-add_executable(main main.cpp ${ALL_SRCS} ${SOURCES})
+add_executable(main main.cpp ${ALL_SRCS} ${SOURCES} src/pyramidBuilding/utils/TileLoader.h src/pyramidBuilding/utils/BaseTileGeneratorLibTiff.h)
 add_executable(pyramidBuildingCLITest test/PyramidBuildingCLITest.cpp ${ALL_SRCS} ${SOURCES})
 
 target_include_directories(main PUBLIC src)

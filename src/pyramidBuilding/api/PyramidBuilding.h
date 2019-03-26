@@ -25,6 +25,7 @@
 #include <glog/logging.h>
 #include <pyramidBuilding/utils/BaseTileGeneratorFastImage.h>
 #include <pyramidBuilding/utils/AverageDownsampler.h>
+#include <pyramidBuilding/utils/BaseTileGeneratorLibTiffWithCache.h>
 
 #include "pyramidBuilding/data/TileRequest.h"
 #include "pyramidBuilding/utils/GridGenerator.h"
@@ -207,11 +208,10 @@ namespace pb {
             auto maxDim = std::max(fullFovWidth,fullFovHeight);
             deepZoomLevel = int(ceil(log2(maxDim)) + 1);
 
-
             auto graph = new htgs::TaskGraphConf<TileRequest, Tile<px_t>>();
 
-            auto generator = new BaseTileGeneratorLibTiff<px_t>(gridGenerator, this->options->getBlendingMethod());
-            auto baseTileTask = new BaseTileTask<px_t>(30, generator);
+            auto generator = new BaseTileGeneratorLibTiffWithCache<px_t>(gridGenerator, this->options->getBlendingMethod());
+            auto baseTileTask = new BaseTileTask<px_t>(10, generator);
 
             auto bookkeeper = new htgs::Bookkeeper<Tile<px_t>>();
 
@@ -339,11 +339,11 @@ namespace pb {
 
             VLOG(1) << "done generating pyramid." << std::endl;
 
+            graph->writeDotToFile("graph", DOTGEN_COLOR_COMP_TIME);
             #ifdef NDEBUG
             #else
                 graph->writeDotToFile("graph", DOTGEN_COLOR_COMP_TIME);
             #endif
-
 
             delete runtime;
             delete gridGenerator;
