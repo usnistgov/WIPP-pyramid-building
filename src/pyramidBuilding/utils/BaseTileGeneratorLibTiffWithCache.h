@@ -121,18 +121,9 @@ namespace pb {
                 auto destOffset = tileOverlap.y * pyramidTileWidth + tileOverlap.x;
 
                 for (auto y = overlapFov.y; y < overlapFov.y + overlapFov.height; y++) {
-                    std::copy_n(image + y * fovWidth, overlapFov.width, tile + destOffset + (y - overlapFov.y) * pyramidTileWidth);
+                    //copy each row of the partial FOV overlap to correct position in the pyramid tile.
+                    std::copy_n(image + y * fovWidth + overlapFov.x, overlapFov.width, tile + destOffset + (y - overlapFov.y) * pyramidTileWidth);
                 }
-
-
-//                for (auto x = overlapFov.x; x < overlapFov.x + overlapFov.width; x++) {
-//                    for (auto y = overlapFov.y; y < overlapFov.y + overlapFov.height; y++) {
-//                        auto srcIndex = y * fovWidth + x;
-//                        auto destIndex = destOffset + (y - overlapFov.y) * pyramidTileWidth + (x - overlapFov.x);
-//                        assert(0 <= destIndex && destIndex < pyramidTileWidth * pyramidTileHeight);
-//                        blender->blend(tile, destIndex, image[srcIndex]);
-//                    }
-//                }
 
                 fovsCache->releaseFOV(fov->getPath());
 
