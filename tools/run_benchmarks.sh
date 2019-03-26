@@ -91,7 +91,7 @@ if [[ $# -lt 1 ]]; then
 fi
 
 export GLOG_logtostderr=1;
-export GLOG_v=3
+export GLOG_v=1
 
 DATASET_NAME=${1}
 RUNS=${2-1}
@@ -125,7 +125,7 @@ for ((i = 1; i <= $RUNS; i++))
 #            { time ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
     else
             echo "benchmarking memory consumption..."
-            { heaptrack ../cmake-build-debug/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
+            { heaptrack ../cmake-build-debug/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${benchmark}_${DATASET_NAME}_${date}.txt
     fi
 
 # "valgrind --tool=massif --stacks=yes --massif-out-file="

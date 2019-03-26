@@ -103,6 +103,8 @@ public:
 
         delete[] newTileData;
 
+        assert(level > 0);
+
         this->addResult(tile);
     }
 

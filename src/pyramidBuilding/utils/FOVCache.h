@@ -87,7 +87,7 @@ public:
             if(it == fovsCache.end()) {
                 std::runtime_error("error in cache implementation " + filename);
             }
-            delete [] it->second;
+            delete[] it->second;
             fovsCache.erase(it);
 
             auto it2 = fovsUsageCount.find(filename);
