@@ -25,7 +25,7 @@ namespace pb {
 using namespace std::experimental;
 
 template <class T>
-class WriteTiffTileTask : public htgs::ITask< Tile<T>, Tile<T> > {
+class WriteTiffTileTask : public htgs::ITask< Tile<T>, htgs::VoidData > {
 
 public:
     WriteTiffTileTask(
@@ -140,7 +140,7 @@ public:
     /// \return Writer name
     std::string getName() override { return "PyramidalTiledTiffWriter"; }
 
-    ITask<Tile<T>, Tile<T>> *copy() override {
+    ITask<Tile<T>, VoidData> *copy() override {
         return new WriteTiffTileTask(this->getNumThreads(), this->_pathOut, this->pyramidName, this->imageDepth, this->info);
     }
 

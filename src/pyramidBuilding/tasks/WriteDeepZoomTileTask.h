@@ -23,13 +23,13 @@ namespace pb {
 using namespace std::experimental;
 
     template <class T>
-    class WriteDeepZoomTileTask : public htgs::ITask< Tile<T>, Tile<T> > {
+class WriteDeepZoomTileTask : public htgs::ITask< Tile<T>, htgs::VoidData > {
 
     public:
 
 
         WriteDeepZoomTileTask(size_t numThreads, const std::string &_pathOut, const int nbPyramidLevel,
-                const ImageDepth imageDepth) : htgs::ITask<Tile<T>, Tile<T>>(numThreads),
+                const ImageDepth imageDepth) : htgs::ITask<Tile<T>, htgs::VoidData>(numThreads),
         _pathOut(_pathOut), nbPyramidLevel(nbPyramidLevel), imageDepth(imageDepth) {
 
             //create the images directory structure
@@ -79,8 +79,6 @@ using namespace std::experimental;
                     break;
                 }
             }
-
-            this->addResult(data);
         }
 
         /// \brief Close the tiff file
@@ -91,7 +89,7 @@ using namespace std::experimental;
         /// \return Writer name
         std::string getName() override { return "DeepZoomWriteTask"; }
 
-        ITask<Tile<T>, Tile<T>> *copy() override {
+        ITask<Tile<T>, VoidData> *copy() override {
             return new WriteDeepZoomTileTask(this->getNumThreads(), this->_pathOut, this->nbPyramidLevel, this->imageDepth);
         }
 

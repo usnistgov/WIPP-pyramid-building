@@ -209,7 +209,7 @@ namespace pb {
             auto maxDim = std::max(fullFovWidth,fullFovHeight);
             deepZoomLevel = int(ceil(log2(maxDim)) + 1);
 
-            auto graph = new htgs::TaskGraphConf<TileRequest, Tile<px_t>>();
+            auto graph = new htgs::TaskGraphConf<TileRequest, VoidData>();
 
             auto generator = new BaseTileGeneratorLibTiffWithCache<px_t>(gridGenerator, this->options->getBlendingMethod());
             auto baseTileTask = new BaseTileTask<px_t>(nbThreadsPerTask, generator);
@@ -224,7 +224,7 @@ namespace pb {
 
             auto createTileTask = new CreateTileTask<px_t>(nbThreadsPerTask, downsampler);
 
-            htgs::ITask< Tile<px_t>, Tile<px_t>> *writeTask = nullptr;
+            htgs::ITask< Tile<px_t>, htgs::VoidData> *writeTask = nullptr;
 
             if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
                 auto outputPath = filesystem::path(_outputDir) / (pyramidName + "_files");
@@ -288,16 +288,16 @@ namespace pb {
 
             graph->finishedProducingData();
 
-            while(!graph->isOutputTerminated()){
-                auto r = graph->consumeData();
-                if(r == nullptr){
-                    break;
-
-                }
-
-                VLOG(3) << "tile output needs to be consumed to release shared pointer!";
-
-            }
+//            while(!graph->isOutputTerminated()){
+//                auto r = graph->consumeData();
+//                if(r == nullptr){
+//                    break;
+//
+//                }
+//
+//                VLOG(3) << "tile output needs to be consumed to release shared pointer!";
+//
+//            }
 
 
             if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
