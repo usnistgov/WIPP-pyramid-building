@@ -105,14 +105,17 @@ mkdir -p results
 
 date=$(date +"%m_%d_%Y_%T")
 
-CLEAR_CACHE=0;
 
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
-            echo "linux detected - can clear cache";
-            CLEAR_CACHE=1;
-        else
-            echo "not a linux OS - cannot clear cache";
-        fi
+    echo "linux detected - can clear cache";
+    CLEAR_CACHE=1;
+else
+    echo "not a linux OS - cannot clear cache";
+fi
+
+if [[ "$CLEAR_CACHE" == "1" ]]; then
+        sudo bash -c "sync; echo 1 > /proc/sys/vm/drop_caches"
+fi
 
 echo "ok? $RUNS"
 

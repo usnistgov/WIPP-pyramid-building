@@ -9,6 +9,7 @@
 # Needs install of getopt first :
 # On OSX : brew install -y gnu-getopt && echo 'export PATH="/usr/local/opt/gnu-getopt/bin:$PATH"' >> ~/.bash_profile
 
+echo "running as $USER"
 
 # saner programming env: these switches turn some bugs into errors
 set -o errexit -o pipefail -o noclobber -o nounset
@@ -111,9 +112,6 @@ CLEAR_CACHE=0;
 
 for ((i = 1; i <= $RUNS; i++))
     do
-    if [[ "$CLEAR_CACHE" == "1" ]]; then
-                bash -c "sync; echo 1 > /proc/sys/vm/drop_caches"
-    fi
     if [[ "$benchmark" == "exectime" ]]; then
 
             if [[ "$OSTYPE" == "linux-gnu" ]]; then
@@ -123,12 +121,16 @@ for ((i = 1; i <= $RUNS; i++))
                 echo "not a linux OS - cannot clear cache";
             fi
 
+            if [[ "$CLEAR_CACHE" == "1" ]]; then
+                    sudo bash -c "sync; echo 1 > /proc/sys/vm/drop_caches"
+            fi
+
             echo "checking if sources need to be recompiled..."
 
 
             echo "benchmarking execution time..."
 #            ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending;
-           { time ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${benchmark}_${DATASET_NAME}_${date}.txt
+            { time ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${benchmark}_${DATASET_NAME}_${date}.txt
     else
             echo "benchmarking memory consumption..."
             { heaptrack ../cmake-build-debug/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${benchmark}_${DATASET_NAME}_${date}.txt
