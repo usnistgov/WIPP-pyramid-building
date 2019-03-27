@@ -162,13 +162,11 @@ namespace pb {
         void loadTile(tdata_t src, T *dest, uint32_t rowMin, uint32_t colMin) {
             uint32_t
                     rowMax = std::min(rowMin + _tileHeight, _FOVHeight),
-                    colMax = std::min(colMin + _tileWidth, _FOVWidth);
+                    colMax = std::min(colMin + _tileWidth, _FOVWidth),
+                    width = colMax - colMin;
 
             for (uint32_t row = 0; row < rowMax - rowMin; ++row) {
-                for (uint32_t col = 0; col < colMax - colMin; ++col) {
-                    dest[(rowMin + row) * _FOVWidth + (colMin + col)] =
-                            (T) ((FileType *) (src))[row * _tileWidth + col];
-                }
+                std::copy_n((FileType*)src + row * _tileWidth, width, dest + _FOVWidth * (rowMin + row) + colMin);
             }
         }
 

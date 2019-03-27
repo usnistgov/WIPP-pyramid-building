@@ -19,6 +19,16 @@ namespace pb {
     public:
         Blender(BlendingMethod const &blendingMethod) : blendingMethod(blendingMethod) {}
 
+        void blend(T *srcStartOffset,size_t range, T *destStartOffset){
+            switch (blendingMethod) {
+                case BlendingMethod::OVERLAY:
+                    std::copy_n(srcStartOffset, range, destStartOffset);
+                    break;
+                case BlendingMethod::MAX:
+                    throw std::runtime_error("range copy for MAX blending not implemented.");
+            }
+        }
+
         void blend(T *tile, size_t index, T val) {
             switch (blendingMethod) {
                 case BlendingMethod::MAX:

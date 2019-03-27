@@ -47,7 +47,6 @@ using namespace std::experimental;
 
         }
 
-
         void executeTask(std::shared_ptr<Tile<T>> data) override {
 
             filesystem::path path = _pathOut;

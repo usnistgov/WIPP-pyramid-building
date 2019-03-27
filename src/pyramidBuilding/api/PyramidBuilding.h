@@ -131,7 +131,7 @@ namespace pb {
             uint32_t _tilesize = 256;
             DownsamplingType downsamplingType = DownsamplingType::NEIGHBORS_AVERAGE;
             PyramidFormat pyramidFormat = PyramidFormat::DEEPZOOM;
-            BlendingMethod blendingMethod = BlendingMethod::MAX;
+            BlendingMethod blendingMethod = BlendingMethod::OVERLAY;
             std::string pyramidName = "output";
             uint32_t overlap = 0;
             ImageDepth depth = ImageDepth::_16U;
@@ -184,7 +184,7 @@ namespace pb {
 
             VLOG(1) << "generating pyramid...";
 
-            size_t nbThreadsPerTask = 15;
+            size_t nbThreadsPerTask = 7;
 
             auto begin = std::chrono::high_resolution_clock::now();
 
@@ -272,7 +272,18 @@ namespace pb {
 
 //           blockTraversal(graph, numTileRow, numTileCol);
        //   diagTraversal(graph, numTileRow, numTileCol);
-          recursiveTraversal<px_t>(graph, numTileRow, numTileCol, (size_t)0, (size_t)0);
+     //     recursiveTraversal<px_t>(graph, numTileRow, numTileCol, (size_t)0, (size_t)0);
+
+            fi::Traversal traversal = fi::Traversal(fi::TraversalType::DIAGONAL,numTileRow,numTileCol);
+
+
+
+            for (auto step : traversal.getTraversal()) {
+                auto row = step.first, col = step.second;
+                auto tileRequest = new TileRequest(row, col);
+                VLOG(2) <<  "(" << row << "," << col << ")"<< std::endl;
+                graph->produceData(tileRequest);
+            }
 
 
             graph->finishedProducingData();

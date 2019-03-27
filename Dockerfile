@@ -1,6 +1,6 @@
+#@IgnoreInspection BashAddShebang
 FROM gcc
 
-#!/usr/bin/env bash
 #make sure libs are up -to-date
 RUN apt-get update -y ;\
 apt-get install -y cmake ;\
