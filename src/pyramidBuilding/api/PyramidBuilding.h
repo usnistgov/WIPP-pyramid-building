@@ -184,7 +184,7 @@ namespace pb {
 
             VLOG(1) << "generating pyramid...";
 
-            size_t nbThreadsPerTask = 7;
+            size_t nbThreadsPerTask = 10;
 
             auto begin = std::chrono::high_resolution_clock::now();
 
@@ -212,33 +212,29 @@ namespace pb {
             auto graph = new htgs::TaskGraphConf<TileRequest, VoidData>();
 
             auto generator = new BaseTileGeneratorLibTiffWithCache<px_t>(gridGenerator, this->options->getBlendingMethod());
-            auto baseTileTask = new BaseTileTask<px_t>(nbThreadsPerTask, generator);
+            auto baseTileTask = new BaseTileTask<px_t>(1, generator);
+            graph->setGraphConsumerTask(baseTileTask);
 
             auto bookkeeper = new htgs::Bookkeeper<Tile<px_t>>();
 
             auto writeRule = new WriteTileRule<px_t>();
-
             auto pyramidRule = new PyramidRule<px_t>(numTileCol,numTileRow);
 
             auto downsampler = new AverageDownsampler<px_t>();
-
-            auto createTileTask = new CreateTileTask<px_t>(nbThreadsPerTask, downsampler);
-
-            htgs::ITask< Tile<px_t>, htgs::VoidData> *writeTask = nullptr;
-
-            if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
-                auto outputPath = filesystem::path(_outputDir) / (pyramidName + "_files");
-                writeTask = new WriteDeepZoomTileTask<px_t>(nbThreadsPerTask, outputPath, deepZoomLevel, this->options->getDepth());
-            }
-
-            graph->setGraphConsumerTask(baseTileTask);
+            auto createTileTask = new CreateTileTask<px_t>(1, downsampler);
 
             //incoming edges from the bookeeper
             graph->addEdge(baseTileTask, bookkeeper); //pyramid base level tile
             graph->addEdge(createTileTask,bookkeeper); //pyramid higher level tile
-
-            //outgoing edges
             graph->addRuleEdge(bookkeeper, pyramidRule, createTileTask); //caching tiles and creating a tile at higher level;
+
+            htgs::ITask< Tile<px_t>, htgs::VoidData> *writeTask = nullptr;
+            if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
+                auto outputPath = filesystem::path(_outputDir) / (pyramidName + "_files");
+                writeTask = new WriteDeepZoomTileTask<px_t>(nbThreadsPerTask, outputPath, deepZoomLevel, this->options->getDepth());
+            }
+            graph->addRuleEdge(bookkeeper, writeRule, writeTask); //exiting the graph;
+
 
             //TODO CHECK for now we link to the writeTask but do not use it. We could.
             // If large latency in write, it could be worthwhile. Otherwise thread management will dominate.
@@ -251,13 +247,11 @@ namespace pb {
             }
 
         //    auto tiledTiffWriteTask = new WriteTiffTileTask<px_t>(1,_outputDir, pyramidName, options->getDepth(), gridGenerator);
-
-            graph->addRuleEdge(bookkeeper, writeRule, writeTask); //exiting the graph;
         //    graph->addRuleEdge(bookkeeper, writeRule, tiledTiffWriteTask);
 
 
             //output task
-            graph->addGraphProducerTask(writeTask);
+           // graph->addGraphProducerTask(writeTask);
 
             auto *runtime = new htgs::TaskGraphRuntime(graph);
 

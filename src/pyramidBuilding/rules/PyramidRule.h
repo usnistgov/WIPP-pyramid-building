@@ -70,6 +70,7 @@ public:
         auto level = data->getLevel();
 
 
+        //freeing cache if the incoming tile has ancestors.
         if(level > 0) {
             auto gridCol = levelGridSizes[level-1][0];
 
@@ -83,12 +84,14 @@ public:
             }
         }
 
+        //generated all  levels. We are done.
         if(level == this->numLevel -1){
             VLOG(3) << "done generating last level." << std::endl;
             done = true;
             return;
         }
 
+        //storing new tile in cache. check if a block is full so we can produce a new tile.
         std::ostringstream oss;
         oss << "applying pyramid rule \n" << "tile : (" << row << "," << col << ")" <<
                                           " - grid size at level: " << level << " (" << levelGridSizes[level][0] << "," <<  levelGridSizes[level][1] << ")";

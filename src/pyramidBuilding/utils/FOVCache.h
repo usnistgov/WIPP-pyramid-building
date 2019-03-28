@@ -17,7 +17,7 @@
 
 #include <experimental/filesystem>
 #include <atomic>
-#include "TileLoader.h"
+#include "TiffTileLoader.h"
 
 namespace pb {
 
@@ -31,10 +31,10 @@ public:
 
     //number of FOVs
     std::atomic<uint32_t> readCount;
-    TileLoader<T>* tileLoader;
+    TiffTileLoader<T>* tileLoader;
 
     FOVCache(std::string directory, std::map<std::string, uint32_t> fovsUsageCount) : _directory(directory), fovsUsageCount(fovsUsageCount) {
-        tileLoader = new TileLoader<T>(directory);
+        tileLoader = new TiffTileLoader<T>(directory);
     };
 
     ~FOVCache() {

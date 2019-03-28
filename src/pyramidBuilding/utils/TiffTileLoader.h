@@ -18,7 +18,7 @@ namespace pb {
 
 
     template <class T>
-    class TileLoader {
+    class TiffTileLoader {
 
     private:
 
@@ -37,7 +37,7 @@ namespace pb {
     public :
 
 
-        TileLoader(std::string directory) : _directory(directory) {}
+        TiffTileLoader(std::string directory) : _directory(directory) {}
 
 
 

@@ -133,7 +133,7 @@ for ((i = 1; i <= $RUNS; i++))
             { time ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${benchmark}_${DATASET_NAME}_${date}.txt
     else
             echo "benchmarking memory consumption..."
-            { heaptrack ../cmake-build-debug/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${benchmark}_${DATASET_NAME}_${date}.txt
+            { heaptrack ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${benchmark}_${DATASET_NAME}_${date}.txt
     fi
 
 # "valgrind --tool=massif --stacks=yes --massif-out-file="

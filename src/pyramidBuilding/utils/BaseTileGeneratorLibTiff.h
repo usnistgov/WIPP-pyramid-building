@@ -19,7 +19,7 @@
 #include <experimental/filesystem>
 #include "Blender.h"
 #include "BaseTileGenerator.h"
-#include "TileLoader.h"
+#include "TiffTileLoader.h"
 
 namespace pb {
 
@@ -55,7 +55,7 @@ namespace pb {
                                                                                                   blendingMethod(blendingMethod),
                                                                                                   fovWidth(reader->getFovWidth()),
                                                                                                   fovHeight(reader->getFovHeight()) {
-            tileLoader = new TileLoader<T>(directory);
+            tileLoader = new TiffTileLoader<T>(directory);
             blender = new Blender<T>(blendingMethod);
         }
 
@@ -139,7 +139,7 @@ namespace pb {
 
 
     private:
-        TileLoader<T>* tileLoader;
+        TiffTileLoader<T>* tileLoader;
         const std::map<std::pair<size_t, size_t>, std::vector<PartialFov *>> grid;
         const std::string directory;
         const size_t tileWidth;

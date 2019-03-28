@@ -61,63 +61,29 @@ namespace pb {
 
             size_t level = data->getLevel();
 
-
+            //We receive the tile at the top of a regular pyramid. We generate deepZoom pyramid extra level
+            // by downsampling this tile over and over until we generate a 1x1 pixel tile.
             if (level == this->numLevel - 1) {
 
                 T* originalData = data->getData();
+                T* newTileData = nullptr;
 
                 size_t width = data->get_width();
                 size_t height = data->get_height();
 
-                T* newTileData = new T[width * height];
+                int levelLeft = (int)(this -> maxDeepZoomLevel -  this->numLevel);
 
-                for(uint32_t i = 0; i < (width * height); i++){
-                    newTileData[i] = originalData[i];
-                }
+                for (int i = levelLeft -1 ; i >= 0; i--) {
 
-                //TODO level should be int
-                for (int i = (int) this->numLevel; i < maxDeepZoomLevel; i++) {
-
-                    int l = this->maxDeepZoomLevel - 1 - i;
-                    std::string level_string = std::to_string(l);
-
-                    filesystem::path path = _pathOut;
-                    auto dirPath = path / level_string;
-                    if (!filesystem::exists(dirPath)) {
-                        filesystem::create_directories(dirPath);
-                    }
-
-                    if (l > 1) {
-                        auto res = downsampler->downsample(newTileData, width, height);
-                        //TODO valgrind still detect a leak of a few bytes here
-                        delete[] newTileData;
-                        newTileData = res;
-                    }
+                    newTileData = downsampler->downsample(originalData, width, height);
 
                     width = static_cast<size_t>(ceil((double) width / 2));
                     height = static_cast<size_t>(ceil((double) height / 2));
 
-                    auto outputFilename =
-                            std::to_string(data->getCol()) + "_" + std::to_string(data->getRow()) + ".png";
-                    auto fullImagePath = dirPath / outputFilename;
+                    auto originalLevel = (size_t)(this->maxDeepZoomLevel - 1 - i);
 
-
-                    //TODO CHECK how to clean up? Plus need to be factored
-                    switch (imageDepth) {
-                        case ImageDepth::_16U : {
-                            cv::Mat image(height, width, CV_16U, newTileData);
-                            cv::imwrite(fullImagePath.string(), image);
-                            image.release();
-                            break;
-                        }
-                        case ImageDepth::_8U : {
-                            cv::Mat image(height, width, CV_8U, newTileData);
-                            cv::imwrite(fullImagePath.string(), image);
-                            image.release();
-                            break;
-                        }
-                    }
-
+                    auto tile = new Tile<T>(originalLevel, 0, 0, width, height, newTileData);
+                    this->addResult(tile);
                 }
 
                 done = true;
