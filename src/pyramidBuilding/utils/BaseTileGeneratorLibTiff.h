@@ -13,7 +13,7 @@
 #include "Helper.h"
 #include <FastImage/api/FastImage.h>
 #include <FastImage/TileLoaders/GrayscaleTiffTileLoader.h>
-#include "StitchingVectorParser.h"
+#include "StitchingVectorParserOld.h"
 #include "../data/Tile.h"
 #include "pyramidBuilding/api/OptionsType.h"
 #include <experimental/filesystem>
@@ -42,7 +42,7 @@ namespace pb {
          * The pyramid base level tile generator needs information on the general structure of the full FOVs.
          * @param reader the MistStitchedImageReader that contains information on partial FOV overlaps.
          */
-        BaseTileGeneratorLibTiff(StitchingVectorParser *reader, BlendingMethod blendingMethod) : grid(reader->getGrid()), directory(
+        BaseTileGeneratorLibTiff(StitchingVectorParserOld *reader, BlendingMethod blendingMethod) : grid(reader->getGrid()), directory(
                 reader->getImageDirectoryPath()), tileWidth(
                 reader->getFovTileWidth()), tileHeight(reader->getFovTileHeight()), pyramidTileSize(
                 reader->getPyramidTileSize()),

@@ -28,7 +28,7 @@
 #include <pyramidBuilding/utils/BaseTileGeneratorLibTiffWithCache.h>
 
 #include "pyramidBuilding/data/TileRequest.h"
-#include "pyramidBuilding/utils/StitchingVectorParser.h"
+#include "pyramidBuilding/utils/StitchingVectorParserOld.h"
 #include "pyramidBuilding/utils/BaseTileGeneratorLibTiff.h"
 #include "pyramidBuilding/tasks/WriteDeepZoomTileTask.h"
 #include "pyramidBuilding/rules/DeepZoomDownsamplingRule.h"
@@ -194,7 +194,7 @@ namespace pb {
             std::string format = "png";
 
 
-            auto gridGenerator = new StitchingVectorParser(_inputDir, _inputVector, options->getTilesize());
+            auto gridGenerator = new StitchingVectorParserOld(_inputDir, _inputVector, options->getTilesize());
 
             auto grid = gridGenerator->getGrid();
 
