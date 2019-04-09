@@ -38,7 +38,7 @@ namespace pb {
      * The pyramid base level is composed of tiles carved from a set of overlapping FOVs.
      * For a given pyramid tile size, we can generate a grid structure : (row,col) -> vector of partial overlapping FOVs.
      */
-    class GridGenerator {
+    class StitchingVectorParser {
 
     private:
         size_t pyramidTileSize;
@@ -46,6 +46,7 @@ namespace pb {
         std::string stitchingVectorPath;
 
         std::map<std::pair<size_t,size_t> , std::vector<PartialFov*>> grid;
+        std::map<std::pair<size_t,size_t> , std::string> FOVGrid;
 
         size_t fovWidth = 0;
         size_t fovHeight = 0;
@@ -56,6 +57,9 @@ namespace pb {
 
         size_t gridMaxRow = 0;
         size_t gridMaxCol = 0;
+
+        size_t FOVGridMaxRow = 0;
+        size_t FOVGridMaxCol = 0;
 
         std::map<std::string, uint32_t> cache;
 
@@ -74,7 +78,7 @@ namespace pb {
          * @param stitchingVectorPath  where to locate the corresponding stitching vector.
          * @param pyramidTileSize size of pyramid tile.
          */
-        GridGenerator(const std::string &imageDirectoryPath,
+        StitchingVectorParser(const std::string &imageDirectoryPath,
                                 const std::string &stitchingVectorPath, size_t pyramidTileSize) :
                                                                           imageDirectoryPath(imageDirectoryPath),
                                                                           stitchingVectorPath(stitchingVectorPath),
@@ -83,6 +87,9 @@ namespace pb {
             //TODO CHECK THAT THE FILE EXISTS (otherwise it will silently break)
             std::ifstream infile(stitchingVectorPath);
             size_t tileSize = pyramidTileSize;
+
+            size_t gridFOVRow = 0;
+            size_t gridFOVCol = 0;
 
             //partial images (fovs)
             size_t fovGlobalX = 0;
@@ -96,6 +103,8 @@ namespace pb {
             std::string line;
             std::string pair;
 
+            std::string file;
+
             VLOG(2) << "parsing stitching vector...";
 
             while (std::getline(infile, line)) {
@@ -103,32 +112,36 @@ namespace pb {
                 if(line == ""){
                     continue;
                 }
-                std::string file;
                 while(std::getline(iss,pair,';')) {
                     std::string key, val;
                     std::istringstream iss2(pair);
-                    while( std::getline(std::getline(iss2 >> std::ws , key, ':') >> std::ws, val)) {
+                    while (std::getline(std::getline(iss2 >> std::ws, key, ':') >> std::ws, val)) {
                         VLOG(3) << key << ": " << val << std::endl;
 
-                        if(key  == "position") {
+                        if (key == "position") {
                             std::regex rgx("\\(([0-9]+), ([0-9]+)\\)");
                             std::smatch matches;
-                            if(std::regex_search(val, matches, rgx)) {
+                            if (std::regex_search(val, matches, rgx)) {
                                 fovGlobalX = std::strtoul(matches[1].str().data(), nullptr, 10);
                                 fovGlobalY = std::strtoul(matches[2].str().data(), nullptr, 10);
 
-                                if(fovGlobalX > maxFovGlobalX) maxFovGlobalX = fovGlobalX;
-                                if(fovGlobalY > maxFovGlobalY) maxFovGlobalY = fovGlobalY;
-
-                                //TODO CHECK best function to parse stitching vector coords (spec?)
-    //                            fovGlobalX = static_cast<size_t>(std::stoi(matches[1].str()));
-    //                            fovGlobalY = static_cast<size_t>(std::stoi(matches[2].str()));
+                                if (fovGlobalX > maxFovGlobalX) maxFovGlobalX = fovGlobalX;
+                                if (fovGlobalY > maxFovGlobalY) maxFovGlobalY = fovGlobalY;
                             } else {
                                 throw "position coordinates cannot be converted to 4bytes signed integer";
                             }
-                        }
-                        else if( key == "file"){
+                        } else if (key == "file") {
                             file = val;
+                        } else if (key == "grid") {
+                            std::regex rgx("\\(([0-9]+), ([0-9]+)\\)");
+                            std::smatch matches;
+                            if (std::regex_search(val, matches, rgx)) {
+                                gridFOVCol = std::strtoul(matches[1].str().data(), nullptr, 10);
+                                gridFOVRow = std::strtoul(matches[2].str().data(), nullptr, 10);
+
+                                if (gridFOVCol > FOVGridMaxCol) FOVGridMaxCol = gridFOVCol;
+                                if (gridFOVRow > FOVGridMaxRow) FOVGridMaxRow = gridFOVRow;
+                            }
                         }
                     }
                 }
@@ -148,6 +161,10 @@ namespace pb {
                     TIFFGetField(tiff, TIFFTAG_TILELENGTH, &fovTileHeight);
                     TIFFClose(tiff);
                 }
+
+                //Coordinates are inversed to keep consistency => (row,col)
+                std::pair<size_t,size_t> index= std::make_pair(gridFOVRow,gridFOVCol);
+                FOVGrid.insert(std::make_pair(index,file));
 
                 fullFovWidth = maxFovGlobalX + fovWidth;
                 fullFovHeight = maxFovGlobalY + fovHeight;
@@ -170,7 +187,6 @@ namespace pb {
                 counter += count;
 
                 //compute overlap between an FOV and each pyramid tile.
-
                 for(size_t j = startRow; j <= endRow ; j++) {
                     for(size_t i = startCol; i <= endCol ; i++) {
                         cv::Rect tile = cv::Rect(i * tileSize, j * tileSize, tileSize, tileSize); //tile global coordinates
@@ -235,7 +251,7 @@ namespace pb {
         }
 
 
-        ~GridGenerator(){
+        ~StitchingVectorParser(){
           for(auto &elt : grid){
               for(auto &fov : elt.second){
                   delete fov;

@@ -16,7 +16,7 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include "pyramidBuilding/api/OptionsType.h"
-#include "pyramidBuilding/utils/GridGenerator.h"
+#include "pyramidBuilding/utils/StitchingVectorParser.h"
 
 #include <experimental/filesystem>
 
@@ -30,7 +30,7 @@ class WriteTiffTileTask : public htgs::ITask< Tile<T>, htgs::VoidData > {
 public:
     WriteTiffTileTask(
             size_t numThreads, const std::string &_pathOut, const std::string &pyramidName,
-            const ImageDepth imageDepth, const GridGenerator *gridGenerator) :
+            const ImageDepth imageDepth, const StitchingVectorParser *gridGenerator) :
             htgs::ITask<Tile<T>, Tile<T>>(numThreads),
             _pathOut(_pathOut),
             pyramidName(pyramidName),
@@ -149,7 +149,7 @@ private:
     const std::string pyramidName;
     const std::string _pathOut;
     const ImageDepth imageDepth;
-    const GridGenerator *info;
+    const StitchingVectorParser *info;
     TIFF* _tiff;
 
 

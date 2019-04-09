@@ -13,13 +13,13 @@
 #include "Helper.h"
 #include <FastImage/api/FastImage.h>
 #include <FastImage/TileLoaders/GrayscaleTiffTileLoader.h>
-#include "GridGenerator.h"
+#include "StitchingVectorParser.h"
 #include "../data/Tile.h"
 #include "pyramidBuilding/api/OptionsType.h"
 #include <experimental/filesystem>
 #include "Blender.h"
 #include "BaseTileGenerator.h"
-#include "TiffTileLoader.h"
+#include "TiffImageLoader.h"
 
 namespace pb {
 
@@ -42,7 +42,7 @@ namespace pb {
          * The pyramid base level tile generator needs information on the general structure of the full FOVs.
          * @param reader the MistStitchedImageReader that contains information on partial FOV overlaps.
          */
-        BaseTileGeneratorLibTiff(GridGenerator *reader, BlendingMethod blendingMethod) : grid(reader->getGrid()), directory(
+        BaseTileGeneratorLibTiff(StitchingVectorParser *reader, BlendingMethod blendingMethod) : grid(reader->getGrid()), directory(
                 reader->getImageDirectoryPath()), tileWidth(
                 reader->getFovTileWidth()), tileHeight(reader->getFovTileHeight()), pyramidTileSize(
                 reader->getPyramidTileSize()),
@@ -55,7 +55,7 @@ namespace pb {
                                                                                                   blendingMethod(blendingMethod),
                                                                                                   fovWidth(reader->getFovWidth()),
                                                                                                   fovHeight(reader->getFovHeight()) {
-            tileLoader = new TiffTileLoader<T>(directory);
+            tileLoader = new TiffImageLoader<T>(directory);
             blender = new Blender<T>(blendingMethod);
         }
 
@@ -113,7 +113,7 @@ namespace pb {
                 auto overlapFov = fov->getFovCoordOverlap();
                 auto tileOverlap = fov->getTileOverlap();
 
-                T* image = tileLoader->loadFullFOV(filename);
+                T* image = tileLoader->loadFullImage(filename);
 
                 auto destOffset = tileOverlap.y * pyramidTileWidth + tileOverlap.x;
 
@@ -139,7 +139,7 @@ namespace pb {
 
 
     private:
-        TiffTileLoader<T>* tileLoader;
+        TiffImageLoader<T>* tileLoader;
         const std::map<std::pair<size_t, size_t>, std::vector<PartialFov *>> grid;
         const std::string directory;
         const size_t tileWidth;

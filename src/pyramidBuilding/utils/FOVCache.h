@@ -17,7 +17,7 @@
 
 #include <experimental/filesystem>
 #include <atomic>
-#include "TiffTileLoader.h"
+#include "TiffImageLoader.h"
 
 namespace pb {
 
@@ -31,10 +31,10 @@ public:
 
     //number of FOVs
     std::atomic<uint32_t> readCount;
-    TiffTileLoader<T>* tileLoader;
+    TiffImageLoader<T>* imageLoader;
 
     FOVCache(std::string directory, std::map<std::string, uint32_t> fovsUsageCount) : _directory(directory), fovsUsageCount(fovsUsageCount) {
-        tileLoader = new TiffTileLoader<T>(directory);
+        imageLoader = new TiffImageLoader<T>(directory);
     };
 
     ~FOVCache() {
@@ -50,7 +50,7 @@ public:
             fovsUsageCount.erase(it);
         }
 
-        delete tileLoader;
+        delete imageLoader;
     }
 
     T* getFOV(const std::string &filename){
@@ -63,7 +63,7 @@ public:
         if(it == fovsCache.end()) {
             readCount++;
             VLOG(3) << "FOV not already loaded : " << filename << std::endl;
-            fov = tileLoader->loadFullFOV(filename);
+            fov = imageLoader->loadFullImage(filename);
             fovsCache[filename] = fov;
             if(fovsCache.size() > cacheMaxCount) {cacheMaxCount = fovsCache.size();}
         }

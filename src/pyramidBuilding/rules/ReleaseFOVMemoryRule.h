@@ -8,11 +8,11 @@
 #include <htgs/api/IMemoryReleaseRule.hpp>
 #include <glob.h>
 
-class ReleaseTileMemoryRule : public htgs::IMemoryReleaseRule {
+class ReleaseFOVMemoryRule : public htgs::IMemoryReleaseRule {
 
 public:
 
-    ReleaseTileMemoryRule(size_t releaseCount) : releaseCount(releaseCount) {}
+    ReleaseFOVMemoryRule(size_t releaseCount) : releaseCount(releaseCount) {}
 
     void memoryUsed() override {
         releaseCount--;

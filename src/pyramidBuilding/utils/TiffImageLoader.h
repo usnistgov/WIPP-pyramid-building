@@ -18,7 +18,7 @@ namespace pb {
 
 
     template <class T>
-    class TiffTileLoader {
+    class TiffImageLoader {
 
     private:
 
@@ -37,7 +37,7 @@ namespace pb {
     public :
 
 
-        TiffTileLoader(std::string directory) : _directory(directory) {}
+        TiffImageLoader(std::string directory) : _directory(directory) {}
 
 
 
@@ -53,7 +53,28 @@ namespace pb {
                 TIFFGetField(tiff, TIFFTAG_SAMPLEFORMAT, &_sampleFormat);
         }
 
-        T *loadFullFOV(std::string filename) {
+
+        void loadFullImage(T* image, std::string filename) {
+            auto fullPath = _directory + filename;
+            auto file = fullPath.c_str();
+            TIFF* tiff = TIFFOpen(file, "r");
+
+            collectMetadata(tiff);
+
+            if (tiff) {
+                void *buf = _TIFFmalloc(TIFFTileSize(tiff));
+
+                for (uint32_t posRow = 0; posRow < _FOVHeight; posRow += _tileHeight) {
+                    for (uint32_t posCol = 0; posCol < _FOVWidth; posCol += _tileWidth) {
+                        loadAndCastImageTile(tiff, image, buf, posRow, posCol);
+                    }
+                }
+                _TIFFfree(buf);
+                TIFFClose(tiff);
+            }
+        }
+
+        T *loadFullImage(std::string filename) {
 
             auto fullPath = _directory + filename;
             auto file = fullPath.c_str();
@@ -61,14 +82,14 @@ namespace pb {
 
             collectMetadata(tiff);
 
-            T *region = nullptr;
+            T *region = new T[_FOVWidth * _FOVHeight]();
             if (tiff) {
-                region = new T[_FOVWidth * _FOVHeight]();
+
                 void *buf = _TIFFmalloc(TIFFTileSize(tiff));
 
                 for (uint32_t posRow = 0; posRow < _FOVHeight; posRow += _tileHeight) {
                     for (uint32_t posCol = 0; posCol < _FOVWidth; posCol += _tileWidth) {
-                        loadPartAndCastFOV(tiff, region, buf, posRow, posCol);
+                        loadAndCastImageTile(tiff, region, buf, posRow, posCol);
                     }
                 }
                 _TIFFfree(buf);
@@ -82,7 +103,7 @@ namespace pb {
 
         std::string _directory;
 
-        void loadPartAndCastFOV(TIFF* tiff, T *region, tdata_t buf, uint32_t rowMin, uint32_t
+        void loadAndCastImageTile(TIFF *tiff, T *region, tdata_t buf, uint32_t rowMin, uint32_t
         colMin) {
             TIFFReadTile(tiff,
                          buf,
