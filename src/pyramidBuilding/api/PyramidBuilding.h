@@ -26,6 +26,8 @@
 #include <pyramidBuilding/utils/BaseTileGeneratorFastImage.h>
 #include <pyramidBuilding/utils/AverageDownsampler.h>
 #include <pyramidBuilding/utils/BaseTileGeneratorLibTiffWithCache.h>
+#include <pyramidBuilding/utils/StitchingVectorParser.h>
+#include <pyramidBuilding/data/FOVRequest.h>
 
 #include "pyramidBuilding/data/TileRequest.h"
 #include "pyramidBuilding/utils/StitchingVectorParserOld.h"
@@ -194,60 +196,62 @@ namespace pb {
             std::string format = "png";
 
 
-            auto gridGenerator = new StitchingVectorParserOld(_inputDir, _inputVector, options->getTilesize());
+            auto gridGenerator = new StitchingVectorParser(_inputDir, _inputVector);
 
             auto grid = gridGenerator->getGrid();
 
-            size_t numTileRow = gridGenerator->getGridMaxRow(0) + 1;
-            size_t numTileCol = gridGenerator->getGridMaxCol(0) + 1;
+            size_t numTileRow = gridGenerator->getMaxRow() + 1;
+            size_t numTileCol = gridGenerator->getMaxCol() + 1;
+
+            auto graph = new htgs::TaskGraphConf<FOVRequest, VoidData>();
 
 
-            size_t fullFovWidth = gridGenerator->getFullFovWidth();
-            size_t fullFovHeight = gridGenerator->getFullFovHeight();
-            int deepZoomLevel = 0;
-            //calculate pyramid depth
-            auto maxDim = std::max(fullFovWidth,fullFovHeight);
-            deepZoomLevel = int(ceil(log2(maxDim)) + 1);
-
-            auto graph = new htgs::TaskGraphConf<TileRequest, VoidData>();
-
-            auto generator = new BaseTileGeneratorLibTiffWithCache<px_t>(gridGenerator, this->options->getBlendingMethod());
-            auto baseTileTask = new BaseTileTask<px_t>(1, generator);
-            graph->setGraphConsumerTask(baseTileTask);
-
-            auto bookkeeper = new htgs::Bookkeeper<Tile<px_t>>();
-
-            auto writeRule = new WriteTileRule<px_t>();
-            auto pyramidRule = new PyramidRule<px_t>(numTileCol,numTileRow);
-
-            auto downsampler = new AverageDownsampler<px_t>();
-            auto createTileTask = new CreateTileTask<px_t>(1, downsampler);
-
-            //incoming edges from the bookeeper
-            graph->addEdge(baseTileTask, bookkeeper); //pyramid base level tile
-            graph->addEdge(createTileTask,bookkeeper); //pyramid higher level tile
-            graph->addRuleEdge(bookkeeper, pyramidRule, createTileTask); //caching tiles and creating a tile at higher level;
-
-            htgs::ITask< Tile<px_t>, htgs::VoidData> *writeTask = nullptr;
-            if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
-                auto outputPath = filesystem::path(_outputDir) / (pyramidName + "_files");
-                writeTask = new WriteDeepZoomTileTask<px_t>(nbThreadsPerTask, outputPath, deepZoomLevel, this->options->getDepth());
-            }
-            graph->addRuleEdge(bookkeeper, writeRule, writeTask); //exiting the graph;
-
-
-            //TODO CHECK for now we link to the writeTask but do not use it. We could.
-            // If large latency in write, it could be worthwhile. Otherwise thread management will dominate.
-            if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
-                auto outputPath = filesystem::path(_outputDir) / (pyramidName + "_files");
-                auto deepzoomDownsamplingRule = new DeepZoomDownsamplingRule<px_t>(numTileCol, numTileRow, deepZoomLevel,
-                                                                                   outputPath, this->options->getDepth(), downsampler);
-                graph->addRuleEdge(bookkeeper, deepzoomDownsamplingRule,
-                                   writeTask); //generating extra tiles up to 1x1 pixel to satisfy deepzoom format
-            }
-
-        //    auto tiledTiffWriteTask = new WriteTiffTileTask<px_t>(1,_outputDir, pyramidName, options->getDepth(), gridGenerator);
-        //    graph->addRuleEdge(bookkeeper, writeRule, tiledTiffWriteTask);
+//            size_t fullFovWidth = gridGenerator->getFullFovWidth();
+//            size_t fullFovHeight = gridGenerator->getFullFovHeight();
+//            int deepZoomLevel = 0;
+//            //calculate pyramid depth
+//            auto maxDim = std::max(fullFovWidth,fullFovHeight);
+//            deepZoomLevel = int(ceil(log2(maxDim)) + 1);
+//
+//
+//
+//            auto generator = new BaseTileGeneratorLibTiffWithCache<px_t>(gridGenerator, this->options->getBlendingMethod());
+//            auto baseTileTask = new BaseTileTask<px_t>(1, generator);
+//            graph->setGraphConsumerTask(baseTileTask);
+//
+//            auto bookkeeper = new htgs::Bookkeeper<Tile<px_t>>();
+//
+//            auto writeRule = new WriteTileRule<px_t>();
+//            auto pyramidRule = new PyramidRule<px_t>(numTileCol,numTileRow);
+//
+//            auto downsampler = new AverageDownsampler<px_t>();
+//            auto createTileTask = new CreateTileTask<px_t>(1, downsampler);
+//
+//            //incoming edges from the bookeeper
+//            graph->addEdge(baseTileTask, bookkeeper); //pyramid base level tile
+//            graph->addEdge(createTileTask,bookkeeper); //pyramid higher level tile
+//            graph->addRuleEdge(bookkeeper, pyramidRule, createTileTask); //caching tiles and creating a tile at higher level;
+//
+//            htgs::ITask< Tile<px_t>, htgs::VoidData> *writeTask = nullptr;
+//            if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
+//                auto outputPath = filesystem::path(_outputDir) / (pyramidName + "_files");
+//                writeTask = new WriteDeepZoomTileTask<px_t>(nbThreadsPerTask, outputPath, deepZoomLevel, this->options->getDepth());
+//            }
+//            graph->addRuleEdge(bookkeeper, writeRule, writeTask); //exiting the graph;
+//
+//
+//            //TODO CHECK for now we link to the writeTask but do not use it. We could.
+//            // If large latency in write, it could be worthwhile. Otherwise thread management will dominate.
+//            if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
+//                auto outputPath = filesystem::path(_outputDir) / (pyramidName + "_files");
+//                auto deepzoomDownsamplingRule = new DeepZoomDownsamplingRule<px_t>(numTileCol, numTileRow, deepZoomLevel,
+//                                                                                   outputPath, this->options->getDepth(), downsampler);
+//                graph->addRuleEdge(bookkeeper, deepzoomDownsamplingRule,
+//                                   writeTask); //generating extra tiles up to 1x1 pixel to satisfy deepzoom format
+//            }
+//
+//        //    auto tiledTiffWriteTask = new WriteTiffTileTask<px_t>(1,_outputDir, pyramidName, options->getDepth(), gridGenerator);
+//        //    graph->addRuleEdge(bookkeeper, writeRule, tiledTiffWriteTask);
 
 
             //output task
@@ -274,9 +278,9 @@ namespace pb {
 
             for (auto step : traversal.getTraversal()) {
                 auto row = step.first, col = step.second;
-                auto tileRequest = new TileRequest(row, col);
-                VLOG(2) <<  "(" << row << "," << col << ")"<< std::endl;
-                graph->produceData(tileRequest);
+                auto request = new FOVRequest(row,col);
+                VLOG(3) <<  "fov request : " << "(" << row << "," << col << ")"<< std::endl;
+                graph->produceData(request);
             }
 
 
@@ -324,8 +328,8 @@ namespace pb {
 
             delete runtime;
             delete gridGenerator;
-            delete generator;
-            delete downsampler;
+//            delete generator;
+//            delete downsampler;
 
             auto end = std::chrono::high_resolution_clock::now();
             VLOG(1) << "Execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " mS" << std::endl;

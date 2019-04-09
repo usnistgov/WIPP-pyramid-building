@@ -14,16 +14,14 @@ namespace pb {
 
 
     public:
-        FOVRequest(std::string filename) : filename(filename) {}
-
-
-        const std::string &getFilename() const {
-            return filename;
-        }
+        FOVRequest(uint32_t row, uint32_t col) : row(row), col(col) {}
 
     private:
-        std::string filename;
+        uint32_t row;
+        uint32_t col;
 
     };
+
+}
 
 #endif //PYRAMIDBUILDING_FOVREQUEST_H

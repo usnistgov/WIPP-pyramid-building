@@ -27,23 +27,24 @@
 #include "../data/FOVMetadata.h"
 #include "../data/FOV.h"
 
-
 namespace pb {
 
     class StitchingVectorParser {
+
+
     private:
 
         std::string imageDirectoryPath;
         std::string stitchingVectorPath;
 
-        std::map<std::pair<size_t,size_t> , FOV*> gridFOVs;
+        std::map<std::pair<size_t,size_t> , FOV*> grid;
         FOVMetadata* fovMetadata = nullptr;
 
         uint32_t fullFovWidth = 0;
         uint32_t fullFovHeight = 0;
 
-        uint32_t FOVGridMaxRow = 0;
-        uint32_t FOVGridMaxCol = 0;
+        uint32_t maxRow = 0;
+        uint32_t maxCol = 0;
 
     public:
         /**
@@ -107,8 +108,8 @@ namespace pb {
                                 col = (uint32_t)std::strtoul(matches[1].str().data(), nullptr, 10);
                                 row = (uint32_t)std::strtoul(matches[2].str().data(), nullptr, 10);
 
-                                if (col > FOVGridMaxCol) FOVGridMaxCol = col;
-                                if (row > FOVGridMaxRow) FOVGridMaxRow = row;
+                                if (col > maxCol) maxCol = col;
+                                if (row > maxRow) maxRow = row;
                             }
                         }
                     }
@@ -143,15 +144,12 @@ namespace pb {
                     fovMetadata = new FOVMetadata(width, height, samplePerPixel, bitsPerSample, sampleFormat);
                     fovMetadata->setTileWidth(tileWidth);
                     fovMetadata->setTileHeight(tileHeight);
-
-                    //store as static member so it can found whenever we need it
-                    FOV::setMetadata(fovMetadata);
                 }
 
                 //Coordinates are inversed to keep consistency => (row,col)
                 std::pair<size_t,size_t> index= std::make_pair(row,col);
-                auto fov = new FOV(filename,row,col,fovGlobalX,fovGlobalY);
-                gridFOVs.insert(std::make_pair(index,fov));
+                auto fov = new FOV(filename,row,col,fovGlobalX,fovGlobalY, fovMetadata);
+                grid.insert(std::make_pair(index,fov));
             }
 
             //dimensions of the fullFOV
@@ -161,12 +159,38 @@ namespace pb {
             infile.close();
         }
 
+
+        const std::map<std::pair<size_t, size_t>, FOV *> &getGrid() const {
+            return grid;
+        }
+
+        FOVMetadata *getFovMetadata() const {
+            return fovMetadata;
+        }
+
+        uint32_t getFullFovWidth() const {
+            return fullFovWidth;
+        }
+
+        uint32_t getFullFovHeight() const {
+            return fullFovHeight;
+        }
+
+        uint32_t getMaxRow() const {
+            return maxRow;
+        }
+
+        uint32_t getMaxCol() const {
+            return maxCol;
+        }
+
+
         //TODO CHECK we destroyed this properly
         ~StitchingVectorParser(){
-            for(auto &elt : gridFOVs){
+            for(auto &elt : grid){
                 delete elt.second;
             }
-            gridFOVs.clear();
+            grid.clear();
         }
     };
 

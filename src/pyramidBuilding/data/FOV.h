@@ -14,15 +14,13 @@ namespace pb {
     class FOV : htgs::IData {
 
     public:
-        FOV(std::string filename, uint32_t row, uint32_t col, uint32_t globalX, uint32_t globalY) : filename(filename) {}
 
+        FOV(const std::string &filename, uint32_t row, uint32_t col, uint32_t globalX, uint32_t globalY,
+            FOVMetadata *metadata) : filename(filename), row(row), col(col), globalX(globalX), globalY(globalY),
+                                     metadata(metadata) {}
 
         const std::string &getFilename() const {
             return filename;
-        }
-
-        static void setMetadata(FOVMetadata *metadata) {
-            FOV::metadata = metadata;
         }
 
 
@@ -32,9 +30,10 @@ namespace pb {
         uint32_t col;
         uint32_t globalX;
         uint32_t globalY;
-
-        static FOVMetadata* metadata;
+        FOVMetadata *metadata;
 
     };
+
+}
 
 #endif //PYRAMIDBUILDING_FOV_H
