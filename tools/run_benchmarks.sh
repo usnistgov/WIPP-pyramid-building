@@ -91,8 +91,10 @@ if [[ $# -lt 1 ]]; then
     exit 4
 fi
 
-export GLOG_logtostderr=1;
-export GLOG_v=1
+export GLOG_logtostderr=1
+export GLOG_v=3
+
+echo "log level: $GLOG_v"
 
 DATASET_NAME=${1}
 RUNS=${2-1}

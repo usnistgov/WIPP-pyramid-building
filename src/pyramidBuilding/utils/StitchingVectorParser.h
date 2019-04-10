@@ -36,6 +36,7 @@ namespace pb {
 
         std::string imageDirectoryPath;
         std::string stitchingVectorPath;
+        uint32_t pyramidTileSize;
 
         std::map<std::pair<size_t,size_t>, FOV*> grid;
         std::map<std::pair<size_t,size_t>, u_int8_t> fovUsageCount = {};
@@ -57,9 +58,10 @@ namespace pb {
          * @param stitchingVectorPath  where to locate the corresponding stitching vector.
          */
         StitchingVectorParser(const std::string &imageDirectoryPath,
-                                 const std::string &stitchingVectorPath) :
+                                 const std::string &stitchingVectorPath, uint32_t pyramidTileSize) :
                 imageDirectoryPath(imageDirectoryPath),
-                stitchingVectorPath(stitchingVectorPath) {
+                stitchingVectorPath(stitchingVectorPath),
+                pyramidTileSize(pyramidTileSize) {
 
             std::ifstream infile(stitchingVectorPath);
 
@@ -155,14 +157,14 @@ namespace pb {
                 auto fov = new FOV(filename,row,col,fovGlobalX,fovGlobalY, fovMetadata);
                 grid.insert(std::make_pair(index,fov));
 
-                uint32_t colMin = fovGlobalX / 256;
-                uint32_t rowMin = fovGlobalY / 256;
-                uint32_t colMax = (fovGlobalX + fovMetadata->getWidth() - 1) / 256;
-                uint32_t rowMax = (fovGlobalY + fovMetadata->getHeight() - 1) / 256;
+                uint32_t colMin = fovGlobalX / pyramidTileSize;
+                uint32_t rowMin = fovGlobalY / pyramidTileSize;
+                uint32_t colMax = (fovGlobalX + fovMetadata->getWidth() - 1) / pyramidTileSize;
+                uint32_t rowMax = (fovGlobalY + fovMetadata->getHeight() - 1) / pyramidTileSize;
 
                 for(auto col = colMin; col <= colMax; col++){
                     for (auto row = rowMin; row <= rowMax; row++){
-                        fovUsageCount[{row,col}]++;
+                        fovUsageCount[{row,col}] += 1;
                     }
                 }
             }

@@ -79,9 +79,16 @@ namespace pb {
                         std::copy_n(image + srcOffset + j * fovWidth, rangeX, tile + destOffset + j * currentTileWidth);
                     }
 
-                    fovUsageCount[{row,col}]--;
+                    uint8_t fovCount = fovUsageCount[{row,col}];
+
+                    fovUsageCount[{row,col}] -= 1;
+
+                    fovCount = fovUsageCount[{row,col}];
+
+                    VLOG(3) << " number of FOV needed to completed tile (" << row << "," << col << ") : " << fovCount << std::endl;
 
                     if(fovUsageCount[{row,col}] == 0){
+                        VLOG(3) << "tile (" << row << "," << col << ") completed. " << std::endl;
                         this->addResult(t);
                     }
 

@@ -198,12 +198,12 @@ namespace pb {
             std::string format = "png";
 
 
-            auto gridGenerator = new StitchingVectorParser(_inputDir, _inputVector);
+            auto gridGenerator = new StitchingVectorParser(_inputDir, _inputVector, pyramidTileSize);
 
             auto grid = gridGenerator->getGrid();
 
-            size_t numTileRow = std::ceil( (double)gridGenerator->getFovMetadata()->getFullFovHeight() / pyramidTileSize);
-            size_t numTileCol =std::ceil( (double)gridGenerator->getFovMetadata()->getFullFovWidth() / pyramidTileSize);
+            size_t numTileRow = static_cast<size_t >(std::ceil( (double)gridGenerator->getFovMetadata()->getFullFovHeight() / pyramidTileSize));
+            size_t numTileCol = static_cast<size_t >(std::ceil( (double)gridGenerator->getFovMetadata()->getFullFovWidth() / pyramidTileSize));
 
             auto graph = new htgs::TaskGraphConf<FOV, VoidData>();
             auto loader = new TiffImageLoader<px_t>(_inputDir);
