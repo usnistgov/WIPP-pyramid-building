@@ -67,13 +67,13 @@ class WriteDeepZoomTileTask : public htgs::ITask< Tile<T>, htgs::VoidData > {
             switch(imageDepth){
 
                 case ImageDepth::_16U : {
-                    cv::Mat image(data->get_height(), data->get_width(), CV_16U, data->getData());
+                    cv::Mat image(data->getHeight(), data->getWidth(), CV_16U, data->getData());
                     cv::imwrite(fullImagePath.string(), image);
                     image.release();
                     break;
                 }
                 case ImageDepth::_8U : {
-                    cv::Mat image(data->get_height(), data->get_width(), CV_8U, data->getData());
+                    cv::Mat image(data->getHeight(), data->getWidth(), CV_8U, data->getData());
                     cv::imwrite(fullImagePath.string(), image);
                     image.release();
                     break;

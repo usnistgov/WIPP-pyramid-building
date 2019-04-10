@@ -48,43 +48,43 @@ public:
         switch (block.size()){
             //regular block
             case 4:
-                width = block[0]->get_width() + block[1]->get_width();
-                height = block[0]->get_height() + block[2]->get_height();
+                width = block[0]->getWidth() + block[1]->getWidth();
+                height = block[0]->getHeight() + block[2]->getHeight();
 
                 newTileData = new T[ width * height ]();
                 copyTileBlock(newTileData, block[0].get(), width, height, 0, 0);
-                copyTileBlock(newTileData, block[1].get(), width, height, block[0]->get_width(), 0);
-                copyTileBlock(newTileData, block[2].get(), width, height, 0, block[0]->get_height());
-                copyTileBlock(newTileData, block[3].get(), width, height, block[0]->get_width(), block[0]->get_height());
+                copyTileBlock(newTileData, block[1].get(), width, height, block[0]->getWidth(), 0);
+                copyTileBlock(newTileData, block[2].get(), width, height, 0, block[0]->getHeight());
+                copyTileBlock(newTileData, block[3].get(), width, height, block[0]->getWidth(), block[0]->getHeight());
 
                 downsampleData = this->downsampler->downsample(newTileData, width, height);
                 break;
             //right vertical block
             case 3:
-                width = block[0]->get_width();
-                height = block[0]->get_height() + block[2]->get_height();
+                width = block[0]->getWidth();
+                height = block[0]->getHeight() + block[2]->getHeight();
 
                 newTileData = new T[ width * height ]();
                 copyTileBlock(newTileData, block[0].get(), width, height, 0, 0);
-                copyTileBlock(newTileData, block[2].get(), width, height, 0, block[0]->get_height());
+                copyTileBlock(newTileData, block[2].get(), width, height, 0, block[0]->getHeight());
 
                 downsampleData = this->downsampler->downsample(newTileData, width, height);
                 break;
             //bottom horizontal block
             case 2:
-                width = block[0]->get_width() + block[1]->get_width();
-                height = block[0]->get_height();
+                width = block[0]->getWidth() + block[1]->getWidth();
+                height = block[0]->getHeight();
 
                 newTileData = new T[ width * height ]();
                 copyTileBlock(newTileData, block[0].get(), width, height, 0, 0);
-                copyTileBlock(newTileData, block[1].get(), width, height, block[0]->get_width(), 0);
+                copyTileBlock(newTileData, block[1].get(), width, height, block[0]->getWidth(), 0);
 
                 downsampleData = this->downsampler->downsample(newTileData, width, height);
                 break;
             //bottom right single block
             case 1:
-                width = block[0]->get_width();
-                height = block[0]->get_height();
+                width = block[0]->getWidth();
+                height = block[0]->getHeight();
 
                 newTileData = new T[ width * height ]();
                 copyTileBlock(newTileData, block[0].get(), width, height, 0, 0);
@@ -118,10 +118,10 @@ public:
 
 private:
     void copyTileBlock(T *data, Tile<T>* block, size_t fullWidth, size_t fullHeight, size_t colOffset, size_t rowOffset) {
-        for (size_t j = 0; j < block->get_height(); j ++) {
-            for (size_t i = 0; i < block->get_width(); i ++) {
+        for (size_t j = 0; j < block->getHeight(); j ++) {
+            for (size_t i = 0; i < block->getWidth(); i ++) {
                 size_t index = fullWidth * ( j + rowOffset) + colOffset + i;
-                data[index] = block->getData()[j * block->get_width() + i];
+                data[index] = block->getData()[j * block->getWidth() + i];
             }
         }
     }

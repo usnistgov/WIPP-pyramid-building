@@ -13,6 +13,7 @@
 #include <glog/logging.h>
 #include <tiffio.h>
 #include <experimental/filesystem>
+#include "htgs/api/MemoryData.hpp"
 
 namespace pb {
 

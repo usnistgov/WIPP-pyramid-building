@@ -65,11 +65,11 @@ namespace pb {
             return _col;
         }
 
-        size_t get_width() const {
+        size_t getWidth() const {
             return _width;
         }
 
-        size_t get_height() const {
+        size_t getHeight() const {
             return _height;
         }
 

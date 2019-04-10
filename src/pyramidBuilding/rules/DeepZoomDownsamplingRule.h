@@ -68,8 +68,8 @@ namespace pb {
                 T* originalData = data->getData();
                 T* newTileData = nullptr;
 
-                size_t width = data->get_width();
-                size_t height = data->get_height();
+                size_t width = data->getWidth();
+                size_t height = data->getHeight();
 
                 int levelLeft = (int)(this -> maxDeepZoomLevel -  this->numLevel);
 

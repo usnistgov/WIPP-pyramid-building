@@ -67,7 +67,7 @@ public:
             fovsCache[filename] = fov;
             if(fovsCache.size() > cacheMaxCount) {cacheMaxCount = fovsCache.size();}
         }
-        else{
+        else {
             VLOG(3) << "FOV already loaded : " << filename <<  std::endl;
             fov = it->second;
         }

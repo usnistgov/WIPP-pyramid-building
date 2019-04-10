@@ -8,10 +8,11 @@
 #include <string>
 #include <htgs/api/IData.hpp>
 #include "FOVMetadata.h"
+#include <htgs/api/MemoryData.hpp>
 
 namespace pb {
 
-    class FOV : htgs::IData {
+    class FOV : public htgs::IData {
 
     public:
 
@@ -23,6 +24,26 @@ namespace pb {
             return filename;
         }
 
+        uint32_t getRow() const {
+            return row;
+        }
+
+        uint32_t getCol() const {
+            return col;
+        }
+
+        uint32_t getGlobalX() const {
+            return globalX;
+        }
+
+        uint32_t getGlobalY() const {
+            return globalY;
+        }
+
+        FOVMetadata *getMetadata() const {
+            return metadata;
+        }
+
 
     private:
         std::string filename;
@@ -31,7 +52,6 @@ namespace pb {
         uint32_t globalX;
         uint32_t globalY;
         FOVMetadata *metadata;
-
     };
 
 }

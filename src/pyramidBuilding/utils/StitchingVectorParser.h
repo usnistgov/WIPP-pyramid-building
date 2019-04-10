@@ -37,7 +37,9 @@ namespace pb {
         std::string imageDirectoryPath;
         std::string stitchingVectorPath;
 
-        std::map<std::pair<size_t,size_t> , FOV*> grid;
+        std::map<std::pair<size_t,size_t>, FOV*> grid;
+        std::map<std::pair<size_t,size_t>, u_int8_t> fovUsageCount = {};
+
         FOVMetadata* fovMetadata = nullptr;
 
         uint32_t fullFovWidth = 0;
@@ -45,6 +47,8 @@ namespace pb {
 
         uint32_t maxRow = 0;
         uint32_t maxCol = 0;
+
+
 
     public:
         /**
@@ -141,7 +145,7 @@ namespace pb {
                     TIFFGetField(tiff, TIFFTAG_SAMPLEFORMAT, &sampleFormat);
                     TIFFClose(tiff);
 
-                    fovMetadata = new FOVMetadata(width, height, samplePerPixel, bitsPerSample, sampleFormat);
+                    fovMetadata = new FOVMetadata(width, height, samplePerPixel, bitsPerSample, sampleFormat, imageDirectoryPath);
                     fovMetadata->setTileWidth(tileWidth);
                     fovMetadata->setTileHeight(tileHeight);
                 }
@@ -150,11 +154,27 @@ namespace pb {
                 std::pair<size_t,size_t> index= std::make_pair(row,col);
                 auto fov = new FOV(filename,row,col,fovGlobalX,fovGlobalY, fovMetadata);
                 grid.insert(std::make_pair(index,fov));
+
+                uint32_t colMin = fovGlobalX / 256;
+                uint32_t rowMin = fovGlobalY / 256;
+                uint32_t colMax = (fovGlobalX + fovMetadata->getWidth() - 1) / 256;
+                uint32_t rowMax = (fovGlobalY + fovMetadata->getHeight() - 1) / 256;
+
+                for(auto col = colMin; col <= colMax; col++){
+                    for (auto row = rowMin; row <= rowMax; row++){
+                        fovUsageCount[{row,col}]++;
+                    }
+                }
             }
 
             //dimensions of the fullFOV
             fullFovWidth = maxFovGlobalX + fovMetadata->getWidth();
             fullFovHeight = maxFovGlobalY + fovMetadata->getHeight();
+
+            fovMetadata->setFullFovWidth(fullFovWidth);
+            fovMetadata->setFullFovHeight(fullFovHeight);
+            fovMetadata->setMaxRow(maxRow);
+            fovMetadata->setMaxCol(maxCol);
 
             infile.close();
         }
@@ -184,15 +204,19 @@ namespace pb {
             return maxCol;
         }
 
+        std::map<std::pair<size_t, size_t>, u_int8_t> &getFovUsageCount() {
+            return fovUsageCount;
+        }
+
 
         //TODO CHECK we destroyed this properly
         ~StitchingVectorParser(){
-            for(auto &elt : grid){
-                delete elt.second;
-            }
-            grid.clear();
+//            for(auto &elt : grid){
+//                delete elt.second;
+//            }
+//            grid.clear();
         }
-    };
+        };
 
 }
 

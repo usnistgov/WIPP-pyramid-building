@@ -8,38 +8,40 @@
 #include <htgs/api/ITask.hpp>
 #include <pyramidBuilding/rules/ReleaseFOVMemoryRule.h>
 #include <pyramidBuilding/utils/TiffImageLoader.h>
-#include <pyramidBuilding/data/FOVRequest.h>
+#include <pyramidBuilding/utils/StitchingVectorParser.h>
+#include <pyramidBuilding/data/FOVWithData.h>
 
 
 namespace pb {
 
 template <class T>
-class ImageReader : public htgs::ITask<FOVRequest, htgs::MemoryData<T*>> {
+class ImageReader : public htgs::ITask<FOV, FOVWithData<T> > {
 
 public:
 
-    ImageReader(size_t numThreads, TiffImageLoader<T> imageLoader) : htgs::ITask<FOVRequest, htgs::MemoryData<T*>>(numThreads), imageLoader(imageLoader) {
-    }
+    ImageReader(size_t numThreads, TiffImageLoader <T> *imageLoader) : htgs::ITask<FOV, FOVWithData<T> >(numThreads), imageLoader(imageLoader) {}
 
-    void executeTask(std::shared_ptr<FOVRequest> data) override {
 
+    void executeTask(std::shared_ptr<FOV> data) override {
         std::string filename = data->getFilename();
-        htgs::m_data_t<T> fov = this->getMemory("fov", new ReleaseFOVMemoryRule(1));
-        imageLoader.loadFullImage(fov->get(),filename);
-        this->addResult(fov);
+        htgs::m_data_t<T> image = this->template getMemory<T>("fov", new ReleaseFOVMemoryRule(1));
+        imageLoader->loadFullImage(image->get(), filename);
+        this->addResult(new FOVWithData<T>(data,image));
     }
 
-    htgs::ITask <FOVRequest, htgs::MemoryData<T*>> *copy() override {
-        return new ImageReader(this->getNumThreads(), this->getImageLoader);
+    htgs::ITask<FOV, FOVWithData<T>> *copy() override {
+        return nullptr;
     }
 
-    const TiffImageLoader<T> &getImageLoader() const {
+    const TiffImageLoader<T>* getImageLoader() const {
         return imageLoader;
     }
 
 
+
+
 private:
-    TiffImageLoader<T> imageLoader;
+    TiffImageLoader<T>* imageLoader;
 
 };
 

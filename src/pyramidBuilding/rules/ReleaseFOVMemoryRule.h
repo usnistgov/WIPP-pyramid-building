@@ -8,24 +8,32 @@
 #include <htgs/api/IMemoryReleaseRule.hpp>
 #include <glob.h>
 
-class ReleaseFOVMemoryRule : public htgs::IMemoryReleaseRule {
+namespace pb {
 
-public:
+    class ReleaseFOVMemoryRule : public htgs::IMemoryReleaseRule {
 
-    ReleaseFOVMemoryRule(size_t releaseCount) : releaseCount(releaseCount) {}
+    public:
 
-    void memoryUsed() override {
-        releaseCount--;
-    }
+        ReleaseFOVMemoryRule(size_t releaseCount) : releaseCount(releaseCount) {}
 
-    bool canReleaseMemory() override {
-        return releaseCount == 0;
-    }
+        void memoryUsed() override {
+            releaseCount--;
+        }
+
+        bool canReleaseMemory() override {
+            return releaseCount == 0;
+        }
 
 
-private:
-    size_t releaseCount;
-};
+
+
+    private:
+        size_t releaseCount;
+
+    };
+
+
+}
 
 
 #endif //PYRAMIDBUILDING_RELEASETILEMEMORYRULE_H
