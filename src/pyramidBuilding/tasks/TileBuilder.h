@@ -115,7 +115,7 @@ namespace pb {
             if(it == tileCache.end()){
                     auto width = std::min(tileSize, fullWidth - col * tileSize);
                     auto height = std::min(tileSize, fullHeight - row * tileSize);
-                    t = new Tile<T>(0,row,col,width,height, new T[width * height]);
+                    t = new Tile<T>(0,row,col,width,height, new T[width * height]());
                     tileCache.insert({index,t});
             }
             else{
