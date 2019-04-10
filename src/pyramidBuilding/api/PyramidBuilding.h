@@ -26,11 +26,9 @@
 #include <pyramidBuilding/utils/BaseTileGeneratorFastImage.h>
 #include <pyramidBuilding/utils/AverageDownsampler.h>
 #include <pyramidBuilding/utils/BaseTileGeneratorLibTiffWithCache.h>
-#include <pyramidBuilding/utils/StitchingVectorParser.h>
-#include <pyramidBuilding/memory/FOVAllocator.h>
 
 #include "pyramidBuilding/data/TileRequest.h"
-#include "pyramidBuilding/utils/StitchingVectorParserOld.h"
+#include "pyramidBuilding/utils/GridGenerator.h"
 #include "pyramidBuilding/utils/BaseTileGeneratorLibTiff.h"
 #include "pyramidBuilding/tasks/WriteDeepZoomTileTask.h"
 #include "pyramidBuilding/rules/DeepZoomDownsamplingRule.h"
@@ -42,9 +40,7 @@
 #include "pyramidBuilding/tasks/CreateTileTask.h"
 #include "pyramidBuilding/tasks/BaseTileTask.h"
 #include "pyramidBuilding/data/Tile.h"
-#include "pyramidBuilding/utils/AverageDownsampler.h"
-#include "pyramidBuilding/tasks/ImageReader.h"
-#include <pyramidBuilding/tasks/TileBuilder.h>
+#include "../utils/AverageDownsampler.h"
 
 namespace pb {
 
@@ -198,27 +194,12 @@ namespace pb {
             std::string format = "png";
 
 
-            auto gridGenerator = new StitchingVectorParser(_inputDir, _inputVector);
+            auto gridGenerator = new GridGenerator(_inputDir, _inputVector, options->getTilesize());
 
             auto grid = gridGenerator->getGrid();
 
-            size_t numTileRow = std::ceil( (double)gridGenerator->getFovMetadata()->getFullFovHeight() / pyramidTileSize);
-            size_t numTileCol =std::ceil( (double)gridGenerator->getFovMetadata()->getFullFovWidth() / pyramidTileSize);
-
-            auto graph = new htgs::TaskGraphConf<FOV, VoidData>();
-            auto loader = new TiffImageLoader<px_t>(_inputDir);
-            auto reader = new ImageReader<px_t>(1, loader);
-
-            auto fovWidth = gridGenerator->getFovMetadata()->getWidth();
-            auto fovHeight = gridGenerator->getFovMetadata()->getHeight();
-
-
-            graph->setGraphConsumerTask(reader);
-            graph->addMemoryManagerEdge("fov", reader, new FOVAllocator<px_t>(fovWidth, fovHeight), 10, htgs::MMType::Static);
-
-            auto tileBuilder = new TileBuilder<px_t>(gridGenerator->getFovMetadata(), pyramidTileSize, gridGenerator->getFovUsageCount());
-            graph->addEdge(reader,tileBuilder);
-
+            size_t numTileRow = gridGenerator->getGridMaxRow(0) + 1;
+            size_t numTileCol = gridGenerator->getGridMaxCol(0) + 1;
 
 
             size_t fullFovWidth = gridGenerator->getFullFovWidth();
@@ -227,24 +208,23 @@ namespace pb {
             //calculate pyramid depth
             auto maxDim = std::max(fullFovWidth,fullFovHeight);
             deepZoomLevel = int(ceil(log2(maxDim)) + 1);
-//
-//
-//
-//            auto generator = new BaseTileGeneratorLibTiffWithCache<px_t>(gridGenerator, this->options->getBlendingMethod());
-//            auto baseTileTask = new BaseTileTask<px_t>(1, generator);
-//            graph->setGraphConsumerTask(baseTileTask);
-//
+
+            auto graph = new htgs::TaskGraphConf<TileRequest, VoidData>();
+
+            auto generator = new BaseTileGeneratorLibTiff<px_t>(gridGenerator, this->options->getBlendingMethod());
+            auto baseTileTask = new BaseTileTask<px_t>(1, generator);
+            graph->setGraphConsumerTask(baseTileTask);
+
             auto bookkeeper = new htgs::Bookkeeper<Tile<px_t>>();
-//
+
             auto writeRule = new WriteTileRule<px_t>();
             auto pyramidRule = new PyramidRule<px_t>(numTileCol,numTileRow);
-//
+
             auto downsampler = new AverageDownsampler<px_t>();
             auto createTileTask = new CreateTileTask<px_t>(1, downsampler);
-//
-//            //incoming edges from the bookeeper
-            graph->addEdge(tileBuilder, bookkeeper); //pyramid base level tile
-//            graph->addEdge(baseTileTask, bookkeeper); //pyramid base level tile
+
+            //incoming edges from the bookeeper
+            graph->addEdge(baseTileTask, bookkeeper); //pyramid base level tile
             graph->addEdge(createTileTask,bookkeeper); //pyramid higher level tile
             graph->addRuleEdge(bookkeeper, pyramidRule, createTileTask); //caching tiles and creating a tile at higher level;
 
@@ -288,18 +268,15 @@ namespace pb {
        //   diagTraversal(graph, numTileRow, numTileCol);
      //     recursiveTraversal<px_t>(graph, numTileRow, numTileCol, (size_t)0, (size_t)0);
 
-            size_t numFovRow = std::ceil( (double)gridGenerator->getFovMetadata()->getFullFovHeight() / gridGenerator->getFovMetadata()->getHeight());
-            size_t numFovCol = std::ceil( (double)gridGenerator->getFovMetadata()->getFullFovWidth() / gridGenerator->getFovMetadata()->getWidth());
-
-            fi::Traversal traversal = fi::Traversal(fi::TraversalType::DIAGONAL,numFovRow,numFovCol);
+            fi::Traversal traversal = fi::Traversal(fi::TraversalType::DIAGONAL,numTileRow,numTileCol);
 
 
 
             for (auto step : traversal.getTraversal()) {
                 auto row = step.first, col = step.second;
-                auto fov = grid.find(step)->second;
-                VLOG(3) <<  "fov request : " << "(" << row << "," << col << ")"<< std::endl;
-                graph->produceData(fov);
+                auto tileRequest = new TileRequest(row, col);
+                VLOG(2) <<  "(" << row << "," << col << ")"<< std::endl;
+                graph->produceData(tileRequest);
             }
 
 
@@ -347,8 +324,8 @@ namespace pb {
 
             delete runtime;
             delete gridGenerator;
-//            delete generator;
-//            delete downsampler;
+            delete generator;
+            delete downsampler;
 
             auto end = std::chrono::high_resolution_clock::now();
             VLOG(1) << "Execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " mS" << std::endl;

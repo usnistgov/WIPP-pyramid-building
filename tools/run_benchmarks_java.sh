@@ -20,7 +20,7 @@ if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
 fi
 
 OPTIONS=i:v:o:t:d:n:b
-LONGOPTS=images:,vector:,output:,tilesize:,depth:,name:,blending
+LONGOPTS=images:,vector:,output:,tilesize:,depth:,name:,blending:,cache:,threads:,
 
 # -use ! and PIPESTATUS to get exit code with errexit set
 # -temporarily store output to be able to check for errors
@@ -37,7 +37,7 @@ eval set -- "$PARSED"
 
 echo $PARSED
 
-images="" vector="" output="" tilesize=256 depth="8U" name="output" blending="max"
+images="" vector="" output="" tilesize=256 depth="8U" name="output" blending="max" cache=0,threads=10
 # now enjoy the options in order and nicely split until we see --
 while true; do
     case "$1" in
@@ -67,6 +67,14 @@ while true; do
             ;;
         -b|--blending)
             blending="$2"
+            shift 2
+            ;;
+        --cache)
+            cache="$2"
+            shift 2
+            ;;
+        --threads)
+            threads="$2"
             shift 2
             ;;
         --)
@@ -113,22 +121,26 @@ else
     echo "not a linux OS - cannot clear cache";
 fi
 
-if [[ "$CLEAR_CACHE" == "1" ]]; then
-        sudo bash -c "sync; echo 1 > /proc/sys/vm/drop_caches"
-fi
+#if [[ "$CLEAR_CACHE" == "1" ]]; then
+#        sudo bash -c "sync; echo 1 > /proc/sys/vm/drop_caches"
+#fi
 
 echo "ok? $RUNS"
 
 for ((i = 1; i <= $RUNS; i++))
     do
-#            if [[ "$CLEAR_CACHE" == "1" ]]; then
-#                        sudo bash -c "sync; echo 1 > /proc/sys/vm/drop_caches"
-#            fi
+            if [[ "$CLEAR_CACHE" == "1" ]]; then
+                        sudo bash -c "sync; echo 1 > /proc/sys/vm/drop_caches"
+            fi
 
                 cd ${EXEC_PATH}
                  echo `pwd`
 #                  { java -jar pyramidio-1.1.1-SNAPSHOT-jar-with-dependencies.jar $images $vector $output -t $tilesize ; }
-             { time  java -jar pyramidio-1.1.1-SNAPSHOT-jar-with-dependencies.jar $images $vector $output -t $tilesize ; } 2>> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
+                echo "images: $images" >> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
+                echo "stitching vector: $vector" >> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
+                echo "output: $output" >> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
+                echo "tilesize: $tilesize, imageCache: $cache, threads: $threads " >> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
+             { time  java -jar pyramidio-1.1.1-SNAPSHOT-jar-with-dependencies.jar $images $vector $output $tilesize $cache $threads ; } 2>> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
 done
 
 echo "done"
