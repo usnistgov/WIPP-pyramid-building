@@ -211,7 +211,7 @@ namespace pb {
 
             auto graph = new htgs::TaskGraphConf<TileRequest, VoidData>();
 
-            auto generator = new BaseTileGeneratorLibTiffWithCache<px_t>(gridGenerator, this->options->getBlendingMethod());
+            auto generator = new BaseTileGeneratorLibTiff<px_t>(gridGenerator, this->options->getBlendingMethod());
             auto baseTileTask = new BaseTileTask<px_t>(1, generator);
             graph->setGraphConsumerTask(baseTileTask);
 
