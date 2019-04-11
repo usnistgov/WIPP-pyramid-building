@@ -188,7 +188,7 @@ namespace pb {
 
             VLOG(1) << "generating pyramid...";
 
-            size_t nbThreadsPerTask = 10;
+            size_t nbThreadsPerTask = 30;
 
             auto begin = std::chrono::high_resolution_clock::now();
 
@@ -214,7 +214,7 @@ namespace pb {
 
             auto maxNumberOfConcurrentFOVLoaded = gridGenerator->getMaxFovUsage();
             graph->setGraphConsumerTask(reader);
-            graph->addMemoryManagerEdge("fov", reader, new FOVAllocator<px_t>(fovWidth, fovHeight), 1, htgs::MMType::Static);
+            graph->addMemoryManagerEdge("fov", reader, new FOVAllocator<px_t>(fovWidth, fovHeight), 4, htgs::MMType::Static);
 
             auto tileBuilder = new TileBuilder<px_t>(gridGenerator->getFovMetadata(), pyramidTileSize, gridGenerator->getFovUsageCount());
             graph->addEdge(reader,tileBuilder);
@@ -240,7 +240,7 @@ namespace pb {
             auto pyramidRule = new PyramidRule<px_t>(numTileCol,numTileRow);
 //
             auto downsampler = new AverageDownsampler<px_t>();
-            auto createTileTask = new CreateTileTask<px_t>(1, downsampler);
+            auto createTileTask = new CreateTileTask<px_t>(nbThreadsPerTask, downsampler);
 //
 //            //incoming edges from the bookeeper
             graph->addEdge(tileBuilder, bookkeeper); //pyramid base level tile
@@ -251,7 +251,7 @@ namespace pb {
             htgs::ITask< Tile<px_t>, htgs::VoidData> *writeTask = nullptr;
             if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
                 auto outputPath = filesystem::path(_outputDir) / (pyramidName + "_files");
-                writeTask = new WriteDeepZoomTileTask<px_t>(nbThreadsPerTask, outputPath, deepZoomLevel, this->options->getDepth());
+                writeTask = new WriteDeepZoomTileTask<px_t>(40, outputPath, deepZoomLevel, this->options->getDepth());
             }
             graph->addRuleEdge(bookkeeper, writeRule, writeTask); //exiting the graph;
 
