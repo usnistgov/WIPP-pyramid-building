@@ -178,6 +178,12 @@ namespace pb {
             fovMetadata->setMaxRow(maxRow);
             fovMetadata->setMaxCol(maxCol);
 
+            VLOG(3) << "parsing info : " << std::endl;
+            VLOG(3) << "fov grid max row : " << maxRow << std::endl;
+            VLOG(3) << "fov grid max col : " << maxCol << std::endl;
+            VLOG(3) << "full fov width : " << fullFovWidth << std::endl;
+            VLOG(3) << "full fov height : " << fullFovHeight << std::endl;
+
             infile.close();
         }
 

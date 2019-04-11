@@ -214,7 +214,7 @@ namespace pb {
 
 
             graph->setGraphConsumerTask(reader);
-            graph->addMemoryManagerEdge("fov", reader, new FOVAllocator<px_t>(fovWidth, fovHeight), 10, htgs::MMType::Static);
+            graph->addMemoryManagerEdge("fov", reader, new FOVAllocator<px_t>(fovWidth, fovHeight), 1, htgs::MMType::Static);
 
             auto tileBuilder = new TileBuilder<px_t>(gridGenerator->getFovMetadata(), pyramidTileSize, gridGenerator->getFovUsageCount());
             graph->addEdge(reader,tileBuilder);
@@ -288,8 +288,8 @@ namespace pb {
             //   diagTraversal(graph, numTileRow, numTileCol);
             //     recursiveTraversal<px_t>(graph, numTileRow, numTileCol, (size_t)0, (size_t)0);
 
-            size_t numFovRow = std::ceil( (double)gridGenerator->getFovMetadata()->getFullFovHeight() / gridGenerator->getFovMetadata()->getHeight());
-            size_t numFovCol = std::ceil( (double)gridGenerator->getFovMetadata()->getFullFovWidth() / gridGenerator->getFovMetadata()->getWidth());
+            size_t numFovRow = gridGenerator->getMaxRow() + 1;
+            size_t numFovCol = gridGenerator->getMaxCol() + 1;
 
             fi::Traversal traversal = fi::Traversal(fi::TraversalType::DIAGONAL,numFovRow,numFovCol);
 

@@ -81,15 +81,20 @@ namespace pb {
 
                     uint8_t fovCount = fovUsageCount[{row,col}];
 
+                    assert(fovCount > 0);
+
                     fovUsageCount[{row,col}] -= 1;
 
                     fovCount = fovUsageCount[{row,col}];
 
-                    VLOG(3) << " number of FOV needed to completed tile (" << row << "," << col << ") : " << fovCount << std::endl;
+                    assert(fovCount >= 0);
+
+                    VLOG(3) << " number of FOV needed to completed tile (" << row << "," << col << ") : " << (int)fovCount << std::endl;
 
                     if(fovUsageCount[{row,col}] == 0){
                         VLOG(3) << "tile (" << row << "," << col << ") completed. " << std::endl;
                         this->addResult(t);
+                        tileCache.erase({row,col});
                     }
 
 
