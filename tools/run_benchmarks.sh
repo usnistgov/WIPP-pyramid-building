@@ -9,7 +9,7 @@
 # Needs install of getopt first :
 # On OSX : brew install -y gnu-getopt && echo 'export PATH="/usr/local/opt/gnu-getopt/bin:$PATH"' >> ~/.bash_profile
 
-echo "running as $USER"
+echo "running as $USER on behalf of $SUDO_USER"
 
 # saner programming env: these switches turn some bugs into errors
 set -o errexit -o pipefail -o noclobber -o nounset
@@ -128,14 +128,15 @@ for ((i = 1; i <= $RUNS; i++))
             fi
 
             echo "checking if sources need to be recompiled..."
+            echo "[TODO - NOT IMPLEMENTED]"
 
 
             echo "benchmarking execution time..."
 #            ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending;
-            { time ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${benchmark}_${DATASET_NAME}_${date}.txt
+            { sudo -u $SUDO_USER time ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${benchmark}_${DATASET_NAME}_${date}.txt
     else
             echo "benchmarking memory consumption..."
-            { heaptrack ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${benchmark}_${DATASET_NAME}_${date}.txt
+            { sudo -u $SUDO_USER heaptrack ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${benchmark}_${DATASET_NAME}_${date}.txt
     fi
 
 # "valgrind --tool=massif --stacks=yes --massif-out-file="

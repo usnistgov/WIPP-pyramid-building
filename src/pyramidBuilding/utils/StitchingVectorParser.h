@@ -49,6 +49,8 @@ namespace pb {
         uint32_t maxRow = 0;
         uint32_t maxCol = 0;
 
+        u_int8_t maxFovUsage = 0;
+
 
 
     public:
@@ -165,6 +167,7 @@ namespace pb {
                 for(auto col = colMin; col <= colMax; col++){
                     for (auto row = rowMin; row <= rowMax; row++){
                         fovUsageCount[{row,col}] += 1;
+                        if(fovUsageCount[{row,col}] > maxFovUsage){ maxFovUsage = fovUsageCount[{row,col}];}
                     }
                 }
             }
@@ -214,6 +217,10 @@ namespace pb {
 
         std::map<std::pair<size_t, size_t>, u_int8_t> &getFovUsageCount() {
             return fovUsageCount;
+        }
+
+        u_int8_t getMaxFovUsage() const {
+            return maxFovUsage;
         }
 
 

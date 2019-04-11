@@ -212,7 +212,7 @@ namespace pb {
             auto fovWidth = gridGenerator->getFovMetadata()->getWidth();
             auto fovHeight = gridGenerator->getFovMetadata()->getHeight();
 
-
+            auto maxNumberOfConcurrentFOVLoaded = gridGenerator->getMaxFovUsage();
             graph->setGraphConsumerTask(reader);
             graph->addMemoryManagerEdge("fov", reader, new FOVAllocator<px_t>(fovWidth, fovHeight), 1, htgs::MMType::Static);
 
@@ -298,7 +298,7 @@ namespace pb {
             for (auto step : traversal.getTraversal()) {
                 auto row = step.first, col = step.second;
                 auto fov = grid.find(step)->second;
-                VLOG(3) <<  "fov request : " << "(" << row << "," << col << ")"<< std::endl;
+                VLOG(4) <<  "fov request : " << "(" << row << "," << col << ")"<< std::endl;
                 graph->produceData(fov);
             }
 

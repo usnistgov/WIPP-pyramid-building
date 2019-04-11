@@ -33,6 +33,8 @@ namespace pb {
             auto fov = data->getFov();
             T* image = data->getData()->get();
 
+            VLOG(3) << " number of tiled cached in TileBuilder when receiving FOV (" << fov->getRow() << "," << fov->getCol() << ") : " << tileCache.size() << std::endl;
+
             uint32_t fovWidth = fov->getMetadata()->getWidth();
             uint32_t fovHeight = fov->getMetadata()->getHeight();
 
@@ -50,6 +52,8 @@ namespace pb {
                 for (auto row = rowMin; row <= rowMax; row++) {
 
                     Tile<T>* t = getTile(row,col);
+
+                    VLOG(3) << " filling tile ( "<< row << "," << col << ") with FOV (" << fov->getRow() << "," << fov->getCol() << ")"  << std::endl;
 
                     uint32_t tileTopLeftX = col * tileSize;
                     uint32_t tileTopLeftY = row * tileSize;
@@ -70,8 +74,13 @@ namespace pb {
                     T* tile = t->getData();
 
                     uint32_t srcOffset = (startY - fovTopLeftY) * fovWidth + (startX - fovTopLeftX);
-                    uint32_t destOffset = (startY - tileTopLeftY) * tileSize + (startX - tileTopLeftX);
+                    uint32_t destOffset = (startY - tileTopLeftY) * currentTileWidth + (startX - tileTopLeftX);
 
+
+                    assert(currentTileWidth <= tileSize);
+                    assert(currentTileHeight <= tileSize);
+                    assert(rangeY <= currentTileHeight);
+                    assert(rangeX <= currentTileWidth);
 
     //              printArray<T>("fov", image, fovWidth, fovHeight);
                     for(auto j = 0; j < rangeY; j++){
@@ -89,7 +98,7 @@ namespace pb {
 
                     assert(fovCount >= 0);
 
-                    VLOG(3) << " number of FOV needed to completed tile (" << row << "," << col << ") : " << (int)fovCount << std::endl;
+                    VLOG(3) << " number of FOV needed to complete tile (" << row << "," << col << ") : " << (int)fovCount << std::endl;
 
                     if(fovUsageCount[{row,col}] == 0){
                         VLOG(3) << "tile (" << row << "," << col << ") completed. " << std::endl;
@@ -118,22 +127,23 @@ namespace pb {
         Tile<T>* getTile(uint32_t row, uint32_t col){
 
             std::lock_guard<std::mutex> guard(lock);
-
-            VLOG(3) << " building tile :  (" << row << "," << col << ")" << std::endl;
-
-            Tile<T>* t = nullptr;
+       //     Tile<T>* t = nullptr;
             std::pair<size_t,size_t> index= std::make_pair(row,col);
             auto it = tileCache.find(index);
             if(it == tileCache.end()){
+                    VLOG(3) << " building new tile :  (" << row << "," << col << ")" << std::endl;
+                    VLOG(3) << " number of FOV needed to fill tile (" << row << "," << col << ") : " << (int)fovUsageCount[{row,col}] << std::endl;
                     auto width = std::min(tileSize, fullWidth - col * tileSize);
                     auto height = std::min(tileSize, fullHeight - row * tileSize);
-                    t = new Tile<T>(0,row,col,width,height, new T[width * height]());
+                    Tile<T>* t = new Tile<T>(0,row,col,width,height, new T[width * height]());
                     tileCache.insert({index,t});
             }
             else{
-                t = it->second;
+                VLOG(3) << "tile already in cache :  (" << row << "," << col << ")" << std::endl;
+             //   t = it->second;
             }
-            return t;
+            return tileCache.find(index)->second;
+            //return t;
         }
 
     private:
