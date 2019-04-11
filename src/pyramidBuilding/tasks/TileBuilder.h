@@ -13,6 +13,7 @@
 #include <pyramidBuilding/data/Tile.h>
 #include <algorithm>
 #include <pyramidBuilding/utils/Helper.h>
+#include <pyramidBuilding/utils/TileCache.h>
 
 
 namespace pb {
@@ -22,18 +23,20 @@ namespace pb {
 
     public:
 
-        TileBuilder(FOVMetadata* metadata, uint32_t tileSize, std::map<std::pair<size_t,size_t>, u_int8_t> &fovUsageCount) :
-        metadata(metadata), tileSize(tileSize), fovUsageCount(fovUsageCount) {
-            fullWidth = metadata->getFullFovWidth();
-            fullHeight = metadata->getFullFovHeight();
-        }
+        TileBuilder(
+                size_t numThreads,
+                FOVMetadata* metadata,
+                uint32_t tileSize,
+                TileCache<T>* tileCache)
+                : htgs::ITask<FOVWithData<T>, Tile<T> >(numThreads),
+        metadata(metadata), tileSize(tileSize), tileCache(tileCache) {}
 
         void executeTask(std::shared_ptr<FOVWithData<T>> data) override {
 
             auto fov = data->getFov();
             T* image = data->getData()->get();
 
-            VLOG(3) << " number of tiled cached in TileBuilder when receiving FOV (" << fov->getRow() << "," << fov->getCol() << ") : " << tileCache.size() << std::endl;
+            VLOG(3) << " number of tiled cached in TileBuilder when receiving FOV (" << fov->getRow() << "," << fov->getCol() << ") : " << tileCache->size() << std::endl;
 
             uint32_t fovWidth = fov->getMetadata()->getWidth();
             uint32_t fovHeight = fov->getMetadata()->getHeight();
@@ -51,7 +54,7 @@ namespace pb {
             for (auto col = colMin; col <= colMax; col++) {
                 for (auto row = rowMin; row <= rowMax; row++) {
 
-                    Tile<T>* t = getTile(row,col);
+                    Tile<T>* t = tileCache->getTile(row,col);
 
                     VLOG(3) << " filling tile ( "<< row << "," << col << ") with FOV (" << fov->getRow() << "," << fov->getCol() << ")"  << std::endl;
 
@@ -88,22 +91,12 @@ namespace pb {
                         std::copy_n(image + srcOffset + j * fovWidth, rangeX, tile + destOffset + j * currentTileWidth);
                     }
 
-                    uint8_t fovCount = fovUsageCount[{row,col}];
+                    tileCache->doneCopyingFOVintoTile(row,col);
 
-                    assert(fovCount > 0);
-
-                    fovUsageCount[{row,col}] -= 1;
-
-                    fovCount = fovUsageCount[{row,col}];
-
-                    assert(fovCount >= 0);
-
-                    VLOG(3) << " number of FOV needed to complete tile (" << row << "," << col << ") : " << (int)fovCount << std::endl;
-
-                    if(fovUsageCount[{row,col}] == 0){
-                        VLOG(3) << "tile (" << row << "," << col << ") completed. " << std::endl;
+                    if(tileCache->tileReady(row,col)){
+                        VLOG(3) << "tile (" << row << "," << col << ") ready. " << std::endl;
                         this->addResult(t);
-                        tileCache.erase({row,col});
+                        tileCache->deleteTile(row,col);
                     }
 
 
@@ -121,40 +114,18 @@ namespace pb {
         }
 
         htgs::ITask <FOVWithData<T>, Tile<T>> *copy() override {
-            return nullptr;
+            return new TileBuilder(this->getNumThreads(), metadata, tileSize, tileCache);
         }
 
-        Tile<T>* getTile(uint32_t row, uint32_t col){
 
-            std::lock_guard<std::mutex> guard(lock);
-       //     Tile<T>* t = nullptr;
-            std::pair<size_t,size_t> index= std::make_pair(row,col);
-            auto it = tileCache.find(index);
-            if(it == tileCache.end()){
-                    VLOG(3) << " building new tile :  (" << row << "," << col << ")" << std::endl;
-                    VLOG(3) << " number of FOV needed to fill tile (" << row << "," << col << ") : " << (int)fovUsageCount[{row,col}] << std::endl;
-                    auto width = std::min(tileSize, fullWidth - col * tileSize);
-                    auto height = std::min(tileSize, fullHeight - row * tileSize);
-                    Tile<T>* t = new Tile<T>(0,row,col,width,height, new T[width * height]());
-                    tileCache.insert({index,t});
-            }
-            else{
-                VLOG(3) << "tile already in cache :  (" << row << "," << col << ")" << std::endl;
-             //   t = it->second;
-            }
-            return tileCache.find(index)->second;
-            //return t;
-        }
+
+    std::string getName() override { return "Tile Builder"; }
 
     private:
 
         FOVMetadata* metadata;
+        TileCache<T>* tileCache;
         uint32_t tileSize;
-        std::map<std::pair<size_t,size_t>, Tile<T>*> tileCache;
-        std::map<std::pair<size_t,size_t>, u_int8_t> fovUsageCount;
-        std::mutex lock;
-        uint32_t fullWidth;
-        uint32_t fullHeight;
 
     };
 

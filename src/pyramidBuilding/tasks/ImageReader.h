@@ -30,12 +30,14 @@ public:
     }
 
     htgs::ITask<FOV, FOVWithData<T>> *copy() override {
-        return nullptr;
+        return new ImageReader(this->getNumThreads(),imageLoader);
     }
 
     const TiffImageLoader<T>* getImageLoader() const {
         return imageLoader;
     }
+
+    std::string getName() override { return "Image Reader"; }
 
 
 

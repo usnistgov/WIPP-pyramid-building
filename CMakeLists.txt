@@ -61,7 +61,7 @@ set(SOURCES src/pyramidBuilding/api/PyramidBuilding.h src/pyramidBuilding/api/Co
 #add_executable(testbasePerf testBasePerf.cpp ${ALL_SRCS} ${SOURCES} testBasePerf.h)
 #add_executable(stitching testStitchingVectorParser.cpp ${ALL_SRCS} ${SOURCES})
 #add_executable(libtiff testLibtiff.cpp ${ALL_SRCS} ${SOURCES} src/utils/StitchedFOVTileLoader.h src/tasks/WriteTiffTileTask.h)
-add_executable(main main.cpp ${ALL_SRCS} ${SOURCES} src/pyramidBuilding/utils/TiffImageLoader.h src/pyramidBuilding/utils/BaseTileGeneratorLibTiff.h src/pyramidBuilding/rules/ReleaseFOVMemoryRule.h src/pyramidBuilding/memory/TileAllocator.h)
+add_executable(main main.cpp ${ALL_SRCS} ${SOURCES} src/pyramidBuilding/utils/TiffImageLoader.h src/pyramidBuilding/utils/BaseTileGeneratorLibTiff.h src/pyramidBuilding/rules/ReleaseFOVMemoryRule.h src/pyramidBuilding/memory/TileAllocator.h src/pyramidBuilding/utils/TileCache.h)
 add_executable(pyramidBuildingCLITest test/PyramidBuildingCLITest.cpp ${ALL_SRCS} ${SOURCES})
 
 target_include_directories(main PUBLIC src)
