@@ -92,7 +92,7 @@ if [[ $# -lt 1 ]]; then
 fi
 
 export GLOG_logtostderr=1
-export GLOG_v=0
+export GLOG_v=3
 
 echo "log level: $GLOG_v"
 
@@ -114,26 +114,24 @@ CLEAR_CACHE=0;
 
 for ((i = 1; i <= $RUNS; i++))
     do
+        if [[ "$OSTYPE" == "linux-gnu" ]]; then
+            echo "linux detected - can clear cache";
+            CLEAR_CACHE=1;
+        else
+            echo "not a linux OS - cannot clear cache";
+        fi
+
+        if [[ "$CLEAR_CACHE" == "1" ]]; then
+                sudo bash -c "sync; echo 1 > /proc/sys/vm/drop_caches"
+        fi
+
+        echo "checking if sources need to be recompiled..."
+        echo "[TODO - NOT IMPLEMENTED]"
+
     if [[ "$benchmark" == "exectime" ]]; then
-
-            if [[ "$OSTYPE" == "linux-gnu" ]]; then
-                echo "linux detected - can clear cache";
-                CLEAR_CACHE=1;
-            else
-                echo "not a linux OS - cannot clear cache";
-            fi
-
-            if [[ "$CLEAR_CACHE" == "1" ]]; then
-                    sudo bash -c "sync; echo 1 > /proc/sys/vm/drop_caches"
-            fi
-
-            echo "checking if sources need to be recompiled..."
-            echo "[TODO - NOT IMPLEMENTED]"
-
-
             echo "benchmarking execution time..."
 #            ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending;
-            { time ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${benchmark}_${DATASET_NAME}_${date}.txt
+            { sudo -u $SUDO_USER time ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${benchmark}_${DATASET_NAME}_${date}.txt
     else
             echo "benchmarking memory consumption..."
             { sudo -u $SUDO_USER heaptrack ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${benchmark}_${DATASET_NAME}_${date}.txt
@@ -141,5 +139,7 @@ for ((i = 1; i <= $RUNS; i++))
 
 # "valgrind --tool=massif --stacks=yes --massif-out-file="
 #            { valgrind --tool=massif --stacks=yes --massif-out-file=$OUTPUT_DIR/$MASSIF_DIR/${DATASET_NAME}_${date}.txt ../cmake-build-debug/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
+
+echo "benchmarks completed."
 
 done

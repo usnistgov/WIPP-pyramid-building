@@ -21,7 +21,7 @@ include_directories(${HTGS_INCLUDE_DIR})
 include_directories(${FastImage_INCLUDE_DIR})
 link_libraries(${FastImage_LIBRARIES})
 
-find_package(NVTX QUIET)
+#find_package(NVTX QUIET)
 
 if(NVTX_FOUND)
     message(STATUS "FOUND NVTX!")

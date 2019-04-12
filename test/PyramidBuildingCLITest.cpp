@@ -55,11 +55,11 @@ int main(int argc, const char** argv)
 //    std::string inputDirectory = "/home/gerardin/Documents/images/dataset6/tiled-images/";
 //    uint32_t tilesize = 1024;
 
-//
-//    std::string vector = "/home/gerardin/Documents/images/dataset7/img-global-positions-0.txt";
-//    std::string inputDirectory = "/home/gerardin/Documents/images/dataset7/tiled-images/";
-//    uint32_t tilesize = 1024;
-//
+
+    std::string vector = "/home/gerardin/Documents/images/dataset7/img-global-positions-0.txt";
+    std::string inputDirectory = "/home/gerardin/Documents/images/dataset7/tiled-images/";
+    uint32_t tilesize = 1024;
+
 //
 //    std::string vector = "/home/gerardin/Documents/images/dataset7/manualStitching/img-global-positions-0.txt";
 //    std::string inputDirectory = "/home/gerardin/Documents/images/dataset7/tiled-images/";

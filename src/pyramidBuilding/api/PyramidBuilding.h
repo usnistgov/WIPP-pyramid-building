@@ -220,8 +220,6 @@ namespace pb {
             auto tileBuilder = new TileBuilder<px_t>(1, gridGenerator->getFovMetadata(), pyramidTileSize, tileCache);
             graph->addEdge(reader,tileBuilder);
 
-
-
             size_t fullFovWidth = gridGenerator->getFullFovWidth();
             size_t fullFovHeight = gridGenerator->getFullFovHeight();
             int deepZoomLevel = 0;
