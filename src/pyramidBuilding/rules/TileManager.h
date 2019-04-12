@@ -34,11 +34,10 @@ namespace pb {
                 auto fovs = entry->second;
                 for(auto fov : fovs){
                     auto fovRow = fov.first, fovCol = fov.second;
-                    if(usedFOVs.find({fovRow,fovCol}) != usedFOVs.end()){
-                        return;
+                    if(usedFOVs.find({fovRow,fovCol}) == usedFOVs.end()){
+                        this->addResult(info.getGrid().find({fovRow, fovCol})->second);
+                        usedFOVs[{fovRow, fovCol}] = true;
                     }
-                    this->addResult(info.getGrid().find({fovRow, fovCol})->second);
-                    usedFOVs[{fovRow, fovCol}] = true;
                 }
             }
         }
