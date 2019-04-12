@@ -26,7 +26,6 @@ namespace pb {
 
 
         Tile<T>* getTile(uint32_t row, uint32_t col){
-
             std::lock_guard<std::mutex> guard(lock);
             //     Tile<T>* t = nullptr;
             std::pair<size_t,size_t> index= std::make_pair(row,col);
@@ -57,6 +56,7 @@ namespace pb {
         }
 
         void doneCopyingFOVintoTile(uint32_t row, uint32_t col){
+            std::lock_guard<std::mutex> guard(lock2);
             fovUsageCount[{row,col}] -= 1;
             VLOG(3) << " number of FOV needed to complete tile (" << row << "," << col << ") : " << (int)fovUsageCount[{row,col}] << std::endl;
             assert((fovUsageCount[{row,col}]) >= 0);
@@ -69,7 +69,7 @@ namespace pb {
 
     private :
         std::map<std::pair<size_t,size_t>, Tile<T>*> tileCache;
-        std::mutex lock;
+        std::mutex lock, lock2;
         uint32_t fullWidth;
         uint32_t fullHeight;
         uint32_t tileSize;
