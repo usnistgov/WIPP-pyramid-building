@@ -45,6 +45,8 @@
 #include "pyramidBuilding/utils/AverageDownsampler.h"
 #include "pyramidBuilding/tasks/ImageReader.h"
 #include <pyramidBuilding/tasks/TileBuilder.h>
+#include <pyramidBuilding/rules/TileManager.h>
+#include <pyramidBuilding/rules/EmptyTileManager.h>
 
 namespace pb {
 
@@ -205,19 +207,28 @@ namespace pb {
             size_t numTileRow = static_cast<size_t >(std::ceil( (double)gridGenerator->getFovMetadata()->getFullFovHeight() / pyramidTileSize));
             size_t numTileCol = static_cast<size_t >(std::ceil( (double)gridGenerator->getFovMetadata()->getFullFovWidth() / pyramidTileSize));
 
-            auto graph = new htgs::TaskGraphConf<FOV, VoidData>();
+            auto graph = new htgs::TaskGraphConf<TileRequest, VoidData>();
             auto loader = new TiffImageLoader<px_t>(_inputDir);
             auto reader = new ImageReader<px_t>(2, loader);
 
             auto fovWidth = gridGenerator->getFovMetadata()->getWidth();
             auto fovHeight = gridGenerator->getFovMetadata()->getHeight();
 
+            auto tileManager = new htgs::Bookkeeper<TileRequest>();
+            graph->setGraphConsumerTask(tileManager);
+            auto tileManagerRegularTileRule = new TileManager(*gridGenerator);
+            auto tileManagerEmptyTileRule = new EmptyTileManager<px_t>(*gridGenerator);
+
+            graph->addRuleEdge(tileManager,tileManagerRegularTileRule,reader);
+
+
             auto maxNumberOfConcurrentFOVLoaded = gridGenerator->getMaxFovUsage();
-            graph->setGraphConsumerTask(reader);
+
             graph->addMemoryManagerEdge("fov", reader, new FOVAllocator<px_t>(fovWidth, fovHeight), 10, htgs::MMType::Static);
 
             auto tileCache = new TileCache<px_t>(gridGenerator->getFullFovWidth(), gridGenerator->getFullFovHeight(), pyramidTileSize, gridGenerator->getFovUsageCount());
             auto tileBuilder = new TileBuilder<px_t>(1, gridGenerator->getFovMetadata(), pyramidTileSize, tileCache);
+
             graph->addEdge(reader,tileBuilder);
 
             size_t fullFovWidth = gridGenerator->getFullFovWidth();
@@ -234,6 +245,8 @@ namespace pb {
 //            graph->setGraphConsumerTask(baseTileTask);
 //
             auto bookkeeper = new htgs::Bookkeeper<Tile<px_t>>();
+
+            graph->addRuleEdge(tileManager,tileManagerEmptyTileRule,bookkeeper);
 //
             auto writeRule = new WriteTileRule<px_t>();
             auto pyramidRule = new PyramidRule<px_t>(numTileCol,numTileRow);
@@ -287,19 +300,27 @@ namespace pb {
             //   diagTraversal(graph, numTileRow, numTileCol);
             //     recursiveTraversal<px_t>(graph, numTileRow, numTileCol, (size_t)0, (size_t)0);
 
-            size_t numFovRow = gridGenerator->getMaxRow() + 1;
-            size_t numFovCol = gridGenerator->getMaxCol() + 1;
+//            size_t numFovRow = gridGenerator->getMaxRow() + 1;
+//            size_t numFovCol = gridGenerator->getMaxCol() + 1;
 
-            fi::Traversal traversal = fi::Traversal(fi::TraversalType::DIAGONAL,numFovRow,numFovCol);
+//            fi::Traversal traversal = fi::Traversal(fi::TraversalType::DIAGONAL,numFovRow,numFovCol);
+//
+//
+//
+//            for (auto step : traversal.getTraversal()) {
+//                auto row = step.first, col = step.second;
+//                auto fov = grid.find(step)->second;
+//                VLOG(4) <<  "fov request : " << "(" << row << "," << col << ")"<< std::endl;
+//                graph->produceData(fov);
+//            }
 
-
-
+            fi::Traversal traversal = fi::Traversal(fi::TraversalType::DIAGONAL,numTileRow,numTileCol);
             for (auto step : traversal.getTraversal()) {
                 auto row = step.first, col = step.second;
-                auto fov = grid.find(step)->second;
-                VLOG(4) <<  "fov request : " << "(" << row << "," << col << ")"<< std::endl;
-                graph->produceData(fov);
+                VLOG(4) <<  "tile request : " << "(" << row << "," << col << ")"<< std::endl;
+                graph->produceData(new TileRequest(row,col));
             }
+
 
 
             graph->finishedProducingData();

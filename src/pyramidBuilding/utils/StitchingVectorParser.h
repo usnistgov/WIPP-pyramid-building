@@ -40,6 +40,7 @@ namespace pb {
 
         std::map<std::pair<size_t,size_t>, FOV*> grid;
         std::map<std::pair<size_t,size_t>, u_int8_t> fovUsageCount = {};
+        std::map<std::pair<size_t,size_t>, std::vector<std::pair<size_t,size_t>>> fovUsage = {};
 
         FOVMetadata* fovMetadata = nullptr;
 
@@ -164,10 +165,11 @@ namespace pb {
                 uint32_t colMax = (fovGlobalX + fovMetadata->getWidth() - 1) / pyramidTileSize;
                 uint32_t rowMax = (fovGlobalY + fovMetadata->getHeight() - 1) / pyramidTileSize;
 
-                for(auto col = colMin; col <= colMax; col++){
-                    for (auto row = rowMin; row <= rowMax; row++){
-                        fovUsageCount[{row,col}] += 1;
-                        if(fovUsageCount[{row,col}] > maxFovUsage){ maxFovUsage = fovUsageCount[{row,col}];}
+                for(auto tileCol = colMin; tileCol <= colMax; tileCol++){
+                    for (auto tileRow = rowMin; tileRow <= rowMax; tileRow++){
+                        fovUsageCount[{tileRow,tileCol}] += 1;
+                        if(fovUsageCount[{tileRow,tileCol}] > maxFovUsage){ maxFovUsage = fovUsageCount[{tileRow,tileCol}];}
+                        fovUsage[{tileRow,tileCol}].push_back({row,col});
                     }
                 }
             }
@@ -221,6 +223,14 @@ namespace pb {
 
         u_int8_t getMaxFovUsage() const {
             return maxFovUsage;
+        }
+
+        const std::map<std::pair<size_t, size_t>, std::vector<std::pair<size_t, size_t>>> &getFovUsage() const {
+            return fovUsage;
+        }
+
+        uint32_t getPyramidTileSize() const {
+            return pyramidTileSize;
         }
 
 
