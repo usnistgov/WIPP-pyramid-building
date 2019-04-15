@@ -12,6 +12,10 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(TIFF_INCLUDE_DIR /usr/lib)
 
+message(libTiff path :  ${TIFF_LIBRARIES} )
+
+
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules")
 #TODO FIX opencv is not installed in a standard directory - THIS HAS BEEN FIXED
 set(CMAKE_PREFIX_PATH /usr/local/opt/opencv@3/)
@@ -20,6 +24,8 @@ find_package(FastImage REQUIRED)
 include_directories(${HTGS_INCLUDE_DIR})
 include_directories(${FastImage_INCLUDE_DIR})
 link_libraries(${FastImage_LIBRARIES})
+
+
 
 #find_package(NVTX QUIET)
 
@@ -32,10 +38,11 @@ endif()
 
 # TODO CHANGE? SHOULD KEEP THIS DEPENDENCY? REMOVE IT? SWITCH TO OPENCV2?
 find_package(OpenCV 3 REQUIRED)
-link_libraries(${OpenCV_LIBRARIES})
+link_libraries(${OpenCV_LIBRARIES} )
 message("OpenCV Version: ${OpenCV_VERSION}")
 
 #TODO FIX tclap is also a dependency (NOT DECLARED YET)
+
 
 if(APPLE)
     link_directories(/usr/local/Cellar/llvm/7.0.1/lib/)
@@ -66,3 +73,7 @@ add_executable(pyramidBuildingCLITest test/PyramidBuildingCLITest.cpp ${ALL_SRCS
 
 target_include_directories(main PUBLIC src)
 target_include_directories(pyramidBuildingCLITest PUBLIC src)
+
+#TODO CHECK ADDITIONS FOR STATIC LINK
+#set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} -static )
+#target_link_libraries(main ./dist/deps/tiff-4.0.10/libtiff/libtiff.a)

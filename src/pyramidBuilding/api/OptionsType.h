@@ -7,7 +7,6 @@
 
 namespace pb {
 
-/// \brief Different traversal name
     enum class DownsamplingType {
         NEIGHBORS_AVERAGE,
     };

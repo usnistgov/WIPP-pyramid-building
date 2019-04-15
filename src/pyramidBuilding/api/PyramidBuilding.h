@@ -55,13 +55,6 @@ namespace pb {
     /***
      *  @class The pyramid building algorithm.
      *  @brief The HTGS graph that captures the pyramid building algorithm.
-     *  @details
-     *  HTGS Graph
-     *   Create tileRequest
-     *   Task1 : (BlockRequest, Tile) base level tile generation : generate individual pyramid tiles
-     *   Task2 : (Tile) Bookeeper : receive the pyramid tile and cache it. Generate request for higher level when it can.
-     *   Task3 : (Block, Tile) CreateDownscaledTile : create tile at higher level of the pyramid.
-     *   Task 4 : write the Tile;
      */
     class PyramidBuilding {
 
@@ -209,7 +202,7 @@ namespace pb {
 
             auto graph = new htgs::TaskGraphConf<TileRequest, VoidData>();
             auto loader = new TiffImageLoader<px_t>(_inputDir);
-            auto reader = new ImageReader<px_t>(2, loader);
+            auto reader = new ImageReader<px_t>(1, loader);
 
             auto fovWidth = gridGenerator->getFovMetadata()->getWidth();
             auto fovHeight = gridGenerator->getFovMetadata()->getHeight();
