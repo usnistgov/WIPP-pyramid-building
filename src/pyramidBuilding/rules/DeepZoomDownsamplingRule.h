@@ -83,6 +83,8 @@ namespace pb {
                     auto originalLevel = (size_t)(this->maxDeepZoomLevel - 1 - i);
 
                     auto tile = new Tile<T>(originalLevel, 0, 0, width, height, newTileData);
+                    originalData = newTileData;
+
                     this->addResult(tile);
                 }
 

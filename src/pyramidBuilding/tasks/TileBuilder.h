@@ -119,7 +119,7 @@ namespace pb {
 
 
 
-    std::string getName() override { return "Tile Builder"; }
+    std::string getName() override { return "Empty Tile Rule"; }
 
     private:
 

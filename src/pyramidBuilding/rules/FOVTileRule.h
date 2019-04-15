@@ -17,11 +17,11 @@
 
 namespace pb {
 
-    class TileManager : public htgs::IRule<TileRequest, FOV>
+    class FOVTileRule : public htgs::IRule<TileRequest, FOV>
     {
 
     public:
-        TileManager(StitchingVectorParser &info) : info(info) {}
+        FOVTileRule(StitchingVectorParser &info) : info(info) {}
 
 
     public:

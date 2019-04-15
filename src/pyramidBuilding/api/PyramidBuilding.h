@@ -45,8 +45,8 @@
 #include "pyramidBuilding/utils/AverageDownsampler.h"
 #include "pyramidBuilding/tasks/ImageReader.h"
 #include <pyramidBuilding/tasks/TileBuilder.h>
-#include <pyramidBuilding/rules/TileManager.h>
-#include <pyramidBuilding/rules/EmptyTileManager.h>
+#include <pyramidBuilding/rules/FOVTileRule.h>
+#include <pyramidBuilding/rules/EmptyTileRule.h>
 
 namespace pb {
 
@@ -216,15 +216,15 @@ namespace pb {
 
             auto tileManager = new htgs::Bookkeeper<TileRequest>();
             graph->setGraphConsumerTask(tileManager);
-            auto tileManagerRegularTileRule = new TileManager(*gridGenerator);
-            auto tileManagerEmptyTileRule = new EmptyTileManager<px_t>(*gridGenerator);
+            auto tileManagerRegularTileRule = new FOVTileRule(*gridGenerator);
+            auto tileManagerEmptyTileRule = new EmptyTileRule<px_t>(*gridGenerator);
 
             graph->addRuleEdge(tileManager,tileManagerRegularTileRule,reader);
 
 
             auto maxNumberOfConcurrentFOVLoaded = gridGenerator->getMaxFovUsage();
 
-            graph->addMemoryManagerEdge("fov", reader, new FOVAllocator<px_t>(fovWidth, fovHeight), 10, htgs::MMType::Static);
+            graph->addMemoryManagerEdge("fov", reader, new FOVAllocator<px_t>(fovWidth, fovHeight), 5, htgs::MMType::Static);
 
             auto tileCache = new TileCache<px_t>(gridGenerator->getFullFovWidth(), gridGenerator->getFullFovHeight(), pyramidTileSize, gridGenerator->getFovUsageCount());
             auto tileBuilder = new TileBuilder<px_t>(1, gridGenerator->getFovMetadata(), pyramidTileSize, tileCache);

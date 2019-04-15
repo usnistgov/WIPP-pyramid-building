@@ -18,11 +18,11 @@ namespace pb {
 
 
     template <class T>
-    class EmptyTileManager : public htgs::IRule<TileRequest, Tile<T>>
+    class EmptyTileRule : public htgs::IRule<TileRequest, Tile<T>>
     {
 
     public:
-        EmptyTileManager(const StitchingVectorParser &info) : info(info) {}
+        EmptyTileRule(const StitchingVectorParser &info) : info(info) {}
 
 
     public:
