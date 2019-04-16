@@ -1,7 +1,9 @@
 # TODOS
 
 
+## VERY IMPORTANT
 
+if not tiled-tiff, program runs and do nothing! CORRECT IMMEDIATLY
 
 ## Checks
 

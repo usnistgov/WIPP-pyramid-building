@@ -54,9 +54,8 @@ tar -xzf tclap.tar.gz ;\
 cd tclap-1.2.2 ;\
 ./configure ;\
 make ;\
-make install
-
-RUN cd /tmp ;\
+make install ;\
+cd /tmp ;\
 git clone https://github.com/google/glog.git; \
 cd glog ;\
 ./autogen.sh && ./configure && make && make install ;\
