@@ -127,7 +127,7 @@ namespace pb {
 
         private:
 
-            uint32_t _tilesize = 256;
+            uint32_t _tilesize = 1024;
             DownsamplingType downsamplingType = DownsamplingType::NEIGHBORS_AVERAGE;
             PyramidFormat pyramidFormat = PyramidFormat::DEEPZOOM;
             BlendingMethod blendingMethod = BlendingMethod::OVERLAY;

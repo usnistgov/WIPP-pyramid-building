@@ -17,7 +17,7 @@
 //TODO do we need to wrap those namespaced global methods in another namespace or class to avoid name collision and
 //produce intelligible documentation?
 /***
- * @brief Collection of methods to parse a command line into inputs ingestible by the pyramid building algorithm.
+ * @brief Collection of methods to parse a command line into inputs expected by the pyramid building algorithm.
  */
 namespace pb {
 

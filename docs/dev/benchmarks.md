@@ -34,10 +34,3 @@ parallel can cause all kinds of trouble.
 If you need to have gnu-getopt first in your PATH run:
     
     echo 'export PATH="/usr/local/opt/gnu-getopt/bin:$PATH"' >> ~/.bash_profile
-
------------------
-
-
--v /home/gerardin/Documents/pyramidBuilding/resources/dataset1/stitching_vector/img-global-positions-1.txt  -i /home/gerardin/Documents/pyramidBuilding/resources/dataset1/tiled-images  -o /home/gerardin/Documents/pyramidBuilding/outputs -t 256 -d 8U
-
--v /home/gerardin/Documents/images/dataset7/img-global-positions-0.txt  -i /home/gerardin/Documents/images/dataset7/tiled-images  -o /home/gerardin/Documents/pyramidBuilding/outputs -t 1024 -d 8U
