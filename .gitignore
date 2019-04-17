@@ -9,7 +9,7 @@ VagrantFile
 .vagrant
 CMakeFiles/
 
-webapp-test/node_modules
+test-webapp/node_modules
 outputs
 
 benchmarks/results
@@ -18,3 +18,4 @@ benchmarks/heaptrack.*
 **/color-compute-time-graph
 
 dist/deps
+dist/build

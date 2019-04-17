@@ -22,18 +22,17 @@ make
 make install
 
 # opencv to write png images and calculate intersections of overlapping tiles.
-# TODO CHANGE? - FOR NOW Pyramid-building depends on openCV3.
 apt-get install build-essential
 apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
 wget -O opencv3.zip https://github.com/opencv/opencv/archive/3.4.5.zip
 unzip -a opencv3.zip
 make build && cd build
 cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local ..
-make -j7 # runs 7 jobs in parallel
+make -j7
 make install
 
 # From https://github.com/cggos/dip_cvqt/issues/1
-# Runtime error when using opencv3 otherwise
+# Linking opencv requires this path
 echo /usr/lib/conf >> /etc/ld.so.conf.d/opencv.conf
 ldconfig -v
 
@@ -46,7 +45,6 @@ cd tclap-1.2.2
 make
 make install
 
-
 #install glog
 git clone https://github.com/google/glog.git
 cd glog
@@ -55,9 +53,6 @@ cd glog
 make
 make install
 
-
-# TODO CHANGE - THIS IS A PRIVATE REPO FOR NOW. 
-# THIS NEED TO BE REPLACED BY A DOCKER COPY OR A PUBLIC GITHUB LIB
 cd /tmp
 git clone https://gitlab.nist.gov/gitlab/gerardin/pyramid-building.git
 cd pyramid-building
@@ -93,6 +88,8 @@ chown MAIN_USER:MAIN_GROUP $OUTPUTS
 su wipp
 
 cd /tmp/pyramid-building/build
+
+
 
 
 

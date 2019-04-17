@@ -136,8 +136,8 @@ namespace pb {
                         throw std::runtime_error(errorMsg);
                     }
 
-                    uint32_t width, height, tileWidth, tileHeight;
-                    short samplePerPixel, bitsPerSample, sampleFormat;
+                    uint32_t width = 0, height = 0, tileWidth = 0, tileHeight = 0;
+                    short samplePerPixel = 0, bitsPerSample = 0, sampleFormat = 0;
 
                     // Load/parse header
                     // For full reference, see https://www.awaresystems.be/imaging/tiff/tifftags.html
@@ -149,6 +149,10 @@ namespace pb {
                     TIFFGetField(tiff, TIFFTAG_BITSPERSAMPLE, &bitsPerSample);
                     TIFFGetField(tiff, TIFFTAG_SAMPLEFORMAT, &sampleFormat);
                     TIFFClose(tiff);
+
+                    if(&tileWidth == 0 || tileHeight == 0){
+                        throw std::runtime_error("Unsupported file format. Images should be tiled tiff.");
+                    }
 
                     fovMetadata = new FOVMetadata(width, height, samplePerPixel, bitsPerSample, sampleFormat, imageDirectoryPath);
                     fovMetadata->setTileWidth(tileWidth);
