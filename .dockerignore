@@ -1,3 +1,4 @@
+# Prevents creating a large context for Dockerfile
 benchmarks
 outputs
 resources
