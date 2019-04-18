@@ -25,11 +25,11 @@ namespace pb {
 
         TileBuilder(
                 size_t numThreads,
-                FOVMetadata* metadata,
+                std::shared_ptr<FOVMetadata> metadata,
                 uint32_t tileSize,
                 TileCache<T>* tileCache)
                 : htgs::ITask<FOVWithData<T>, Tile<T> >(numThreads),
-        metadata(metadata), tileSize(tileSize), tileCache(tileCache) {}
+        metadata(std::move(metadata)), tileSize(tileSize), tileCache(tileCache) {}
 
         void executeTask(std::shared_ptr<FOVWithData<T>> data) override {
 
@@ -38,8 +38,8 @@ namespace pb {
 
             VLOG(3) << " number of tiled cached in TileBuilder when receiving FOV (" << fov->getRow() << "," << fov->getCol() << ") : " << tileCache->size() << std::endl;
 
-            uint32_t fovWidth = fov->getMetadata()->getWidth();
-            uint32_t fovHeight = fov->getMetadata()->getHeight();
+            uint32_t fovWidth = metadata->getWidth();
+            uint32_t fovHeight = metadata->getHeight();
 
             uint32_t fovTopLeftX = fov->getGlobalX();
             uint32_t fovTopLeftY = fov->getGlobalY();
@@ -123,7 +123,7 @@ namespace pb {
 
     private:
 
-        FOVMetadata* metadata;
+        std::shared_ptr<FOVMetadata> metadata;
         TileCache<T>* tileCache;
         uint32_t tileSize;
 

@@ -42,7 +42,7 @@ namespace pb {
         std::map<std::pair<size_t,size_t>, u_int8_t> fovUsageCount = {};
         std::map<std::pair<size_t,size_t>, std::vector<std::pair<size_t,size_t>>> fovUsage = {};
 
-        FOVMetadata* fovMetadata = nullptr;
+        std::shared_ptr<FOVMetadata> fovMetadata = nullptr;
 
         uint32_t fullFovWidth = 0;
         uint32_t fullFovHeight = 0;
@@ -154,7 +154,8 @@ namespace pb {
                         throw std::runtime_error("Unsupported file format. Images should be tiled tiff.");
                     }
 
-                    fovMetadata = new FOVMetadata(width, height, samplePerPixel, bitsPerSample, sampleFormat, imageDirectoryPath);
+                    //make_unique not available on Clang
+                    fovMetadata = std::unique_ptr<FOVMetadata>(new FOVMetadata(width, height, samplePerPixel, bitsPerSample, sampleFormat, imageDirectoryPath));
                     fovMetadata->setTileWidth(tileWidth);
                     fovMetadata->setTileHeight(tileHeight);
                 }
@@ -201,7 +202,7 @@ namespace pb {
             return grid;
         }
 
-        FOVMetadata *getFovMetadata() const {
+        const std::shared_ptr<FOVMetadata> getFovMetadata() const {
             return fovMetadata;
         }
 
@@ -241,8 +242,8 @@ namespace pb {
         //tile. Thus no call to destructor is necessary
         ~StitchingVectorParser(){
             grid.clear();
-            delete fovMetadata;
-            fovMetadata = nullptr;
+            fovUsageCount.clear();
+            fovUsage.clear();
         }
 
     };

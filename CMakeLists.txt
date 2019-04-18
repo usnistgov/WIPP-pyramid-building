@@ -12,6 +12,13 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 #TODO CHECK release flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -funwind-tables -g")
 
+
+#TODO DOES NOT USEFUL. REMOVE
+# make_unique is not available on current OSX libc++
+if(APPLE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y")
+endif(APPLE)
+
 # IMPORTANT to allow CMAKE to find HTGS and FAST IMAGE
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules")
 

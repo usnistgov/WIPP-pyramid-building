@@ -17,7 +17,7 @@ namespace pb {
     public:
 
         FOV(const std::string &filename, uint32_t row, uint32_t col, uint32_t globalX, uint32_t globalY,
-            FOVMetadata *metadata) : filename(filename), row(row), col(col), globalX(globalX), globalY(globalY),
+            std::weak_ptr<FOVMetadata> metadata) : filename(filename), row(row), col(col), globalX(globalX), globalY(globalY),
                                      metadata(metadata) {}
 
         const std::string &getFilename() const {
@@ -40,8 +40,8 @@ namespace pb {
             return globalY;
         }
 
-        FOVMetadata *getMetadata() const {
-            return metadata;
+        const std::shared_ptr<FOVMetadata> getMetadata() const {
+            return metadata.lock();
         }
 
         ~FOV(){
@@ -55,7 +55,7 @@ namespace pb {
         uint32_t col;
         uint32_t globalX;
         uint32_t globalY;
-        FOVMetadata *metadata;
+        std::weak_ptr<FOVMetadata> metadata;
     };
 
 }
