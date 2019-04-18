@@ -2,8 +2,8 @@
 // Created by Gerardin, Antoine D. (Assoc) on 12/19/18.
 //
 
-#ifndef PYRAMIDBUILDING_HELPER_H
-#define PYRAMIDBUILDING_HELPER_H
+#ifndef PYRAMIDBUILDING_UTILS_H
+#define PYRAMIDBUILDING_UTILS_H
 
 #include <iostream>
 #include <algorithm>
@@ -35,4 +35,4 @@ namespace pb {
     }
 }
 
-#endif //PYRAMIDBUILDING_HELPER_H
+#endif //PYRAMIDBUILDING_UTILS_H

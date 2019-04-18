@@ -9,17 +9,17 @@
 #include <iostream>
 #include <map>
 #include <assert.h>
-#include "../data/PartialFov.h"
-#include "Helper.h"
+#include "pyramidBuilding/data/deprecated/PartialFov.h"
+#include "pyramidBuilding/utils/Utils.h"
 #include <FastImage/api/FastImage.h>
 #include <FastImage/TileLoaders/GrayscaleTiffTileLoader.h>
 #include "StitchingVectorParserOld.h"
-#include "../data/Tile.h"
+#include "pyramidBuilding/data/Tile.h"
 #include "pyramidBuilding/api/OptionsType.h"
 #include <experimental/filesystem>
 #include "Blender.h"
 #include "BaseTileGenerator.h"
-#include "TiffImageLoader.h"
+#include "pyramidBuilding/utils/TiffImageLoader.h"
 
 namespace pb {
 

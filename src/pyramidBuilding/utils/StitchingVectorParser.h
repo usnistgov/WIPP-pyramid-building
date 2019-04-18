@@ -23,7 +23,7 @@
 #include <glog/logging.h>
 
 #include "../api/OptionsType.h"
-#include "../data/PartialFov.h"
+#include "pyramidBuilding/data/deprecated/PartialFov.h"
 #include "../data/FOVMetadata.h"
 #include "../data/FOV.h"
 

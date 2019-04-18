@@ -12,10 +12,10 @@
 #include <FastImage/api/FastImage.h>
 #include <FastImage/TileLoaders/GrayscaleTiffTileLoader.h>
 #include <experimental/filesystem>
-#include "../data/PartialFov.h"
-#include "Helper.h"
+#include "pyramidBuilding/data/deprecated/PartialFov.h"
+#include "pyramidBuilding/utils/Utils.h"
 #include "StitchingVectorParserOld.h"
-#include "../data/Tile.h"
+#include "pyramidBuilding/data/Tile.h"
 #include "pyramidBuilding/api/OptionsType.h"
 #include "BaseTileGenerator.h"
 #include "Blender.h"

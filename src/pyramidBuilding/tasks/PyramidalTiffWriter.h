@@ -2,8 +2,8 @@
 // Created by gerardin on 3/11/19.
 //
 
-#ifndef PYRAMIDBUILDING_WRITETIFFTILETASK_H
-#define PYRAMIDBUILDING_WRITETIFFTILETASK_H
+#ifndef PYRAMIDBUILDING_PYRAMIDALTIFFWRITER_H
+#define PYRAMIDBUILDING_PYRAMIDALTIFFWRITER_H
 
 
 #include <htgs/api/ITask.hpp>
@@ -16,7 +16,7 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include "pyramidBuilding/api/OptionsType.h"
-#include "pyramidBuilding/utils/StitchingVectorParserOld.h"
+#include "pyramidBuilding/utils/deprecated/StitchingVectorParserOld.h"
 
 #include <experimental/filesystem>
 
@@ -25,10 +25,10 @@ namespace pb {
 using namespace std::experimental;
 
 template <class T>
-class WriteTiffTileTask : public htgs::ITask< Tile<T>, htgs::VoidData > {
+class PyramidalTiffWriter : public htgs::ITask< Tile<T>, htgs::VoidData > {
 
 public:
-    WriteTiffTileTask(
+    PyramidalTiffWriter(
             size_t numThreads, const std::string &_pathOut, const std::string &pyramidName,
             const ImageDepth imageDepth, const StitchingVectorParserOld *gridGenerator) :
             htgs::ITask<Tile<T>, Tile<T>>(numThreads),
@@ -43,10 +43,6 @@ public:
         if(! filesystem::exists(path)) {
             filesystem::create_directory(path);
         }
-
-//        auto fullPath = path / (pyramidName + ".tif");
-//        auto file = fullPath.c_str();
-//        _tiff = TIFFOpen(file, "w");
 
         size_t bitsPerSample = 0;
 
@@ -141,7 +137,7 @@ public:
     std::string getName() override { return "PyramidalTiledTiffWriter"; }
 
     ITask<Tile<T>, VoidData> *copy() override {
-        return new WriteTiffTileTask(this->getNumThreads(), this->_pathOut, this->pyramidName, this->imageDepth, this->info);
+        return new PyramidalTiffWriter(this->getNumThreads(), this->_pathOut, this->pyramidName, this->imageDepth, this->info);
     }
 
 private:
@@ -157,4 +153,4 @@ private:
 
 }
 
-#endif //PYRAMIDBUILDING_WRITETIFFTILETASK_H
+#endif //PYRAMIDBUILDING_PYRAMIDALTIFFWRITER_H

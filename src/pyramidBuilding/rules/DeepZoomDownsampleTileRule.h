@@ -2,8 +2,8 @@
 // Created by Gerardin, Antoine D. (Assoc) on 12/20/18.
 //
 
-#ifndef PYRAMIDBUILDING_DEEPZOOMDOWNSAMPLINGRULE_H
-#define PYRAMIDBUILDING_DEEPZOOMDOWNSAMPLINGRULE_H
+#ifndef PYRAMIDBUILDING_DEEPZOOMDOWNSAMPLETILERULE_H
+#define PYRAMIDBUILDING_DEEPZOOMDOWNSAMPLETILERULE_H
 
 #include <FastImage/api/FastImage.h>
 #include <math.h>
@@ -36,10 +36,10 @@ namespace pb {
  * @tparam T The depth of the output image.
  */
     template<class T>
-    class DeepZoomDownsamplingRule : public htgs::IRule<Tile<T>, Tile<T>> {
+    class DeepZoomDownsampleTileRule : public htgs::IRule<Tile<T>, Tile<T>> {
 
     public:
-        DeepZoomDownsamplingRule(size_t numTileCol, size_t numTileRow, int maxDeepZoomLevel,
+        DeepZoomDownsampleTileRule(size_t numTileCol, size_t numTileRow, int maxDeepZoomLevel,
                                  const std::string &_pathOut,
                                  ImageDepth imageDepth,
                                  Downsampler<T>* downsampler
@@ -51,10 +51,6 @@ namespace pb {
             auto maxDim = std::max(numTileCol, numTileRow);
             numLevel = static_cast<size_t>(ceil(log2(maxDim)) + 1);
 
-        }
-
-        std::string getName() override {
-            return "DeepZoomDownsampling Rule";
         }
 
         void applyRule(std::shared_ptr<Tile<T>> data, size_t pipelineId) override {
@@ -94,6 +90,11 @@ namespace pb {
 
         }
 
+
+        std::string getName() override {
+            return "DeepZoomDownsampleTileRule";
+        }
+
         bool canTerminateRule(size_t pipelineId) override {
             return done;
         }
@@ -113,4 +114,4 @@ namespace pb {
 
 }
 
-#endif //PYRAMIDBUILDING_DEEPZOOMDOWNSAMPLINGRULE_H
+#endif //PYRAMIDBUILDING_DEEPZOOMDOWNSAMPLETILERULE_H

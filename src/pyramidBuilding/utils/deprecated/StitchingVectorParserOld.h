@@ -22,7 +22,7 @@
 #include <assert.h>
 #include <glog/logging.h>
 
-#include "../data/PartialFov.h"
+#include "pyramidBuilding/data/deprecated/PartialFov.h"
 #include "pyramidBuilding/api/OptionsType.h"
 
 

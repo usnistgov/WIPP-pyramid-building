@@ -23,24 +23,24 @@
 #include <sstream>
 #include <experimental/filesystem>
 #include <glog/logging.h>
-#include <pyramidBuilding/utils/BaseTileGeneratorFastImage.h>
+#include <pyramidBuilding/utils/deprecated/BaseTileGeneratorFastImage.h>
 #include <pyramidBuilding/utils/AverageDownsampler.h>
-#include <pyramidBuilding/utils/BaseTileGeneratorLibTiffWithCache.h>
+#include <pyramidBuilding/utils/deprecated/BaseTileGeneratorLibTiffWithCache.h>
 #include <pyramidBuilding/utils/StitchingVectorParser.h>
 #include <pyramidBuilding/memory/FOVAllocator.h>
 
 #include "pyramidBuilding/data/TileRequest.h"
-#include "pyramidBuilding/utils/StitchingVectorParserOld.h"
-#include "pyramidBuilding/utils/BaseTileGeneratorLibTiff.h"
-#include "pyramidBuilding/tasks/WriteDeepZoomTileTask.h"
-#include "pyramidBuilding/rules/DeepZoomDownsamplingRule.h"
+#include "pyramidBuilding/utils/deprecated/StitchingVectorParserOld.h"
+#include "pyramidBuilding/utils/deprecated/BaseTileGeneratorLibTiff.h"
+#include "pyramidBuilding/tasks/DeepZoomTileWriter.h"
+#include "pyramidBuilding/rules/DeepZoomDownsampleTileRule.h"
 #include "OptionsType.h"
-#include "pyramidBuilding/tasks/WriteTiffTileTask.h"
-#include "pyramidBuilding/utils/Helper.h"
+#include "pyramidBuilding/tasks/PyramidalTiffWriter.h"
+#include "pyramidBuilding/utils/Utils.h"
 #include "pyramidBuilding/rules/WriteTileRule.h"
-#include "pyramidBuilding/rules/PyramidRule.h"
+#include "pyramidBuilding/rules/PyramidCacheRule.h"
 #include "pyramidBuilding/tasks/TileDownsampler.h"
-#include "pyramidBuilding/tasks/BaseTileTask.h"
+#include "pyramidBuilding/tasks/deprecated/BaseTileTask.h"
 #include "pyramidBuilding/data/Tile.h"
 #include "pyramidBuilding/utils/AverageDownsampler.h"
 #include "pyramidBuilding/tasks/ImageReader.h"
@@ -243,7 +243,7 @@ namespace pb {
             graph->addRuleEdge(tileManager,tileManagerEmptyTileRule,bookkeeper);
 //
             auto writeRule = new WriteTileRule<px_t>();
-            auto pyramidRule = new PyramidRule<px_t>(numTileCol,numTileRow);
+            auto pyramidRule = new PyramidCacheRule<px_t>(numTileCol,numTileRow);
 //
             auto downsampler = new AverageDownsampler<px_t>();
             auto tileDownsampler = new TileDownsampler<px_t>(6, downsampler);
@@ -257,7 +257,7 @@ namespace pb {
             htgs::ITask< Tile<px_t>, htgs::VoidData> *writeTask = nullptr;
             if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
                 auto outputPath = filesystem::path(_outputDir) / (pyramidName + "_files");
-                writeTask = new WriteDeepZoomTileTask<px_t>(nbThreadsPerTask, outputPath, deepZoomLevel, this->options->getDepth());
+                writeTask = new DeepZoomTileWriter<px_t>(nbThreadsPerTask, outputPath, deepZoomLevel, this->options->getDepth());
             }
             graph->addRuleEdge(bookkeeper, writeRule, writeTask); //exiting the graph;
 
@@ -266,13 +266,13 @@ namespace pb {
             // If large latency in write, it could be worthwhile. Otherwise thread management will dominate.
             if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
                 auto outputPath = filesystem::path(_outputDir) / (pyramidName + "_files");
-                auto deepzoomDownsamplingRule = new DeepZoomDownsamplingRule<px_t>(numTileCol, numTileRow, deepZoomLevel,
+                auto deepzoomDownsamplingRule = new DeepZoomDownsampleTileRule<px_t>(numTileCol, numTileRow, deepZoomLevel,
                                                                                    outputPath, this->options->getDepth(), downsampler);
                 graph->addRuleEdge(bookkeeper, deepzoomDownsamplingRule,
                                    writeTask); //generating extra tiles up to 1x1 pixel to satisfy deepzoom format
             }
 
-            //    auto tiledTiffWriteTask = new WriteTiffTileTask<px_t>(1,_outputDir, pyramidName, options->getDepth(), gridGenerator);
+            //    auto tiledTiffWriteTask = new PyramidalTiffWriter<px_t>(1,_outputDir, pyramidName, options->getDepth(), gridGenerator);
             //    graph->addRuleEdge(bookkeeper, writeRule, tiledTiffWriteTask);
 
 

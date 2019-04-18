@@ -14,9 +14,18 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include "../utils/Downsampler.h"
-#include "../utils/Helper.h"
+#include "pyramidBuilding/utils/Utils.h"
 
 namespace pb {
+
+    /**
+     * Take a block of tiles and generate a downsampled tile with a factor of 2.
+     * @details Current Implementation copy individual tiles in a bigger tile and then downsample this tile.
+     * Performance could be improved by downsampling tiles in place. In this however more involved since we have to
+     * identify each case and select source tiles depending if we are inside a tile or at the border.
+     * The benefits is not expected to be in term of runtime but in term of memory since less data is kept around.
+     * @tparam T Image pixel representation.
+     */
 
 template <class T>
 class TileDownsampler : public htgs::ITask<TileBlock<T>, Tile<T> > {
@@ -28,7 +37,6 @@ public:
 
     TileDownsampler(size_t numThreads, Downsampler<T> *downsampler) : ITask<TileBlock<T>, Tile<T>>(numThreads), downsampler(downsampler) {}
 
-    //TODO - POTENTIAL IMPROVEMENT - we could downsample in place the data from the different block to spare the extra array creation
     void executeTask(std::shared_ptr<TileBlock<T>> data) override {
 
         auto block = data->getBlock();
@@ -123,13 +131,13 @@ private:
         for(auto j = 0; j < block->getHeight(); j++){
             std::copy_n(block->getData() + j * block->getWidth(), block->getWidth(), data + colOffset + (j + rowOffset) * fullWidth);
         }
-
-//        for (size_t j = 0; j < block->getHeight(); j ++) {
-//            for (size_t i = 0; i < block->getWidth(); i ++) {
-//                size_t index = fullWidth * ( j + rowOffset) + colOffset + i;
-//                data[index] = block->getData()[j * block->getWidth() + i];
-//            }
-//        }
+        //SLOWER IMPLEMENTATION
+        //        for (size_t j = 0; j < block->getHeight(); j ++) {
+        //            for (size_t i = 0; i < block->getWidth(); i ++) {
+        //                size_t index = fullWidth * ( j + rowOffset) + colOffset + i;
+        //                data[index] = block->getData()[j * block->getWidth() + i];
+        //            }
+        //        }
     }
 
 };

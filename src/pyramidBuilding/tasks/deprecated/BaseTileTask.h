@@ -7,8 +7,8 @@
 
 #include <htgs/api/ITask.hpp>
 #include "pyramidBuilding/data/TileBlock.h"
-#include "../data/TileRequest.h"
-#include "pyramidBuilding/utils/BaseTileGenerator.h"
+#include "pyramidBuilding/data/TileRequest.h"
+#include "pyramidBuilding/utils/deprecated/BaseTileGenerator.h"
 
 namespace pb {
 

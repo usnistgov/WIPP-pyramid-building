@@ -12,8 +12,8 @@
 #include <pyramidBuilding/data/FOVWithData.h>
 #include <pyramidBuilding/data/Tile.h>
 #include <algorithm>
-#include <pyramidBuilding/utils/Helper.h>
-#include <pyramidBuilding/utils/TileCache.h>
+#include <pyramidBuilding/utils/Utils.h>
+#include <pyramidBuilding/utils/deprecated/TileCache.h>
 
 
 namespace pb {

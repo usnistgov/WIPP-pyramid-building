@@ -2,15 +2,15 @@
 // Created by Gerardin, Antoine D. (Assoc) on 12/20/18.
 //
 
-#ifndef PYRAMIDBUILDING_PYRAMIDRULE_H
-#define PYRAMIDBUILDING_PYRAMIDRULE_H
+#ifndef PYRAMIDBUILDING_PYRAMIDCACHERULE_H
+#define PYRAMIDBUILDING_PYRAMIDCACHERULE_H
 
 #include <FastImage/api/FastImage.h>
 #include <math.h>
 #include <array>
 #include <assert.h>
-#include "../data/Tile.h"
-#include "pyramidBuilding/data/TileBlock.h"
+#include <pyramidBuilding/data/Tile.h>
+#include <pyramidBuilding/data/TileBlock.h>
 
 
 namespace pb {
@@ -27,10 +27,10 @@ namespace pb {
      * @tparam T The depth of the output image.
      */
 template <class T>
-class PyramidRule : public htgs::IRule<Tile<T>, TileBlock<T>> {
+class PyramidCacheRule : public htgs::IRule<Tile<T>, TileBlock<T>> {
 
 public:
-    PyramidRule(size_t numTileCol, size_t numTileRow) :  numTileCol(numTileCol), numTileRow(numTileRow) {
+    PyramidCacheRule(size_t numTileCol, size_t numTileRow) :  numTileCol(numTileCol), numTileRow(numTileRow) {
 
         //calculate pyramid depth
         auto maxDim = std::max(numTileCol,numTileRow);
@@ -229,4 +229,4 @@ private:
 
 }
 
-#endif //PYRAMIDBUILDING_PYRAMIDRULE_H
+#endif //PYRAMIDBUILDING_PYRAMIDCACHERULE_H
