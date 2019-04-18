@@ -150,7 +150,7 @@ namespace pb {
                     TIFFGetField(tiff, TIFFTAG_SAMPLEFORMAT, &sampleFormat);
                     TIFFClose(tiff);
 
-                    if(&tileWidth == 0 || tileHeight == 0){
+                    if(tileWidth == 0 || tileHeight == 0){
                         throw std::runtime_error("Unsupported file format. Images should be tiled tiff.");
                     }
 
@@ -237,15 +237,15 @@ namespace pb {
             return pyramidTileSize;
         }
 
-
-        //TODO CHECK we destroyed this properly
+        //FOV are passed to the graph as shared_ptr and are destroyed when the FOV data is copied to each overlapping
+        //tile. Thus no call to destructor is necessary
         ~StitchingVectorParser(){
-//            for(auto &elt : grid){
-//                delete elt.second;
-//            }
-//            grid.clear();
+            grid.clear();
+            delete fovMetadata;
+            fovMetadata = nullptr;
         }
-        };
+
+    };
 
 }
 

@@ -92,7 +92,7 @@ public:
                 downsampleData = this->downsampler->downsample(newTileData, width, height);
                 break;
                 default:
-                    throw std::runtime_error("block was malformed. Size : " + block.size() );
+                    throw std::runtime_error("block was malformed. Size : " + std::to_string(block.size()) );
         }
 
         auto downsampleWidth = ceil( (double)width / 2);

@@ -193,7 +193,7 @@ namespace pb {
             std::string format = "png";
 
 
-            auto gridGenerator = new StitchingVectorParser(_inputDir, _inputVector, pyramidTileSize);
+            std::shared_ptr<StitchingVectorParser> gridGenerator = std::make_shared<StitchingVectorParser>(_inputDir, _inputVector, pyramidTileSize);
 
             auto grid = gridGenerator->getGrid();
 
@@ -209,8 +209,9 @@ namespace pb {
 
             auto tileManager = new htgs::Bookkeeper<TileRequest>();
             graph->setGraphConsumerTask(tileManager);
-            auto tileManagerRegularTileRule = new FOVTileRule(*gridGenerator);
-            auto tileManagerEmptyTileRule = new EmptyTileRule<px_t>(*gridGenerator);
+
+            auto tileManagerEmptyTileRule = new EmptyTileRule<px_t>(gridGenerator);
+            auto tileManagerRegularTileRule = new FOVTileRule(gridGenerator);
 
             graph->addRuleEdge(tileManager,tileManagerRegularTileRule,reader);
 
@@ -359,7 +360,6 @@ namespace pb {
 #endif
 
             delete runtime;
-            delete gridGenerator;
 //            delete generator;
 //            delete downsampler;
 

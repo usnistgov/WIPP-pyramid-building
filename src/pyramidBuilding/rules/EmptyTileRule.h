@@ -22,19 +22,19 @@ namespace pb {
     {
 
     public:
-        EmptyTileRule(const StitchingVectorParser &info) : info(info) {}
+        EmptyTileRule(std::shared_ptr<StitchingVectorParser> info) : info(info) {}
 
 
     public:
         void applyRule(std::shared_ptr<TileRequest> data, size_t pipelineId) override {
             uint32_t row = data->getRow();
             uint32_t col = data->getCol();
-            auto entry = info.getFovUsage().find({row,col});
+            auto entry = info->getFovUsage().find({row,col});
 
-            if(entry == info.getFovUsage().end()){
-                uint32_t tileSize = info.getPyramidTileSize();
-                uint32_t fullWidth = info.getFullFovWidth();
-                uint32_t fullHeight = info.getFullFovHeight();
+            if(entry == info->getFovUsage().end()){
+                uint32_t tileSize = info->getPyramidTileSize();
+                uint32_t fullWidth = info->getFullFovWidth();
+                uint32_t fullHeight = info->getFullFovHeight();
                 auto width = std::min(tileSize, fullWidth - col * tileSize);
                 auto height = std::min(tileSize, fullHeight - row * tileSize);
                 auto t = new Tile<T>(0,row, col, width, height, new T[width * height]());
@@ -44,7 +44,7 @@ namespace pb {
 
 
     private:
-        StitchingVectorParser info;
+        std::shared_ptr<StitchingVectorParser> info;
 
     };
 

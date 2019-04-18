@@ -22,7 +22,10 @@ namespace pb {
 
         const htgs::m_data_t<T> &getData() const {
             return data;
+        }
 
+        ~FOVWithData(){
+            VLOG(4) << "remove FOV with data" << std::endl;
         }
 
     private:

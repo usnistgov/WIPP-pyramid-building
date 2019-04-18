@@ -86,6 +86,10 @@ class FOVMetadata {
         _maxCol = maxCol;
     }
 
+    ~FOVMetadata(){
+        VLOG(4) << "remove FOV Metadata" << std::endl;
+    }
+
 
 private:
     short _bitsPerSample = 0,

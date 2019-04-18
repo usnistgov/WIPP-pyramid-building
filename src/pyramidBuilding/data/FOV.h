@@ -44,6 +44,10 @@ namespace pb {
             return metadata;
         }
 
+        ~FOV(){
+            VLOG(4) << "remove FOV (" << row << "," << col << ")" << std::endl;
+        }
+
 
     private:
         std::string filename;
