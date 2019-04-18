@@ -22,8 +22,6 @@ namespace pb {
 
         T* downsample(T *newTileData, size_t width, size_t height) override {
 
-            //TODO check this kind of conversion throughout
-            //in particular : when we have size_t as inputs, how do we ensure there is no overflow
             auto downsampleWidth = static_cast<size_t>(ceil((double) width / 2));
             auto downsampleHeight = static_cast<size_t>(ceil((double) height / 2));
 

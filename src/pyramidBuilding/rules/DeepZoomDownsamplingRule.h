@@ -14,7 +14,7 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include "../data/Tile.h"
-#include "../data/BlockRequest.h"
+#include "pyramidBuilding/data/TileBlock.h"
 #include "pyramidBuilding/api/OptionsType.h"
 #include "../utils/Downsampler.h"
 

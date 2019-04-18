@@ -6,7 +6,7 @@
 #define PYRAMIDBUILDING_BASETILETASK_H
 
 #include <htgs/api/ITask.hpp>
-#include "../data/BlockRequest.h"
+#include "pyramidBuilding/data/TileBlock.h"
 #include "../data/TileRequest.h"
 #include "pyramidBuilding/utils/BaseTileGenerator.h"
 

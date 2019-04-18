@@ -2,8 +2,8 @@
 // Created by Gerardin, Antoine D. (Assoc) on 12/19/18.
 //
 
-#ifndef PYRAMIDBUILDING_BLOCKREQUEST_H
-#define PYRAMIDBUILDING_BLOCKREQUEST_H
+#ifndef PYRAMIDBUILDING_TILEBLOCK_H
+#define PYRAMIDBUILDING_TILEBLOCK_H
 
 #include <htgs/api/IData.hpp>
 #include <FastImage/api/FastImage.h>
@@ -20,10 +20,10 @@ namespace pb {
      * The bottom right corner of the image can also produce a block of size 1.
     */
     template<class T>
-    class BlockRequest : public htgs::IData {
+    class TileBlock : public htgs::IData {
 
     public:
-        BlockRequest(const std::vector<std::shared_ptr<Tile<T>>> &block) :
+        TileBlock(const std::vector<std::shared_ptr<Tile<T>>> &block) :
         block(block) {
 
                 assert(block.size() > 0);
@@ -56,9 +56,20 @@ namespace pb {
             return block;
         }
 
-
         size_t getLevel() const {
             return level;
+        }
+
+        size_t getRow() const {
+            return row;
+        }
+
+        size_t getCol() const {
+            return col;
+        }
+
+        BlockType getType() const {
+            return blockType;
         }
 
         /// \brief Output operator stream to print a BlockRequest
@@ -66,7 +77,7 @@ namespace pb {
         /// \param block The BlockRequest to print
         /// \return the output stream with the information
         /// \note Used for debugging only
-        friend std::ostream &operator<<(std::ostream &os, const BlockRequest &block) {
+        friend std::ostream &operator<<(std::ostream &os, const TileBlock &block) {
             os << "Tile - Level: " << block.level + 1 << " from: Block - Level: " << block.level << " Index: ("
                << block.row << "," << block.col << ")" << "Type: " << blockTypeToString(block.blockType) << std::endl;
             return os;
@@ -84,4 +95,4 @@ namespace pb {
 
 }
 
-#endif //PYRAMIDBUILDING_BLOCKREQUEST_H
+#endif //PYRAMIDBUILDING_TILEBLOCK_H

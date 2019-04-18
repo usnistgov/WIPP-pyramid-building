@@ -155,7 +155,7 @@ namespace pb {
                     }
 
                     //make_unique not available on Clang
-                    fovMetadata = std::unique_ptr<FOVMetadata>(new FOVMetadata(width, height, samplePerPixel, bitsPerSample, sampleFormat, imageDirectoryPath));
+                    fovMetadata = std::make_shared<FOVMetadata>(width, height, samplePerPixel, bitsPerSample, sampleFormat, imageDirectoryPath);
                     fovMetadata->setTileWidth(tileWidth);
                     fovMetadata->setTileHeight(tileHeight);
                 }

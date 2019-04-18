@@ -39,7 +39,7 @@
 #include "pyramidBuilding/utils/Helper.h"
 #include "pyramidBuilding/rules/WriteTileRule.h"
 #include "pyramidBuilding/rules/PyramidRule.h"
-#include "pyramidBuilding/tasks/CreateTileTask.h"
+#include "pyramidBuilding/tasks/TileDownsampler.h"
 #include "pyramidBuilding/tasks/BaseTileTask.h"
 #include "pyramidBuilding/data/Tile.h"
 #include "pyramidBuilding/utils/AverageDownsampler.h"
@@ -246,13 +246,13 @@ namespace pb {
             auto pyramidRule = new PyramidRule<px_t>(numTileCol,numTileRow);
 //
             auto downsampler = new AverageDownsampler<px_t>();
-            auto createTileTask = new CreateTileTask<px_t>(6, downsampler);
+            auto tileDownsampler = new TileDownsampler<px_t>(6, downsampler);
 //
 //            //incoming edges from the bookeeper
             graph->addEdge(tileBuilder, bookkeeper); //pyramid base level tile
 //            graph->addEdge(baseTileTask, bookkeeper); //pyramid base level tile
-            graph->addEdge(createTileTask,bookkeeper); //pyramid higher level tile
-            graph->addRuleEdge(bookkeeper, pyramidRule, createTileTask); //caching tiles and creating a tile at higher level;
+            graph->addEdge(tileDownsampler,bookkeeper); //pyramid higher level tile
+            graph->addRuleEdge(bookkeeper, pyramidRule, tileDownsampler); //caching tiles and creating a tile at higher level;
 
             htgs::ITask< Tile<px_t>, htgs::VoidData> *writeTask = nullptr;
             if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {

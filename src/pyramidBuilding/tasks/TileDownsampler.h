@@ -2,12 +2,12 @@
 // Created by Gerardin, Antoine D. (Assoc) on 12/20/18.
 //
 
-#ifndef PYRAMIDBUILDING_CREATETILETASK_H
-#define PYRAMIDBUILDING_CREATETILETASK_H
+#ifndef PYRAMIDBUILDING_TILEDOWNSAMPLER_H
+#define PYRAMIDBUILDING_TILEDOWNSAMPLER_H
 
 #include <htgs/api/ITask.hpp>
 #include <FastImage/api/FastImage.h>
-#include "../data/BlockRequest.h"
+#include "pyramidBuilding/data/TileBlock.h"
 #include <opencv/cv.h>
 #include <opencv2/imgproc.hpp>
 
@@ -19,17 +19,17 @@
 namespace pb {
 
 template <class T>
-class CreateTileTask : public htgs::ITask<BlockRequest<T>, Tile<T> > {
+class TileDownsampler : public htgs::ITask<TileBlock<T>, Tile<T> > {
 
 private:
     Downsampler<T> *downsampler;
 
 public:
 
-    CreateTileTask(size_t numThreads, Downsampler<T> *downsampler) : ITask<BlockRequest<T>, Tile<T>>(numThreads), downsampler(downsampler) {}
+    TileDownsampler(size_t numThreads, Downsampler<T> *downsampler) : ITask<TileBlock<T>, Tile<T>>(numThreads), downsampler(downsampler) {}
 
     //TODO - POTENTIAL IMPROVEMENT - we could downsample in place the data from the different block to spare the extra array creation
-    void executeTask(std::shared_ptr<BlockRequest<T>> data) override {
+    void executeTask(std::shared_ptr<TileBlock<T>> data) override {
 
         auto block = data->getBlock();
 
@@ -45,9 +45,9 @@ public:
 
         size_t width = 0, height = 0;
 
-        switch (block.size()){
+        switch (data->getType()){
             //regular block
-            case 4:
+            case BlockType::Full:
                 width = block[0]->getWidth() + block[1]->getWidth();
                 height = block[0]->getHeight() + block[2]->getHeight();
 
@@ -60,7 +60,7 @@ public:
                 downsampleData = this->downsampler->downsample(newTileData, width, height);
                 break;
             //right vertical block
-            case 3:
+            case BlockType::Vertical:
                 width = block[0]->getWidth();
                 height = block[0]->getHeight() + block[2]->getHeight();
 
@@ -71,7 +71,7 @@ public:
                 downsampleData = this->downsampler->downsample(newTileData, width, height);
                 break;
             //bottom horizontal block
-            case 2:
+            case BlockType::Horizontal:
                 width = block[0]->getWidth() + block[1]->getWidth();
                 height = block[0]->getHeight();
 
@@ -82,7 +82,7 @@ public:
                 downsampleData = this->downsampler->downsample(newTileData, width, height);
                 break;
             //bottom right single block
-            case 1:
+            case BlockType::Single:
                 width = block[0]->getWidth();
                 height = block[0]->getHeight();
 
@@ -112,18 +112,24 @@ public:
         return "Create Tile Task";
     }
 
-    htgs::ITask<BlockRequest<T>, Tile<T> > *copy() override {
-        return new CreateTileTask(this->getNumThreads(), this->downsampler);
+    htgs::ITask<TileBlock<T>, Tile<T> > *copy() override {
+        return new TileDownsampler(this->getNumThreads(), this->downsampler);
     }
 
 private:
     void copyTileBlock(T *data, Tile<T>* block, size_t fullWidth, size_t fullHeight, size_t colOffset, size_t rowOffset) {
-        for (size_t j = 0; j < block->getHeight(); j ++) {
-            for (size_t i = 0; i < block->getWidth(); i ++) {
-                size_t index = fullWidth * ( j + rowOffset) + colOffset + i;
-                data[index] = block->getData()[j * block->getWidth() + i];
-            }
+
+        //Faster implementation of copy. But does not change computation time because of the overlap with slow IO.
+        for(auto j = 0; j < block->getHeight(); j++){
+            std::copy_n(block->getData() + j * block->getWidth(), block->getWidth(), data + colOffset + (j + rowOffset) * fullWidth);
         }
+
+//        for (size_t j = 0; j < block->getHeight(); j ++) {
+//            for (size_t i = 0; i < block->getWidth(); i ++) {
+//                size_t index = fullWidth * ( j + rowOffset) + colOffset + i;
+//                data[index] = block->getData()[j * block->getWidth() + i];
+//            }
+//        }
     }
 
 };
@@ -131,4 +137,4 @@ private:
 }
 
 
-#endif //PYRAMIDBUILDING_CREATETILETASK_H
+#endif //PYRAMIDBUILDING_TILEDOWNSAMPLER_H

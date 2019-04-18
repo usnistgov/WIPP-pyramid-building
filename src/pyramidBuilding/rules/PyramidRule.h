@@ -10,7 +10,7 @@
 #include <array>
 #include <assert.h>
 #include "../data/Tile.h"
-#include "../data/BlockRequest.h"
+#include "pyramidBuilding/data/TileBlock.h"
 
 
 namespace pb {
@@ -27,7 +27,7 @@ namespace pb {
      * @tparam T The depth of the output image.
      */
 template <class T>
-class PyramidRule : public htgs::IRule<Tile<T>, BlockRequest<T>> {
+class PyramidRule : public htgs::IRule<Tile<T>, TileBlock<T>> {
 
 public:
     PyramidRule(size_t numTileCol, size_t numTileRow) :  numTileCol(numTileCol), numTileRow(numTileRow) {
@@ -116,7 +116,7 @@ public:
             VLOG(4) << "corner case : block size 1 " << std::endl;
             //sendTile
             std::vector<std::shared_ptr<Tile<T>>> block{data};
-            this->addResult(new BlockRequest<T>(block));
+            this->addResult(new TileBlock<T>(block));
             return;
         }
 
@@ -125,12 +125,12 @@ public:
             if(row % 2 == 0 && pyramidCache.at(level).at(SOUTH).get() != nullptr) {
                 //send 2 tiles
                 std::vector<std::shared_ptr<Tile<T>>> block{ data, nullptr, pyramidCache.at(level).at(SOUTH) };
-                this->addResult(new BlockRequest<T>(block));
+                this->addResult(new TileBlock<T>(block));
             }
             else if (row % 2 != 0 && pyramidCache.at(level).at(NORTH).get() != nullptr) {
                 //send 2 tiles
                 std::vector<std::shared_ptr<Tile<T>>> block{ pyramidCache.at(level).at(NORTH), nullptr, data };
-                this->addResult(new BlockRequest<T>(block));
+                this->addResult(new TileBlock<T>(block));
             }
             return;
         }
@@ -140,12 +140,12 @@ public:
             if(col % 2 == 0 && pyramidCache.at(level).at(EAST).get() != nullptr) {
                 //send 2 tiles
                 std::vector<std::shared_ptr<Tile<T>>> block{ data, pyramidCache.at(level).at(EAST) };
-                this->addResult(new BlockRequest<T>(block));
+                this->addResult(new TileBlock<T>(block));
             }
             else if (col % 2 != 0 && pyramidCache.at(level).at(WEST).get() != nullptr ) {
                 //send 2 tiles
                 std::vector<std::shared_ptr<Tile<T>>> block{ pyramidCache.at(level).at(WEST), data };
-                this->addResult(new BlockRequest<T>(block));
+                this->addResult(new TileBlock<T>(block));
             }
             return;
         }
@@ -159,7 +159,7 @@ public:
                 //sendTile
                 VLOG(4) << "new tile! " << std::endl;
                 std::vector<std::shared_ptr<Tile<T>>> block{ data, pyramidCache.at(level).at(EAST), pyramidCache.at(level).at(SOUTH), pyramidCache.at(level).at(SOUTH_EAST)};
-                this->addResult(new BlockRequest<T>(block));
+                this->addResult(new TileBlock<T>(block));
             };
         }
 
@@ -172,7 +172,7 @@ public:
                 //sendTile
                 VLOG(4) << "new tile! " << std::endl;
                 std::vector<std::shared_ptr<Tile<T>>> block{ pyramidCache.at(level).at(WEST), data, pyramidCache.at(level).at(SOUTH_WEST), pyramidCache.at(level).at(SOUTH)};
-                this->addResult(new BlockRequest<T>(block));
+                this->addResult(new TileBlock<T>(block));
             }
         }
 
@@ -185,7 +185,7 @@ public:
                 //sendTile
                 VLOG(4) << "new tile! " << std::endl;
                 std::vector<std::shared_ptr<Tile<T>>> block{ pyramidCache.at(level).at(NORTH), pyramidCache.at(level).at(NORTH_EAST), data, pyramidCache.at(level).at(EAST)};
-                this->addResult(new BlockRequest<T>(block));
+                this->addResult(new TileBlock<T>(block));
             }
         }
 
@@ -198,7 +198,7 @@ public:
                 //sendTile
                 VLOG(4) << "new tile! " << std::endl;
                 std::vector<std::shared_ptr<Tile<T>>> block{ pyramidCache.at(level).at(NORTH_WEST), pyramidCache.at(level).at(NORTH), pyramidCache.at(level).at(WEST), data};
-                this->addResult(new BlockRequest<T>(block));
+                this->addResult(new TileBlock<T>(block));
             }
         }
 

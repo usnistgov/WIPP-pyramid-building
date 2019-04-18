@@ -19,13 +19,13 @@ namespace pb {
 
     public:
         /***
-         * @param path to the FOV on disk.
+         * @param filename to the FOV on disk.
          * @param tileOverlap overlap of the FOV in the coordinates of a pyramid tile.
          * @param globalCoordinatesTileOverlap overlap of the FOV in the global coordinates of the full FOV.
          * @param FovCoordOverlap overlap of the tile in the FOV coordinates.
          */
-        PartialFov(const std::string &path, const cv::Rect &tileOverlap,
-                   const cv::Rect &globalCoordinatesTileOverlap, const cv::Rect &FovCoordOverlap) : path(path),
+        PartialFov(const std::string &filename, const cv::Rect &tileOverlap,
+                   const cv::Rect &globalCoordinatesTileOverlap, const cv::Rect &FovCoordOverlap) : filename(filename),
                                                                                                     tileOverlap(
                                                                                                             tileOverlap),
                                                                                                     globalCoordinatesTileOverlap(
@@ -34,8 +34,8 @@ namespace pb {
                                                                                                             FovCoordOverlap) {}
 
 
-        const std::string &getPath() const {
-            return path;
+        const std::string &getFilename() const {
+            return filename;
         }
 
         const cv::Rect &getTileOverlap() const {
@@ -51,8 +51,7 @@ namespace pb {
         }
 
     private:
-        //TODO rename to filename
-        std::string path;
+        std::string filename;
         cv::Rect tileOverlap;
         cv::Rect globalCoordinatesTileOverlap;
         cv::Rect FovCoordOverlap;

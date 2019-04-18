@@ -103,7 +103,7 @@ namespace pb {
             for (auto it2 = fovs.begin(); it2 != fovs.end(); ++it2) {
 
                 auto fov = *it2;
-                auto filename = fov->getPath();
+                auto filename = fov->getFilename();
                 auto extension = getFileExtension(filename);
 
                 if (extension != "tiff" && extension != "tif") {
@@ -125,7 +125,7 @@ namespace pb {
                     blender->blend(image + y * fovWidth + overlapFov.x, overlapFov.width, tile + destOffset + (y - overlapFov.y) * pyramidTileWidth);
                 }
 
-                fovsCache->releaseFOV(fov->getPath());
+                fovsCache->releaseFOV(fov->getFilename());
 
             } //DONE generating the pyramid tile
 
