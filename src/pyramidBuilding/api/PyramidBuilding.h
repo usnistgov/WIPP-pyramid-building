@@ -47,6 +47,7 @@
 #include <pyramidBuilding/tasks/TileBuilder.h>
 #include <pyramidBuilding/rules/FOVTileRule.h>
 #include <pyramidBuilding/rules/EmptyTileRule.h>
+#include <pyramidBuilding/fastImage/utils/TileRequestBuilder.h>
 
 namespace pb {
 
@@ -221,6 +222,8 @@ namespace pb {
             uint32_t overlap = 0;
             std::string format = "png";
 
+            auto tileRequestBuilder = std::make_shared<TileRequestBuilder>(_inputDir, _inputVector, pyramidTileSize);
+
 
             std::shared_ptr<StitchingVectorParser> gridGenerator = std::make_shared<StitchingVectorParser>(_inputDir, _inputVector, pyramidTileSize);
 
@@ -341,6 +344,10 @@ namespace pb {
             for (auto step : traversal.getTraversal()) {
                 auto row = step.first, col = step.second;
                 VLOG(4) <<  "tile request : " << "(" << row << "," << col << ")"<< std::endl;
+       //         auto tileRequest = tileRequestBuilder->getTileRequests().at({row,col});
+
+         //       assert (tileRequest != nullptr);
+
                 graph->produceData(new TileRequest(row,col));
             }
 

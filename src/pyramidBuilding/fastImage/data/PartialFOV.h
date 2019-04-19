@@ -5,11 +5,9 @@
 #ifndef PYRAMIDBUILDING_PARTIALFOV_H
 #define PYRAMIDBUILDING_PARTIALFOV_H
 
-#include "pyramidBuilding/data/FOV.h"
-
 namespace pb {
 
-    class PartialFOV : public FOV {
+    class PartialFOV {
 
 
     public:
@@ -29,8 +27,7 @@ namespace pb {
 
         };
 
-        PartialFOV(const std::string &filename, Overlap* overlap) :
-                       FOV(filename, row, col, globalX, globalY, metadata), filename(filename), overlap(overlap) {}
+        PartialFOV(const std::string &filename, Overlap* overlap) : filename(filename), overlap(overlap) {}
 
             Overlap* overlap;
             std::string filename;

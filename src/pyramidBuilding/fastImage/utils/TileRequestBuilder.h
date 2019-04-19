@@ -23,8 +23,8 @@
 #include <glog/logging.h>
 #include <pyramidBuilding/api/OptionsType.h>
 #include <pyramidBuilding/data/FOVMetadata.h>
-#include <pyramidBuilding/data/FOV.h>
 #include <pyramidBuilding/fastImage/data/PartialFOV.h>
+#include <pyramidBuilding/fastImage/data/FITileRequest.h>
 #include <pyramidBuilding/api/PyramidBuilding.h>
 
 namespace pb {
@@ -51,6 +51,8 @@ namespace pb {
         uint32_t maxCol = 0;
 
         u_int8_t maxFovUsage = 0;
+
+        std::map<std::pair<size_t,size_t>, FITileRequest*> tileRequests = {};
 
 
 
@@ -160,35 +162,36 @@ namespace pb {
                     fovMetadata->setTileHeight(tileHeight);
                 }
 
-                //Coordinates are inversed to keep consistency => (row,col)
-                std::pair<size_t,size_t> index= std::make_pair(row,col);
-
                 uint32_t colMin = fovGlobalX / pyramidTileSize;
                 uint32_t rowMin = fovGlobalY / pyramidTileSize;
                 uint32_t colMax = (fovGlobalX + fovMetadata->getWidth() - 1) / pyramidTileSize;
                 uint32_t rowMax = (fovGlobalY + fovMetadata->getHeight() - 1) / pyramidTileSize;
 
-
-                std::vector<PartialFOV> fovs = {};
-
                 for(auto tileCol = colMin; tileCol <= colMax; tileCol++){
                     for (auto tileRow = rowMin; tileRow <= rowMax; tileRow++){
 
-                        auto originX = tileCol * pyramidTileSize - fovGlobalX;
-                        auto originY = tileRow * pyramidTileSize - fovGlobalY;
-                        auto width = colMax - colMin;
-                        auto height = rowMax - rowMin;
+                        std::pair<size_t,size_t> index = std::make_pair(tileRow,tileCol);
+
+                        auto originX = std::max(tileCol * pyramidTileSize, fovGlobalX) - fovGlobalX;
+                        auto originY = std::max(tileRow * pyramidTileSize, fovGlobalY) - fovGlobalY;
+                        auto width = std::min(pyramidTileSize, fovGlobalX + fovMetadata->getWidth() - originX);
+                        auto height = std::min(pyramidTileSize, fovGlobalY + fovMetadata->getHeight() - originY);
 
                         auto overlap = new PartialFOV::Overlap(originX, originY, width, height);
                         auto fov = new PartialFOV(filename, overlap);
-                        fovs.push_back(fov);
+
+
+                        auto it = tileRequests.find(index);
+
+                        if(it != tileRequests.end()) {
+                            it->second->getFovs().push_back(fov);
+                        }
+                        else {
+                            std::vector<PartialFOV*> fovs({fov});
+                            tileRequests.insert(std::make_pair(index, new FITileRequest(tileRow, tileCol, fovs)));
+                        }
                     }
                 }
-
-                auto width = std::min(pyramidTileSize, fovGlobalX + fovMetadata.getWidth() - col * tileSize);
-                auto height = std::min(tileSize, fovGlobalY + fovMetadata.getHeight() - row * tileSize);
-
-                tileRequests.insert(std::make_pair(index, new FITileRequest(row,col,width,height,fovs)));
             }
 
             //dimensions of the fullFOV
@@ -210,10 +213,6 @@ namespace pb {
         }
 
 
-        const std::map<std::pair<size_t, size_t>, FOV *> &getGrid() const {
-            return grid;
-        }
-
         const std::shared_ptr<FOVMetadata> getFovMetadata() const {
             return fovMetadata;
         }
@@ -234,28 +233,12 @@ namespace pb {
             return maxCol;
         }
 
-        std::map<std::pair<size_t, size_t>, u_int8_t> &getFovUsageCount() {
-            return fovUsageCount;
+        const std::map<std::pair<size_t, size_t>, FITileRequest *> &getTileRequests() const {
+            return tileRequests;
         }
 
-        u_int8_t getMaxFovUsage() const {
-            return maxFovUsage;
-        }
-
-        const std::map<std::pair<size_t, size_t>, std::vector<std::pair<size_t, size_t>>> &getFovUsage() const {
-            return fovUsage;
-        }
-
-        uint32_t getPyramidTileSize() const {
-            return pyramidTileSize;
-        }
-
-        //FOV are passed to the graph as shared_ptr and are destroyed when the FOV data is copied to each overlapping
-        //tile. Thus no call to destructor is necessary
         ~TileRequestBuilder(){
-            grid.clear();
-            fovUsageCount.clear();
-            fovUsage.clear();
+            tileRequests.clear();
         }
 
     };

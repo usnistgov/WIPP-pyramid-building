@@ -6,20 +6,17 @@
 #define PYRAMIDBUILDING_FITILEREQUEST_H
 
 #include <htgs/api/IData.hpp>
+# include <pyramidBuilding/fastImage/data/PartialFOV.h>
 
 namespace pb {
 
-    /***
-     * @class TileRequest TileRequest.h <pyramidBuilding/data/TileRequest.h>
-     * @brief request to read a tile from disk.
-     */
     class FITileRequest : htgs::IData {
 
 
     public:
 
-        FITileRequest(size_t row, size_t col, size_t width, size_t height, const std::vector<PartialFOV> &fovs) : row(
-                row), col(col), width(width), height(height), fovs(fovs) {}
+        FITileRequest(size_t row, size_t col,std::vector<PartialFOV*> &fovs) : row(
+                row), col(col), fovs(fovs) {}
 
 
         size_t getRow() const {
@@ -30,15 +27,7 @@ namespace pb {
             return col;
         }
 
-        size_t getWidth() const {
-            return width;
-        }
-
-        size_t getHeight() const {
-            return height;
-        }
-
-        const std::vector<PartialFOV> &getFovs() const {
+        std::vector<PartialFOV*> &getFovs() {
             return fovs;
         }
 
@@ -49,7 +38,7 @@ namespace pb {
         size_t col;
         size_t width;
         size_t height;
-        std::vector<PartialFOV> fovs;
+        std::vector<PartialFOV*> fovs;
 
 
     };
