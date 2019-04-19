@@ -2,8 +2,8 @@
 // Created by Gerardin, Antoine D. (Assoc) on 4/9/19.
 //
 
-#ifndef PYRAMIDBUILDING_STITCHINGVECTORPARSER_H
-#define PYRAMIDBUILDING_STITCHINGVECTORPARSER_H
+#ifndef PYRAMIDBUILDING_TILEREQUESTBUILDER_H
+#define PYRAMIDBUILDING_TILEREQUESTBUILDER_H
 
 #include <sstream>
 #include <string>
@@ -29,13 +29,10 @@
 
 namespace pb {
 
-    class StitchingVectorParser {
+    class TileRequestBuilder {
 
 
     private:
-
-        size_t MAX_SIZE = 5000;
-        bool FAST_IMAGE = false;
 
         std::string imageDirectoryPath;
         std::string stitchingVectorPath;
@@ -63,7 +60,7 @@ namespace pb {
          * @param imageDirectoryPath where to locate the FOVs
          * @param stitchingVectorPath  where to locate the corresponding stitching vector.
          */
-        StitchingVectorParser(const std::string &imageDirectoryPath,
+        TileRequestBuilder(const std::string &imageDirectoryPath,
                                  const std::string &stitchingVectorPath, uint32_t pyramidTileSize) :
                 imageDirectoryPath(imageDirectoryPath),
                 stitchingVectorPath(stitchingVectorPath),
@@ -161,48 +158,37 @@ namespace pb {
                     fovMetadata = std::make_shared<FOVMetadata>(width, height, samplePerPixel, bitsPerSample, sampleFormat, imageDirectoryPath);
                     fovMetadata->setTileWidth(tileWidth);
                     fovMetadata->setTileHeight(tileHeight);
-
-                    if(fovMetadata->getWidth() > MAX_SIZE || fovMetadata->getHeight() > MAX_SIZE){
-                        FAST_IMAGE = true;
-                    }
                 }
 
                 //Coordinates are inversed to keep consistency => (row,col)
                 std::pair<size_t,size_t> index= std::make_pair(row,col);
-
-                auto fov = new FOV(filename,row,col,fovGlobalX,fovGlobalY, fovMetadata);
-
-                //if big_mode, find overlaps and generate n partial FOVs
-
-                if(! FAST_IMAGE) {
-                    grid.insert(std::make_pair(index, fov));
-                }
 
                 uint32_t colMin = fovGlobalX / pyramidTileSize;
                 uint32_t rowMin = fovGlobalY / pyramidTileSize;
                 uint32_t colMax = (fovGlobalX + fovMetadata->getWidth() - 1) / pyramidTileSize;
                 uint32_t rowMax = (fovGlobalY + fovMetadata->getHeight() - 1) / pyramidTileSize;
 
+
+                std::vector<PartialFOV> fovs = {};
+
                 for(auto tileCol = colMin; tileCol <= colMax; tileCol++){
                     for (auto tileRow = rowMin; tileRow <= rowMax; tileRow++){
-                        fovUsageCount[{tileRow,tileCol}] += 1;
-                        if(fovUsageCount[{tileRow,tileCol}] > maxFovUsage){ maxFovUsage = fovUsageCount[{tileRow,tileCol}];}
 
-                        //if big_mode
                         auto originX = tileCol * pyramidTileSize - fovGlobalX;
                         auto originY = tileRow * pyramidTileSize - fovGlobalY;
                         auto width = colMax - colMin;
                         auto height = rowMax - rowMin;
 
-                        if(FAST_IMAGE) {
-                            auto overlap = new PartialFOV::Overlap(originX, originY, width, height);
-                            auto partialFov = new PartialFOV(filename, row, col, fovGlobalX, fovGlobalY, fovMetadata,
-                                                             overlap);
-                        }
-
-                        fovUsage[{tileRow,tileCol}].push_back({row,col});
+                        auto overlap = new PartialFOV::Overlap(originX, originY, width, height);
+                        auto fov = new PartialFOV(filename, overlap);
+                        fovs.push_back(fov);
                     }
                 }
+
+                auto width = std::min(pyramidTileSize, fovGlobalX + fovMetadata.getWidth() - col * tileSize);
+                auto height = std::min(tileSize, fovGlobalY + fovMetadata.getHeight() - row * tileSize);
+
+                tileRequests.insert(std::make_pair(index, new FITileRequest(row,col,width,height,fovs)));
             }
 
             //dimensions of the fullFOV
@@ -266,7 +252,7 @@ namespace pb {
 
         //FOV are passed to the graph as shared_ptr and are destroyed when the FOV data is copied to each overlapping
         //tile. Thus no call to destructor is necessary
-        ~StitchingVectorParser(){
+        ~TileRequestBuilder(){
             grid.clear();
             fovUsageCount.clear();
             fovUsage.clear();
@@ -276,4 +262,4 @@ namespace pb {
 
 }
 
-#endif //PYRAMIDBUILDING_STITCHINGVECTORPARSER_H
+#endif //PYRAMIDBUILDING_TILEREQUESTBUILDER_H
