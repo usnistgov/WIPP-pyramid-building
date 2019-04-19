@@ -71,4 +71,4 @@ include_directories(src)
 add_subdirectory(test)
 
 
-add_executable(main main.cpp src/pyramidBuilding/fastImage/PyramidTileLoader.h src/pyramidBuilding/fastImage/data/PartialFOV.h src/pyramidBuilding/fastImage/data/FITileRequest.h)
+add_executable(main main.cpp src/pyramidBuilding/fastImage/data/PartialFOV.h src/pyramidBuilding/fastImage/data/FITileRequest.h)

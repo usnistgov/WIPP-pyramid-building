@@ -18,7 +18,7 @@ namespace pb {
             Overlap(size_t originX, size_t originY, size_t width, size_t height) : originX(originX), originY(originY),
                                                                                    width(width), height(height) {}
 
-        private:
+        public:
             size_t originX;
             size_t originY;
             size_t width;
@@ -29,6 +29,16 @@ namespace pb {
 
         PartialFOV(const std::string &filename, Overlap* overlap) : filename(filename), overlap(overlap) {}
 
+        public:
+            Overlap *getOverlap() const {
+                return overlap;
+            }
+
+            const std::string &getFilename() const {
+                return filename;
+            }
+
+    private :
             Overlap* overlap;
             std::string filename;
 
