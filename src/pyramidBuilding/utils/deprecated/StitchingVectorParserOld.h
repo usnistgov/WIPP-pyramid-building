@@ -22,7 +22,7 @@
 #include <assert.h>
 #include <glog/logging.h>
 
-#include "pyramidBuilding/data/deprecated/PartialFov.h"
+#include "pyramidBuilding/data/deprecated/PartialFovOld.h"
 #include "pyramidBuilding/api/OptionsType.h"
 
 
@@ -45,7 +45,7 @@ namespace pb {
         std::string imageDirectoryPath;
         std::string stitchingVectorPath;
 
-        std::map<std::pair<size_t,size_t> , std::vector<PartialFov*>> grid;
+        std::map<std::pair<size_t,size_t> , std::vector<PartialFovOld*>> grid;
         std::map<std::pair<size_t,size_t> , std::string> FOVGrid;
 
         size_t fovWidth = 0;
@@ -211,7 +211,7 @@ namespace pb {
                         fovRelativeY = intersection.y - fovGlobalY;
                         cv::Rect overlapInFovRef = cv::Rect(fovRelativeX, fovRelativeY, intersection.width, intersection.height);
 
-                        auto *partialFov = new PartialFov(file, overlapInTileRef, intersection, overlapInFovRef);
+                        auto *partialFov = new PartialFovOld(file, overlapInTileRef, intersection, overlapInFovRef);
 
                         assert(overlapInTileRef.width == overlapInFovRef.width);
                         assert(overlapInTileRef.height == overlapInFovRef.height);
@@ -228,7 +228,7 @@ namespace pb {
                             it->second.push_back(partialFov);
                         }
                         else {
-                            std::vector<PartialFov*> tileFovs({partialFov});
+                            std::vector<PartialFovOld*> tileFovs({partialFov});
                             grid.insert(std::make_pair(index, tileFovs));
 
                             if(j > gridMaxRow){
@@ -263,7 +263,7 @@ namespace pb {
 
 
 
-        const std::map<std::pair<size_t, size_t>, std::vector<PartialFov *>> &getGrid() const {
+        const std::map<std::pair<size_t, size_t>, std::vector<PartialFovOld *>> &getGrid() const {
             return grid;
         }
 

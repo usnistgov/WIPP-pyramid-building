@@ -21,11 +21,11 @@
 #include <map>
 #include <assert.h>
 #include <glog/logging.h>
-
-#include "../api/OptionsType.h"
-#include "pyramidBuilding/data/deprecated/PartialFov.h"
-#include "../data/FOVMetadata.h"
-#include "../data/FOV.h"
+#include <pyramidBuilding/api/OptionsType.h>
+#include <pyramidBuilding/data/FOVMetadata.h>
+#include <pyramidBuilding/data/FOV.h>
+#include <pyramidBuilding/data/PartialFOV.h>
+#include <pyramidBuilding/api/PyramidBuilding.h>
 
 namespace pb {
 
@@ -33,6 +33,9 @@ namespace pb {
 
 
     private:
+
+        size_t MAX_SIZE = 5000;
+        bool FAST_IMAGE = false;
 
         std::string imageDirectoryPath;
         std::string stitchingVectorPath;
@@ -158,12 +161,22 @@ namespace pb {
                     fovMetadata = std::make_shared<FOVMetadata>(width, height, samplePerPixel, bitsPerSample, sampleFormat, imageDirectoryPath);
                     fovMetadata->setTileWidth(tileWidth);
                     fovMetadata->setTileHeight(tileHeight);
+
+                    if(fovMetadata->getWidth() > MAX_SIZE || fovMetadata->getHeight() > MAX_SIZE){
+                        FAST_IMAGE = true;
+                    }
                 }
 
                 //Coordinates are inversed to keep consistency => (row,col)
                 std::pair<size_t,size_t> index= std::make_pair(row,col);
+
                 auto fov = new FOV(filename,row,col,fovGlobalX,fovGlobalY, fovMetadata);
-                grid.insert(std::make_pair(index,fov));
+
+                //if big_mode, find overlaps and generate n partial FOVs
+
+                if(! FAST_IMAGE) {
+                    grid.insert(std::make_pair(index, fov));
+                }
 
                 uint32_t colMin = fovGlobalX / pyramidTileSize;
                 uint32_t rowMin = fovGlobalY / pyramidTileSize;
@@ -174,6 +187,19 @@ namespace pb {
                     for (auto tileRow = rowMin; tileRow <= rowMax; tileRow++){
                         fovUsageCount[{tileRow,tileCol}] += 1;
                         if(fovUsageCount[{tileRow,tileCol}] > maxFovUsage){ maxFovUsage = fovUsageCount[{tileRow,tileCol}];}
+
+                        //if big_mode
+                        auto originX = tileCol * pyramidTileSize - fovGlobalX;
+                        auto originY = tileRow * pyramidTileSize - fovGlobalY;
+                        auto width = colMax - colMin;
+                        auto height = rowMax - rowMin;
+
+                        if(FAST_IMAGE) {
+                            auto overlap = new PartialFOV::Overlap(originX, originY, width, height);
+                            auto partialFov = new PartialFOV(filename, row, col, fovGlobalX, fovGlobalY, fovMetadata,
+                                                             overlap);
+                        }
+
                         fovUsage[{tileRow,tileCol}].push_back({row,col});
                     }
                 }

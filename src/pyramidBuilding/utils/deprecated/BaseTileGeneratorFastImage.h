@@ -12,7 +12,7 @@
 #include <FastImage/api/FastImage.h>
 #include <FastImage/TileLoaders/GrayscaleTiffTileLoader.h>
 #include <experimental/filesystem>
-#include "pyramidBuilding/data/deprecated/PartialFov.h"
+#include "pyramidBuilding/data/deprecated/PartialFovOld.h"
 #include "pyramidBuilding/utils/Utils.h"
 #include "StitchingVectorParserOld.h"
 #include "pyramidBuilding/data/Tile.h"
@@ -81,17 +81,17 @@ public:
             return new Tile<T>(0, index.first, index.second, pyramidTileWidth, pyramidTileHeight, tile);
         }
 
-        std::vector<PartialFov *> fovs = it->second;
+        std::vector<PartialFovOld *> fovs = it->second;
 
         //iterating over each partial FOV.
         for(auto it2 = fovs.begin(); it2 != fovs.end(); ++it2) {
 
             auto fov = *it2;
             auto filename = fov->getFilename();
-            auto extension = getFileExtension(filename);
+            std::string extension = getFileExtension(filename);
 
             if(extension != "tiff" && extension != "tif") {
-                std::runtime_error("file format not recognized: " + extension);
+                throw std::runtime_error("file format not recognized: " + extension);
             }
 
                 auto overlapFov = fov->getFovCoordOverlap();
@@ -100,7 +100,6 @@ public:
                 size_t startRow, startCol, endRow, endCol;
                 startCol = overlapFov.x /  tileWidth;
                 startRow = overlapFov.y / tileHeight;
-                //TODO CHECK if -1 is correct
                 endCol = ( overlapFov.x + overlapFov.width - 1 ) / tileWidth;
                 endRow = ( overlapFov.y + overlapFov.height - 1 ) / tileHeight;
 
@@ -192,7 +191,7 @@ public:
 
 private:
 
-    const std::map<std::pair<size_t, size_t>, std::vector<PartialFov *>> grid;
+    const std::map<std::pair<size_t, size_t>, std::vector<PartialFovOld *>> grid;
     const std::string directory;
     const size_t tileWidth;
     const size_t tileHeight;

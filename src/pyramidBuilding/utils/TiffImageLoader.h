@@ -99,6 +99,30 @@ namespace pb {
             return region;
         }
 
+        T* loadPartialImage(std::string filename, size_t x, size_t y, size_t width, size_t height) {
+
+            auto fullPath = _directory + filename;
+            auto file = fullPath.c_str();
+            TIFF* tiff = TIFFOpen(file, "r");
+
+            collectMetadata(tiff);
+
+            T *region = new T[width * height]();
+            if (tiff) {
+                void *buf = _TIFFmalloc(TIFFTileSize(tiff));
+
+                for (uint32_t posRow = y; posRow < y + height; posRow += _tileHeight) {
+                    for (uint32_t posCol = x; posCol < x + width; posCol += _tileWidth) {
+                        loadAndCastImageTile(tiff, region, buf, posRow, posCol);
+                    }
+                }
+                _TIFFfree(buf);
+                TIFFClose(tiff);
+            }
+            return region;
+
+        }
+
 
     private :
 

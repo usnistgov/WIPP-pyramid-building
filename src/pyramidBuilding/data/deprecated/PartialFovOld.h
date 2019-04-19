@@ -2,8 +2,8 @@
 // Created by Gerardin, Antoine D. (Assoc) on 1/2/19.
 //
 
-#ifndef PYRAMIDBUILDING_PARTIALFOV_H
-#define PYRAMIDBUILDING_PARTIALFOV_H
+#ifndef PYRAMIDBUILDING_PARTIALFOVOLD_H
+#define PYRAMIDBUILDING_PARTIALFOVOLD_H
 
 #include <string>
 #include <opencv/cv.h>
@@ -15,7 +15,7 @@ namespace pb {
      * @brief Represents the overlap of a pyramid tile and a Field of View (FOV).
      * @details The overlap is represented in several coordinates system to enable building blended tiles.
      */
-    class PartialFov {
+    class PartialFovOld {
 
     public:
         /***
@@ -24,7 +24,7 @@ namespace pb {
          * @param globalCoordinatesTileOverlap overlap of the FOV in the global coordinates of the full FOV.
          * @param FovCoordOverlap overlap of the tile in the FOV coordinates.
          */
-        PartialFov(const std::string &filename, const cv::Rect &tileOverlap,
+        PartialFovOld(const std::string &filename, const cv::Rect &tileOverlap,
                    const cv::Rect &globalCoordinatesTileOverlap, const cv::Rect &FovCoordOverlap) : filename(filename),
                                                                                                     tileOverlap(
                                                                                                             tileOverlap),
@@ -60,4 +60,4 @@ namespace pb {
 
 }
 
-#endif //PYRAMIDBUILDING_PARTIALFOV_H
+#endif //PYRAMIDBUILDING_PARTIALFOVOLD_H

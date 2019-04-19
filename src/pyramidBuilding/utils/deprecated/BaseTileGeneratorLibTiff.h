@@ -9,7 +9,7 @@
 #include <iostream>
 #include <map>
 #include <assert.h>
-#include "pyramidBuilding/data/deprecated/PartialFov.h"
+#include "pyramidBuilding/data/deprecated/PartialFovOld.h"
 #include "pyramidBuilding/utils/Utils.h"
 #include <FastImage/api/FastImage.h>
 #include <FastImage/TileLoaders/GrayscaleTiffTileLoader.h>
@@ -96,7 +96,7 @@ namespace pb {
                 return new Tile<T>(0, index.first, index.second, pyramidTileWidth, pyramidTileHeight, tile);
             }
 
-            std::vector<PartialFov *> fovs = it->second;
+            std::vector<PartialFovOld *> fovs = it->second;
 
 
             //iterating over each partial FOV.
@@ -140,7 +140,7 @@ namespace pb {
 
     private:
         TiffImageLoader<T>* tileLoader;
-        const std::map<std::pair<size_t, size_t>, std::vector<PartialFov *>> grid;
+        const std::map<std::pair<size_t, size_t>, std::vector<PartialFovOld *>> grid;
         const std::string directory;
         const size_t tileWidth;
         const size_t tileHeight;
