@@ -137,6 +137,21 @@ namespace pb {
 
         };
 
+        class ExpertModeOptions {
+
+        public:
+
+           explicit  ExpertModeOptions(const std::map<std::string, size_t> &options = {}) : options(
+                    options) {}
+
+            size_t get(const std::string &key){
+                return options[key] ? options[key] : 1;
+            }
+
+        private:
+            std::map<std::string,size_t> options;
+        };
+
         /***
          * Pyramid Building
          * @param inputDirectory the directory where the FOVs are stored.
@@ -145,9 +160,9 @@ namespace pb {
          * @param outputDirectory in which the pyramid will be generated.
          * @param options
          */
-        PyramidBuilding(std::string inputDirectory,
-                        std::string stitching_vector,
-                        std::string outputDirectory,
+        PyramidBuilding(const std::string &inputDirectory,
+                        const std::string &stitching_vector,
+                        const std::string &outputDirectory,
                         Options* options) :
                 _inputDir(inputDirectory), _inputVector(stitching_vector), _outputDir(outputDirectory), options(options) {
             if(!std::experimental::filesystem::exists(inputDirectory)) {
@@ -161,6 +176,12 @@ namespace pb {
                 filesystem::create_directories(outputDirectory);
             }
         };
+
+
+        void setExpertModeOptions(ExpertModeOptions *expertModeOptions) {
+            this->expertModeOptions = expertModeOptions;
+        }
+
 
         void build() {
 
@@ -181,9 +202,17 @@ namespace pb {
         template<typename px_t>
         void _build(){
 
-            VLOG(1) << "generating pyramid...";
+            if(expertModeOptions != nullptr){
+                VLOG(3) << "expert mode flags" << std::endl;
+            }
 
-            size_t nbThreadsPerTask = 40;
+            VLOG(1) << "generating pyramid..." << std::endl;
+
+            auto readerThreads = expertModeOptions->get("reader");
+            auto builderThreads = expertModeOptions->get("builder");
+            auto writerThreads = expertModeOptions->get("writer");
+            auto downsamplerThreads = expertModeOptions->get("downsampler");
+            auto concurrentFOVs = expertModeOptions->get("fovs");
 
             auto begin = std::chrono::high_resolution_clock::now();
 
@@ -202,7 +231,7 @@ namespace pb {
 
             auto graph = new htgs::TaskGraphConf<TileRequest, VoidData>();
             auto loader = new TiffImageLoader<px_t>(_inputDir);
-            auto reader = new ImageReader<px_t>(1, loader);
+            auto reader = new ImageReader<px_t>(readerThreads, loader);
 
             auto fovWidth = gridGenerator->getFovMetadata()->getWidth();
             auto fovHeight = gridGenerator->getFovMetadata()->getHeight();
@@ -218,10 +247,10 @@ namespace pb {
 
             auto maxNumberOfConcurrentFOVLoaded = gridGenerator->getMaxFovUsage();
 
-            graph->addMemoryManagerEdge("fov", reader, new FOVAllocator<px_t>(fovWidth, fovHeight), 5, htgs::MMType::Static);
+            graph->addMemoryManagerEdge("fov", reader, new FOVAllocator<px_t>(fovWidth, fovHeight), concurrentFOVs, htgs::MMType::Static);
 
             auto tileCache = new TileCache<px_t>(gridGenerator->getFullFovWidth(), gridGenerator->getFullFovHeight(), pyramidTileSize, gridGenerator->getFovUsageCount());
-            auto tileBuilder = new TileBuilder<px_t>(1, gridGenerator->getFovMetadata(), pyramidTileSize, tileCache);
+            auto tileBuilder = new TileBuilder<px_t>(builderThreads, gridGenerator->getFovMetadata(), pyramidTileSize, tileCache);
 
             graph->addEdge(reader,tileBuilder);
 
@@ -246,7 +275,7 @@ namespace pb {
             auto pyramidRule = new PyramidCacheRule<px_t>(numTileCol,numTileRow);
 //
             auto downsampler = new AverageDownsampler<px_t>();
-            auto tileDownsampler = new TileDownsampler<px_t>(6, downsampler);
+            auto tileDownsampler = new TileDownsampler<px_t>(downsamplerThreads, downsampler);
 //
 //            //incoming edges from the bookeeper
             graph->addEdge(tileBuilder, bookkeeper); //pyramid base level tile
@@ -257,7 +286,7 @@ namespace pb {
             htgs::ITask< Tile<px_t>, htgs::VoidData> *writeTask = nullptr;
             if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
                 auto outputPath = filesystem::path(_outputDir) / (pyramidName + "_files");
-                writeTask = new DeepZoomTileWriter<px_t>(nbThreadsPerTask, outputPath, deepZoomLevel, this->options->getDepth());
+                writeTask = new DeepZoomTileWriter<px_t>(writerThreads, outputPath, deepZoomLevel, this->options->getDepth());
             }
             graph->addRuleEdge(bookkeeper, writeRule, writeTask); //exiting the graph;
 
@@ -487,6 +516,7 @@ namespace pb {
         std::string _inputVector;
         std::string _outputDir;
         Options* options;
+        ExpertModeOptions* expertModeOptions = nullptr;
 
 
     };

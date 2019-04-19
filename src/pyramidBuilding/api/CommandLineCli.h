@@ -50,6 +50,33 @@ namespace pb {
         }
     }
 
+    std::map<std::string,size_t> parseExpertMode(std::string &expertMode) {
+
+        std::map<std::string,size_t> flags = {};
+
+        std::string flagDelimiter = ";";
+        std::string valueDelimiter = "=";
+
+        size_t pos = 0;
+        std::string flag;
+        do {
+            pos = expertMode.find(flagDelimiter);
+            flag = expertMode.substr(0, pos);
+            std::cout << flag << std::endl;
+            size_t pos2 = flag.find(valueDelimiter);
+            if(pos2 != std::string::npos){
+                auto key = flag.substr(0,pos2);
+                auto value = flag.substr(pos2 + valueDelimiter.size(),std::string::npos);
+                flags[key] = static_cast<size_t>(std::stoul(value,nullptr,10));
+            }
+            expertMode.erase(0, pos + flagDelimiter.length());
+        }
+        while(pos != std::string::npos);
+        std::cout << expertMode << std::endl;
+
+        return flags;
+    }
+
 
     int pyramidBuilding(int argc, const char **argv) {
 
@@ -85,6 +112,9 @@ namespace pb {
             TCLAP::ValueArg<std::string> blendingArg("b", "blending", "Blending Method", false, "overlay", "string");
             cmd.add(blendingArg);
 
+            TCLAP::ValueArg<std::string> expertArg("e", "expert", "Expert mode", false, "", "string");
+            cmd.add(expertArg);
+
             cmd.parse(argc, argv);
 
             std::string inputDir = inputDirectoryArg.getValue();
@@ -113,6 +143,10 @@ namespace pb {
             BlendingMethod b = parseBlendingMethod(blending);
 
 
+            std::string expertMode = expertArg.getValue();
+            auto expertModeOptions = new PyramidBuilding::ExpertModeOptions(parseExpertMode(expertMode));
+
+
             auto *options = new PyramidBuilding::Options();
             options->setTilesize(tilesize);
             options->setPyramidName(pyramidName);
@@ -123,6 +157,9 @@ namespace pb {
             options->setDepth(d);
 
             auto builder = new PyramidBuilding(inputDir, inputVector, outputDir, options);
+
+            builder->setExpertModeOptions(expertModeOptions);
+
             builder->build();
 
 
