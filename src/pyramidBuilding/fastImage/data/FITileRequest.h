@@ -36,8 +36,6 @@ namespace pb {
 
         size_t row;
         size_t col;
-        size_t width;
-        size_t height;
         std::vector<PartialFOV*> fovs;
 
 

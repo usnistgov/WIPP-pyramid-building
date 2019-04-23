@@ -1,3 +1,7 @@
+
+
+
+
 #!/bin/bash
 # Shell script to run the pyramid building algorithm
 #

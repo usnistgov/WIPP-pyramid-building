@@ -172,14 +172,23 @@ namespace pb {
 
                         std::pair<size_t,size_t> index = std::make_pair(tileRow,tileCol);
 
-                        auto originX = std::max(tileCol * pyramidTileSize, fovGlobalX) - fovGlobalX;
-                        auto originY = std::max(tileRow * pyramidTileSize, fovGlobalY) - fovGlobalY;
-                        auto width = std::min(pyramidTileSize, fovGlobalX + fovMetadata->getWidth() - originX);
-                        auto height = std::min(pyramidTileSize, fovGlobalY + fovMetadata->getHeight() - originY);
+                        auto startX = std::max(tileCol * pyramidTileSize, fovGlobalX);
+                        auto startY = std::max(tileRow * pyramidTileSize, fovGlobalY);
+                        auto endX = std::min(fovGlobalX + fovMetadata->getWidth(), (tileCol + 1) * pyramidTileSize);
+                        auto endY = std::min(fovGlobalY + fovMetadata->getHeight(), (tileRow + 1) * pyramidTileSize);
 
-                        auto overlap = new PartialFOV::Overlap(originX, originY, width, height);
-                        auto fov = new PartialFOV(filename, overlap);
+                        auto width = endX - startX;
+                        auto height = endY - startY;
 
+                        auto fovOverlap = new PartialFOV::Overlap(startX - fovGlobalX, startY - fovGlobalY, width, height);
+
+
+                        auto tileOverlapX = startX - tileCol * pyramidTileSize;
+                        auto tileOverlapY = startY - tileRow * pyramidTileSize;
+
+                        auto tileOverlap = new PartialFOV::Overlap(tileOverlapX,tileOverlapY, width, height);
+
+                        auto fov = new PartialFOV(filename, fovOverlap, tileOverlap);
 
                         auto it = tileRequests.find(index);
 

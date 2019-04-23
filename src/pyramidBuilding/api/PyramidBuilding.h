@@ -224,8 +224,8 @@ namespace pb {
             std::string format = "png";
 
             auto tileRequestBuilder = std::make_shared<TileRequestBuilder>(_inputDir, _inputVector, pyramidTileSize);
-            auto tiffImageLoader = new TiffImageLoader<px_t>(_inputDir);
-            auto tileLoader = new PyramidTileLoader<px_t>(1, tileRequestBuilder, tiffImageLoader);
+            auto tiffImageLoader = new TiffImageLoader<px_t>(_inputDir, pyramidTileSize);
+            auto tileLoader = new PyramidTileLoader<px_t>(1, tileRequestBuilder, tiffImageLoader, pyramidTileSize);
             auto *fi = new fi::FastImage<px_t>(tileLoader, 0);
             fi->getFastImageOptions()->setNumberOfViewParallel(1);
             fi->configureAndRun();

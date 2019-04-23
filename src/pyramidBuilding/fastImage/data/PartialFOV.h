@@ -27,19 +27,25 @@ namespace pb {
 
         };
 
-        PartialFOV(const std::string &filename, Overlap* overlap) : filename(filename), overlap(overlap) {}
+        PartialFOV(const std::string &filename, Overlap* fovOverlap, Overlap* tileOverlap) : filename(filename), fovOverlap(fovOverlap), tileOverlap(tileOverlap) {}
 
         public:
-            Overlap *getOverlap() const {
-                return overlap;
+            Overlap *getFovOverlap() const {
+                return fovOverlap;
+            }
+
+            Overlap *getTileOverlap() const {
+                return tileOverlap;
             }
 
             const std::string &getFilename() const {
                 return filename;
             }
 
+
     private :
-            Overlap* overlap;
+            Overlap* fovOverlap;
+            Overlap* tileOverlap;
             std::string filename;
 
     };

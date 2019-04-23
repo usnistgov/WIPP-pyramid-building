@@ -19,13 +19,13 @@ namespace pb {
 
     public:
 
-        PyramidTileLoader(size_t numThreads, std::shared_ptr<TileRequestBuilder> tileRequestBuilder, TiffImageLoader<T>* imageLoader) : fi::ATileLoader<T>("", numThreads), _tileRequestBuilder(tileRequestBuilder), _imageLoader(imageLoader) {
+        PyramidTileLoader(size_t numThreads, std::shared_ptr<TileRequestBuilder> tileRequestBuilder, TiffImageLoader<T>* imageLoader, size_t pyramidTileSize) : fi::ATileLoader<T>("", numThreads), _tileRequestBuilder(tileRequestBuilder), _imageLoader(imageLoader), _pyramidTileSize(pyramidTileSize) {
 
         }
 
         //TODO CHECK. Problem might occur when duplicating this loader.
         fi::ATileLoader<T> *copyTileLoader() override {
-            return new PyramidTileLoader(this->getNumThreads(), this->_tileRequestBuilder, this->_imageLoader);
+            return new PyramidTileLoader(this->getNumThreads(), this->_tileRequestBuilder, this->_imageLoader, this->_pyramidTileSize);
         }
 
         uint32_t getImageHeight(uint32_t level) const override {
@@ -37,11 +37,11 @@ namespace pb {
         }
 
         uint32_t getTileWidth(uint32_t level) const override {
-            return 1024;
+            return (uint32_t)_pyramidTileSize;
         }
 
         uint32_t getTileHeight(uint32_t level) const override {
-            return 1024;
+            return (uint32_t)_pyramidTileSize;
         }
 
         short getBitsPerSample() const override {
@@ -64,17 +64,25 @@ namespace pb {
 
         double loadTileFromFile(T *tile, uint32_t row, uint32_t col) override {
             auto tileRequest = _tileRequestBuilder->getTileRequests().at({row,col});
+
             for(PartialFOV* fov : tileRequest->getFovs()){
-                _imageLoader->loadPartialImage(fov->getFilename(),fov->getOverlap()->originX,fov->getOverlap()->originY, fov->getOverlap()->width, fov->getOverlap()->height);
+                _imageLoader->loadPartialImageIntoTile(tile,row,col,fov);
+                cv::Mat image(this->_pyramidTileSize, this->_pyramidTileSize, CV_8U, tile);
+                auto path = "/home/gerardin/Documents/pyramidBuilding/outputs/DEBUG/"  + std::to_string(row) + "_" + std::to_string(col) + "---" + std::to_string(counter++) + ".png";
+                cv::imwrite(path, image);
+                image.release();
             }
         }
 
+
+        size_t counter = 0;
 
 
     private:
 
         std::shared_ptr<TileRequestBuilder> _tileRequestBuilder;
         TiffImageLoader<T>* _imageLoader;
+        size_t _pyramidTileSize;
 
     };
 
