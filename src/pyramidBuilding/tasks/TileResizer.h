@@ -19,10 +19,10 @@ class TileResizer : public htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>>
 
     public:
 
-        TileResizer(size_t numThreads, uint32_t pyramidTileSize, const std::shared_ptr<TileRequestBuilder> tileRequestBuilder) : htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>> (numThreads), pyramidTileSize(pyramidTileSize), tileRequestBuilder(tileRequestBuilder) {}
+        TileResizer(size_t numThreads, uint32_t pyramidTileSize, const std::shared_ptr<TileRequestBuilder> &tileRequestBuilder) : htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>> (numThreads), pyramidTileSize(pyramidTileSize), tileRequestBuilder(tileRequestBuilder) {}
 
 
-    void executeTask(std::shared_ptr<htgs::MemoryData<fi::View <T>>> data) override {
+    void executeTask(htgs::m_data_t<fi::View <T>> data) override {
 
             auto view = data->get();
             auto row = view->getRow();
@@ -51,7 +51,7 @@ class TileResizer : public htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>>
             data->releaseMemory();
         }
 
-        ITask <htgs::MemoryData<fi::View <T>>, Tile <T>> *copy() override {
+        htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>> *copy() override {
             return new TileResizer(this->getNumThreads(), pyramidTileSize, tileRequestBuilder);
         }
 

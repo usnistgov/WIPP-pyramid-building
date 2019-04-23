@@ -49,7 +49,6 @@
 #include <pyramidBuilding/rules/EmptyTileRule.h>
 #include <pyramidBuilding/fastImage/utils/TileRequestBuilder.h>
 #include <pyramidBuilding/fastImage/PyramidTileLoader.h>
-#include <pyramidBuilding/tasks/TileResizer.h>
 
 namespace pb {
 
@@ -239,11 +238,6 @@ namespace pb {
 //            auto grid = gridGenerator->getGrid();
 
             auto graph = new htgs::TaskGraphConf<Tile<px_t>, VoidData>();
-
-
-            auto tileResizer = new TileResizer<px_t>(1,pyramidTileSize,tileRequestBuilder);
-
-
 //            auto loader = new TiffImageLoader<px_t>(_inputDir);
 //            auto reader = new ImageReader<px_t>(readerThreads, loader);
 //
