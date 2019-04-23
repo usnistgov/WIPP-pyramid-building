@@ -15,7 +15,10 @@ FastImage uses uint32, openCV uses uint32
 * Other forms of blending?
 * Overlap
 * Support for non tiled images? (from big dataset)
-* Support for large FOVs with Fast Image
+
+
+## FAST IMAGE VERSION
+* How to make sure view values are initialized at 0? Example : check tile (5,0) in dataset 1.
 
 
 

@@ -49,6 +49,7 @@
 #include <pyramidBuilding/rules/EmptyTileRule.h>
 #include <pyramidBuilding/fastImage/utils/TileRequestBuilder.h>
 #include <pyramidBuilding/fastImage/PyramidTileLoader.h>
+#include <pyramidBuilding/tasks/TileResizer.h>
 
 namespace pb {
 
@@ -225,9 +226,9 @@ namespace pb {
 
             auto tileRequestBuilder = std::make_shared<TileRequestBuilder>(_inputDir, _inputVector, pyramidTileSize);
             auto tiffImageLoader = new TiffImageLoader<px_t>(_inputDir, pyramidTileSize);
-            auto tileLoader = new PyramidTileLoader<px_t>(1, tileRequestBuilder, tiffImageLoader, pyramidTileSize);
+            auto tileLoader = new PyramidTileLoader<px_t>(2, tileRequestBuilder, tiffImageLoader, pyramidTileSize);
             auto *fi = new fi::FastImage<px_t>(tileLoader, 0);
-            fi->getFastImageOptions()->setNumberOfViewParallel(1000);
+            fi->getFastImageOptions()->setNumberOfViewParallel(1);
             fi->configureAndRun();
 
             uint32_t numTileRow = (uint32_t)(std::ceil( (double)tileRequestBuilder->getFovMetadata()->getFullFovHeight() / pyramidTileSize));
@@ -238,6 +239,11 @@ namespace pb {
 //            auto grid = gridGenerator->getGrid();
 
             auto graph = new htgs::TaskGraphConf<Tile<px_t>, VoidData>();
+
+
+            auto tileResizer = new TileResizer<px_t>(1,pyramidTileSize,tileRequestBuilder);
+
+
 //            auto loader = new TiffImageLoader<px_t>(_inputDir);
 //            auto reader = new ImageReader<px_t>(readerThreads, loader);
 //
@@ -365,6 +371,7 @@ namespace pb {
                 fi->requestTile(row,col,false,0);
             }
             fi->finishedRequestingTiles();
+            graph->finishedProducingData();
 
             //processing each tile
             while(fi->isGraphProcessingTiles()) {
@@ -374,31 +381,33 @@ namespace pb {
                 if (pview != nullptr) {
                     VLOG(3) << "tile received!";
                     auto view = pview->get();
+                    auto row = view->getRow();
+                    auto col = view->getCol();
+
                     assert(view->getPyramidLevel() == 0);
-                    const auto  dataSize = view->getViewHeight() * view->getViewWidth();
 
-                    px_t *data = new px_t[dataSize];
-                    std::copy(view->getData(),view->getData() +dataSize, data);
+                    //we copy to the view data and crop it to the tile dimension
+                    uint32_t r = (uint32_t)col * pyramidTileSize;
+                    uint32_t width = std::min(pyramidTileSize, (uint32_t)(fullFovWidth - r));
+                    uint32_t height = std::min(pyramidTileSize, (uint32_t)(fullFovHeight - row * pyramidTileSize));
+                    px_t *data = new px_t[width * height];
+                    for (auto x =0 ; x < height; x++){
+                        std::copy_n(view->getData() + x * view->getViewWidth(), width, data + x * width);
+                    }
 
+//                    cv::Mat image2(height, width, CV_8U, data);
+//                    auto path2 = "/home/gerardin/Documents/pyramidBuilding/outputs/DEBUG/tiles/" +  std::to_string(row) + "_" + std::to_string(col) + ".png";
+//                    cv::imwrite(path2, image2);
+//                    image2.release();
 
-                    auto tile = new Tile<px_t>(view->getPyramidLevel(), view->getRow(),view->getCol(), view->getViewWidth(), view->getViewHeight(), view->getData());
+                    auto tile = new Tile<px_t>(view->getPyramidLevel(), row, col, width, height, data);
                     graph->produceData(tile);
-        //            pview->releaseMemory();
+                    pview->releaseMemory();
                 }
             }
 
-            graph->finishedProducingData();
+            delete fi;
 
-//            while(!graph->isOutputTerminated()){
-//                auto r = graph->consumeData();
-//                if(r == nullptr){
-//                    break;
-//
-//                }
-//
-//                VLOG(3) << "tile output needs to be consumed to release shared pointer!";
-//
-//            }
 
 
             if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
@@ -415,23 +424,20 @@ namespace pb {
                 outFile.close();
             }
 
-//TODO REMOVE only when caching is enabled
-//            VLOG(3) << "read count : " << generator->getFovsCache()->readCount << std::endl;
-            //     VLOG(3) << "total number of  reads necessary : " << gridGenerator->getCounter() << std::endl;
-
             runtime->waitForRuntime();
 
             VLOG(1) << "done generating pyramid." << std::endl;
 
-            graph->writeDotToFile("graph", DOTGEN_COLOR_COMP_TIME);
+            graph->writeDotToFile("colorGraph.xdot", DOTGEN_COLOR_COMP_TIME);
 #ifdef NDEBUG
 #else
             graph->writeDotToFile("graph", DOTGEN_COLOR_COMP_TIME);
 #endif
 
             delete runtime;
-//            delete generator;
-//            delete downsampler;
+
+            delete downsampler;
+            delete tiffImageLoader;
 
             auto end = std::chrono::high_resolution_clock::now();
             VLOG(1) << "Execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " mS" << std::endl;

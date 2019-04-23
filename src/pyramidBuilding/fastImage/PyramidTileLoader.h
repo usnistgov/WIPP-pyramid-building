@@ -67,10 +67,10 @@ namespace pb {
 
             for(PartialFOV* fov : tileRequest->getFovs()){
                 _imageLoader->loadPartialImageIntoTile(tile,row,col,fov);
-                cv::Mat image(this->_pyramidTileSize, this->_pyramidTileSize, CV_8U, tile);
-                auto path = "/home/gerardin/Documents/pyramidBuilding/outputs/DEBUG/"  + std::to_string(row) + "_" + std::to_string(col) + "---" + std::to_string(counter++) + ".png";
-                cv::imwrite(path, image);
-                image.release();
+//                cv::Mat image(this->_pyramidTileSize, this->_pyramidTileSize, CV_8U, tile);
+//                auto path = "/home/gerardin/Documents/pyramidBuilding/outputs/DEBUG/"  + std::to_string(row) + "_" + std::to_string(col) + "---" + std::to_string(counter++) + ".png";
+//                cv::imwrite(path, image);
+//                image.release();
             }
         }
 

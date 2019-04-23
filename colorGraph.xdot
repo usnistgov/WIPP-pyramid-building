@@ -1,0 +1,18 @@
+digraph { rankdir="TB"
+forcelabels=true;
+node[shape=record, fontsize=10, fontname="Verdana"];
+edge[fontsize=10, fontname="Verdana"];
+graph [compound=true, labelloc=top, labeljust=left, label="Compute time: 173.784881 s\nCreation time: 0.000193 s\n",pad="0.5", nodesep="0.5", ranksep="0"];
+x0x55b312eea420;
+x0x55b312eebc20;
+x0x55b3138074d0;
+x0x55b312eea420 -> x0x55b312eebc20[label="Pyramid Rule - Cache"];
+x0x55b312eea420 -> x0x55b3138074d0[label="Write Tile Rule"];
+x0x55b312eea420 -> x0x55b3138074d0[label="DeepZoomDownsampleTileRule"];
+x0x55b3137f6c40 -> x0x55b312eea420;
+x0x55b312eebc20 -> x0x55b312eea420;
+x0x55b312eea420[label="Bookkeeper x1\n",shape=box,style=filled,fillcolor=white, color=black,width=.2,height=.2];
+x0x55b312eebc20[label="Create Tile Task x1\n",shape=box,style=filled,fillcolor=white, color=black,width=.2,height=.2];
+x0x55b3138074d0[label="DeepZoomTileWriter x1\n",shape=box,style=filled,fillcolor=white, color=black,width=.2,height=.2];
+x0x55b3137f6c40[label="Graph Input\n0"];
+}

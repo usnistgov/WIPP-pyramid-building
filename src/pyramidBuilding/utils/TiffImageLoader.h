@@ -102,53 +102,98 @@ namespace pb {
             return region;
         }
 
-        T* loadPartialImage(std::string filename, size_t x, size_t y, size_t width, size_t height) {
-
-            auto fullPath = _directory + filename;
-            auto file = fullPath.c_str();
-            TIFF* tiff = TIFFOpen(file, "r");
-
-            collectMetadata(tiff);
-
-
-            T *region = new T[width * height]();
-            if (tiff) {
-                void *buf = _TIFFmalloc(TIFFTileSize(tiff));
-
-                assert(y + height < _FOVHeight);
-                assert(x + width < _FOVWidth);
-
-                for (uint32_t posRow = y; posRow < y + height; posRow += _tileHeight) {
-                    for (uint32_t posCol = x; posCol < x + width; posCol += _tileWidth) {
-                        loadAndCastImageTile(tiff, region, buf, posRow, posCol);
-                    }
-                }
-                _TIFFfree(buf);
-                TIFFClose(tiff);
-            }
-            return region;
-
-        }
-
 
         void loadPartialImageIntoTile( T *tile, uint32_t row, uint32_t col, PartialFOV *fov) {
             //open FOV
             auto fullPath = _directory + fov->getFilename();
             auto file = fullPath.c_str();
             TIFF *tiff = TIFFOpen(file, "r");
+
             collectMetadata(tiff);
 
-            //info FOV subregion to extract
-            auto x = fov->getFovOverlap()->originX;
-            auto y = fov->getFovOverlap()->originY;
-            auto width = fov->getFovOverlap()->width;
-            auto height = fov->getFovOverlap()->height;
+            switch (this->_sampleFormat) {
+                case 1 :
+                    switch (this->_bitsPerSample) {
+                        case 8:
+                            loadPartialImageIntoTileWithCasting<uint8_t>(tile, row, col, fov, tiff);
+                            break;
+                        case 16:
+                            loadPartialImageIntoTileWithCasting<uint16_t>(tile, row, col, fov, tiff);
+                            break;
+                        case 32:
+                            loadPartialImageIntoTileWithCasting<uint32_t>(tile, row, col, fov, tiff);
+                            break;
+                        case 64:
+                            loadPartialImageIntoTileWithCasting<uint64_t>(tile, row, col, fov, tiff);
+                            break;
+                        default:
+                            LOG(FATAL) << "bitsPerSample" << this->_bitsPerSample << "is unknown or unsupported"
+                                       << std::endl;
+                            exit(3);
+                    }
+                    break;
+                case 2:
+                    switch (this->_bitsPerSample) {
+                        case 8:
+                            loadPartialImageIntoTileWithCasting<uint8_t>(tile, row, col, fov, tiff);
+                            break;
+                        case 16:
+                            loadPartialImageIntoTileWithCasting<uint16_t>(tile, row, col, fov, tiff);
+                            break;
+                        case 32:
+                            loadPartialImageIntoTileWithCasting<uint32_t>(tile, row, col, fov, tiff);
+                            break;
+                        case 64:
+                            loadPartialImageIntoTileWithCasting<uint64_t>(tile, row, col, fov, tiff);
+                            break;
+                        default:
+                            LOG(FATAL) << "bitsPerSample" << this->_bitsPerSample << "is unknown or unsupported"
+                                       << std::endl;
+                            exit(3);
+                    }
+                    break;
+                case 3:
+                    switch (this->_bitsPerSample) {
+                        case 8:
+                            loadPartialImageIntoTileWithCasting<float>(tile, row, col, fov, tiff);
+                            break;
+                        case 16:
+                            loadPartialImageIntoTileWithCasting<float>(tile, row, col, fov, tiff);
+                            break;
+                        case 32:
+                            loadPartialImageIntoTileWithCasting<float>(tile, row, col, fov, tiff);
+                            break;
+                        case 64:
+                            loadPartialImageIntoTileWithCasting<float>(tile, row, col, fov, tiff);
+                            break;
+                        default:
+                            LOG(FATAL) << "bitsPerSample" << this->_bitsPerSample << "is unknown or unsupported"
+                                       << std::endl;
+                            exit(3);
+                    }
+                    break;
+                default:
+                    LOG(FATAL) << "sampleFormat" << this->_sampleFormat << "is unknown or unsupported" << std::endl;
+                    exit(2);
+            }
+        }
 
 
+    private :
+
+
+        template <class FileType>
+        void loadPartialImageIntoTileWithCasting( T *tile, uint32_t row, uint32_t col, PartialFOV *fov, TIFF *tiff) {
             //we will read a bunch of tiles in this FOV
             if (tiff) {
+
                 void *buf = _TIFFmalloc(TIFFTileSize(tiff));
 
+                //info FOV subregion to extract
+                auto x = fov->getFovOverlap()->originX;
+                auto y = fov->getFovOverlap()->originY;
+                auto width = fov->getFovOverlap()->width;
+                auto height = fov->getFovOverlap()->height;
 
                 //calculate start and end coordinates of each FOV tile containing a overlapping region
                 auto startX = x / _tileWidth * _tileWidth;
@@ -163,23 +208,25 @@ namespace pb {
                         //now we copy the buffer representing a fov tile in the pyramid tile
                         //we make sure we copy only the region of interest
 //
-//                        cv::Mat image(this->_tileHeight, this->_tileWidth, CV_8U, (uint16_t *)buf);
-//                        auto path = "/home/gerardin/Documents/pyramidBuilding/outputs/DEBUG/tiles/" + fov->getFilename() +  std::to_string(row) + "_" + std::to_string(col) + "---" + std::to_string(posRow) + "_" + std::to_string(posCol) + ".png";
+//                        cv::Mat image(this->_tileHeight, this->_tileWidth, CV_8U, (FileType *)buf);
+//                        auto path = "/home/gerardin/Documents/pyramidBuilding/outputs/DEBUG/tiles/" +
+//                        fov->getFilename() +  std::to_string(row) + "_" + std::to_string(col) + "---" +
+//                        std::to_string(posRow) + "_" + std::to_string(posCol) + ".png";
 //                        cv::imwrite(path, image);
 //                        image.release();
 
                         //global coordinates in the FOV
                         auto minCol = std::max(posCol, x),
-                             minRow = std::max(posRow, y);
+                                minRow = std::max(posRow, y);
 
                         auto maxRow = std::min(posRow + _tileHeight, y + height),
-                             maxCol = std::min(posCol + _tileWidth, x + width);
+                                maxCol = std::min(posCol + _tileWidth, x + width);
 
 
                         auto rangeMinRow = minRow - posRow,
-                             rangeMinCol = minCol - posCol,
-                             rangeHeight = maxRow - minRow,
-                             rangeWidth = maxCol - minCol;
+                                rangeMinCol = minCol - posCol,
+                                rangeHeight = maxRow - minRow,
+                                rangeWidth = maxCol - minCol;
 
                         auto fovOverlapMinCol = minCol - x;
                         auto fovOverlapMinRow = minRow - y;
@@ -187,42 +234,19 @@ namespace pb {
 
                         for (auto rangeRow = 0; rangeRow < rangeHeight; ++rangeRow) {
                             std::copy_n(
-                                    (uint16_t *)buf + (rangeRow + rangeMinRow) * _tileWidth + rangeMinCol,
+                                    (FileType *)buf + (rangeRow + rangeMinRow) * _tileWidth + rangeMinCol,
                                     rangeWidth,
                                     tile + this->_pyramidTileSize * (fov->getTileOverlap()->originY + rangeRow + fovOverlapMinRow) + fov->getTileOverlap()->originX + fovOverlapMinCol);
                         }
 
 
 
-                        cv::Mat image2(this->_pyramidTileSize, this->_pyramidTileSize, CV_8U, tile);
-                        auto path2 = "/home/gerardin/Documents/pyramidBuilding/outputs/DEBUG/tiles/" + fov->getFilename() +  std::to_string(row) + "_" + std::to_string(col) + "---" + std::to_string(posRow) + "_" + std::to_string(posCol) + ".png";
-                        cv::imwrite(path2, image2);
-                        image2.release();
-
-
-
-
-
-//                        auto
-//                                posRowMax = std::min((size_t)posRow + _tileHeight, y + height),
-//                                posColMax = std::min((size_t)posCol + _tileWidth, x + width);
-//
-//                        auto
-//                                rangeWidth = posColMax - posCol,
-//                                rangeHeight = posRowMax - posRow;
-//
-//                        auto
-//                                rowMin = std::max((int32_t)(y - posRow), 0),
-//                                colMin = std::max((int32_t)(x - posCol), 0);
-//
-//                        for (auto rangeRow = ; rangeRow < rangeHeight - rowMin; ++rangeRow) {
-//                            std::copy_n((T *) buf + (rangeRow + rowMin) * _tileWidth, rangeWidth, tile + this->_pyramidTileSize *
-//                                                                                                    (fov->getTileOverlap()->originY +
-//                                                                                                     posRow * _tileHeight +
-//                                                                                                     rangeRow) +
-//                                                                                             posCol * _tileWidth +
-//                                                                                             fov->getTileOverlap()->originX);
-//                        }
+//                        cv::Mat image2(this->_pyramidTileSize, this->_pyramidTileSize, CV_8U, tile);
+//                        auto path2 = "/home/gerardin/Documents/pyramidBuilding/outputs/DEBUG/tiles/" +
+//                        fov->getFilename() +  std::to_string(row) + "_" + std::to_string(col) +
+//                        "---" + std::to_string(posRow) + "_" + std::to_string(posCol) + ".png";
+//                        cv::imwrite(path2, image2);
+//                        image2.release();
 
                     }
                 }
@@ -231,13 +255,6 @@ namespace pb {
                 TIFFClose(tiff);
             }
         }
-
-
-
-    private :
-
-        std::string _directory;
-        size_t _pyramidTileSize = 0;
 
         void loadAndCastImageTile(TIFF *tiff, T *region, tdata_t buf, uint32_t rowMin, uint32_t
         colMin) {
@@ -328,12 +345,8 @@ namespace pb {
         }
 
 
-        template<typename FileType>
-        void loadTileRegion(tdata_t src, T *dest, uint32_t rowMin, uint32_t colMin, uint32_t rowMax, uint32_t colMax) {
-            for (uint32_t row = 0; row < rowMax - rowMin; ++row) {
-                std::copy_n((FileType*)src + rowMin, rowMax-rowMin, dest + _FOVWidth * (rowMin + row) + colMin);
-            }
-        }
+        std::string _directory;
+        size_t _pyramidTileSize = 0;
 
 
 

@@ -36,12 +36,12 @@ message(libTiff path :  ${TIFF_LIBRARIES} )
 
 #TODO Set only in debug mode
 #find_package(NVTX QUIET)
-if(NVTX_FOUND)
-    message(STATUS "FOUND NVTX!")
-    add_definitions(-DUSE_NVTX)
-    include_directories(${NVTX_INCLUDE_DIR})
-    link_libraries(${NVTX_LIBRARIES})
-endif()
+#if(NVTX_FOUND)
+#    message(STATUS "FOUND NVTX!")
+#    add_definitions(-DUSE_NVTX)
+#    include_directories(${NVTX_INCLUDE_DIR})
+#    link_libraries(${NVTX_LIBRARIES})
+#endif()
 
 # FAST IMAGE pull HTGS transitively
 find_package(FastImage REQUIRED)
@@ -70,5 +70,5 @@ include_directories(src)
 #TODO add only for tests
 add_subdirectory(test)
 
-
-add_executable(main main.cpp src/pyramidBuilding/fastImage/data/PartialFOV.h src/pyramidBuilding/fastImage/data/FITileRequest.h)
+add_executable(mainFastImage main.cpp)
+add_executable(main main.cpp src/pyramidBuilding/fastImage/data/PartialFOV.h src/pyramidBuilding/fastImage/data/FITileRequest.h src/pyramidBuilding/tasks/TileResizer.h)
