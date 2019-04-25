@@ -48,6 +48,7 @@ class TileResizer : public htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>>
 
             auto tile = new Tile<T>(view->getPyramidLevel(), row, col, width, height, tileData);
             this->addResult(tile);
+
             data->releaseMemory();
         }
 

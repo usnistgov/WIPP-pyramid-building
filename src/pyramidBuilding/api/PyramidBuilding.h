@@ -49,7 +49,7 @@
 #include <pyramidBuilding/rules/EmptyTileRule.h>
 #include <pyramidBuilding/fastImage/utils/TileRequestBuilder.h>
 #include <pyramidBuilding/fastImage/PyramidTileLoader.h>
-
+#include <mem/Mem.h>
 namespace pb {
 
     using namespace std::experimental;
@@ -244,9 +244,17 @@ namespace pb {
             auto tiffImageLoader = new TiffImageLoader<px_t>(_inputDir, pyramidTileSize);
 
             auto tileLoader = new PyramidTileLoader<px_t>(readerThreads, tileRequestBuilder, tiffImageLoader, pyramidTileSize);
+
+
+
             auto *fi = new fi::FastImage<px_t>(tileLoader, 0);
             fi->getFastImageOptions()->setNumberOfViewParallel((uint32_t)concurrentTiles);
             fi->configureAndRun();
+
+                //fi->getFastImageOptions()->setNumberOfTilesToCache(10);
+
+//            auto tgTask = fi->configureAndMoveToTaskGraphTask("Fast Image");
+
 
             uint32_t numTileRow = (uint32_t)(std::ceil( (double)tileRequestBuilder->getFovMetadata()->getFullFovHeight() / pyramidTileSize));
             uint32_t numTileCol = (uint32_t)(std::ceil( (double)tileRequestBuilder->getFovMetadata()->getFullFovWidth() / pyramidTileSize));
@@ -255,6 +263,10 @@ namespace pb {
 
             size_t fullFovWidth = tileRequestBuilder->getFullFovWidth();
             size_t fullFovHeight = tileRequestBuilder->getFullFovHeight();
+
+
+
+
             int deepZoomLevel = 0;
             //calculate pyramid depth
             auto maxDim = std::max(fullFovWidth,fullFovHeight);
@@ -302,6 +314,8 @@ namespace pb {
 
 
             runtime->executeRuntime();
+
+
 
 
             fi::Traversal traversal = fi::Traversal(fi::TraversalType::DIAGONAL,numTileRow,numTileCol);
@@ -376,6 +390,8 @@ namespace pb {
             delete runtime;
             delete downsampler;
             delete tiffImageLoader;
+
+            std::cout << getPeakRSS() << std::endl;
 
             auto end = std::chrono::high_resolution_clock::now();
             VLOG(1) << "Execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " mS" << std::endl;
