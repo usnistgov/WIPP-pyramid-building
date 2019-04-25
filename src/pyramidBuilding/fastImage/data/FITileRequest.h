@@ -31,6 +31,13 @@ namespace pb {
             return fovs;
         }
 
+        virtual ~FITileRequest() {
+            for(auto fov : fovs){
+                delete fov;
+            }
+            fovs.clear();
+        }
+
 
     private:
 

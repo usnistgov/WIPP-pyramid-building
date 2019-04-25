@@ -64,7 +64,7 @@ class DeepZoomTileWriter : public htgs::ITask< Tile<T>, htgs::VoidData > {
             VLOG(2) << "write tile (" << data->getRow() << "," << data->getCol()  << ") at level " << data->getLevel() <<
             " (deepzoom level " << level << ")"  << std::endl;
 
-            switch(imageDepth){
+            switch(this->imageDepth){
                 case ImageDepth::_16U : {
                     cv::Mat image(data->getHeight(), data->getWidth(), CV_16U, data->getData());
                     cv::imwrite(fullImagePath.string(), image);
@@ -94,8 +94,8 @@ class DeepZoomTileWriter : public htgs::ITask< Tile<T>, htgs::VoidData > {
 
     private:
         const size_t nbPyramidLevel = 0;
-        const std::string _pathOut;
-        const ImageDepth imageDepth;
+        const std::string _pathOut = "/tmp/";
+        const ImageDepth imageDepth = ImageDepth::_8U;
 
     };
 

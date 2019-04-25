@@ -16,3 +16,4 @@
 -i /home/gerardin/Documents/images/dataset2/images
 -o /home/gerardin/Documents/pyramidBuilding/outputs
 -t 1024 -d 8U -n testFI4 
+

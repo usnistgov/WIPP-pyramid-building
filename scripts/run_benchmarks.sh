@@ -20,8 +20,8 @@ if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
     exit 1
 fi
 
-OPTIONS=i:v:o:t:d:n:b:k:
-LONGOPTS=images:,vector:,output:,tilesize:,depth:,name:,blending:,benchmark:
+OPTIONS=i:v:o:t:d:n:b:e:k:
+LONGOPTS=images:,vector:,output:,tilesize:,depth:,name:,blending:,expertmode:,benchmark:
 
 # -use ! and PIPESTATUS to get exit code with errexit set
 # -temporarily store output to be able to check for errors
@@ -39,6 +39,7 @@ eval set -- "$PARSED"
 echo $PARSED
 
 images="" vector="" output="" tilesize=256 depth="8U" name="output" blending="overlay" benchmark="exectime"
+expertmode=""
 # now enjoy the options in order and nicely split until we see --
 while true; do
     case "$1" in
@@ -68,6 +69,10 @@ while true; do
             ;;
         -b|--blending)
             blending="$2"
+            shift 2
+            ;;
+        -e|--expertmode)
+            expertmode="$2"
             shift 2
             ;;
         -k|--benchmark)
@@ -131,10 +136,10 @@ for ((i = 1; i <= $RUNS; i++))
     if [[ "$benchmark" == "exectime" ]]; then
             echo "benchmarking execution time..."
 #            ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending;
-            { sudo -u $SUDO_USER time ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${benchmark}_${DATASET_NAME}_${date}.txt
+            { sudo -u $SUDO_USER time ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending -e $expertmode; } 2>> $OUTPUT_DIR/${benchmark}_${DATASET_NAME}_${date}.txt
     else
             echo "benchmarking memory consumption..."
-            { sudo -u $SUDO_USER heaptrack ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${benchmark}_${DATASET_NAME}_${date}.txt
+            { sudo -u $SUDO_USER heaptrack ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending $expertmode; } 2>> $OUTPUT_DIR/${benchmark}_${DATASET_NAME}_${date}.txt
     fi
 
 # "valgrind --tool=massif --stacks=yes --massif-out-file="

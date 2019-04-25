@@ -147,8 +147,12 @@ namespace pb {
                     options) {}
 
             size_t get(const std::string &key){
-                return options[key] ? options[key] : 1;
+                return options[key];
             }
+
+            bool has(const std::string &key){
+                return options.find(key) != options.end();
+           }
 
         private:
             std::map<std::string,size_t> options;
@@ -204,17 +208,30 @@ namespace pb {
         template<typename px_t>
         void _build(){
 
-            if(expertModeOptions != nullptr){
-                VLOG(3) << "expert mode flags" << std::endl;
-            }
+            size_t readerThreads = 2;
+            size_t builderThreads =  2;
+            size_t writerThreads = 40;
+            size_t downsamplerThreads = 6;
+            size_t concurrentFOVs = 5;
 
             VLOG(1) << "generating pyramid..." << std::endl;
 
-            auto readerThreads = expertModeOptions->get("reader");
-            auto builderThreads = expertModeOptions->get("builder");
-            auto writerThreads = expertModeOptions->get("writer");
-            auto downsamplerThreads = expertModeOptions->get("downsampler");
-            auto concurrentFOVs = expertModeOptions->get("fovs");
+
+            if(expertModeOptions != nullptr){
+                VLOG(3) << "expert mode flags" << std::endl;
+                if(expertModeOptions->has("reader")) readerThreads = expertModeOptions->get("reader");
+                if(expertModeOptions->has("builder")) builderThreads = expertModeOptions->get("builder");
+                if(expertModeOptions->has("writer")) writerThreads = expertModeOptions->get("writer");
+                if(expertModeOptions->has("downsampler")) downsamplerThreads = expertModeOptions->get("downsampler");
+                if(expertModeOptions->has("fovs"))  concurrentFOVs =  expertModeOptions->get("fovs");
+            }
+
+            VLOG(1) << "Threading :" << std::endl;
+            VLOG(1) << "reader : " << readerThreads  << std::endl;
+            VLOG(1) << "builder : " << builderThreads  << std::endl;
+            VLOG(1) << "writer : " << writerThreads  << std::endl;
+            VLOG(1) << "downsampler : " << downsamplerThreads  << std::endl;
+            VLOG(1) << "fovs : " << concurrentFOVs  << std::endl;
 
             auto begin = std::chrono::high_resolution_clock::now();
 
@@ -394,13 +411,12 @@ namespace pb {
 //                    cv::imwrite(path2, image2);
 //                    image2.release();
 
-                    auto tile = new Tile<px_t>(view->getPyramidLevel(), row, col, width, height, data);
+                    auto tile = std::make_shared<Tile<px_t>>(view->getPyramidLevel(), row, col, width, height, data);
                     graph->produceData(tile);
                     pview->releaseMemory();
                 }
             }
 
-            delete fi;
 
 
 
@@ -428,8 +444,8 @@ namespace pb {
             graph->writeDotToFile("graph", DOTGEN_COLOR_COMP_TIME);
 #endif
 
+            delete fi;
             delete runtime;
-
             delete downsampler;
             delete tiffImageLoader;
 

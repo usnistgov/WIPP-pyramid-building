@@ -89,12 +89,12 @@ namespace pb {
 
 
     private :
-        size_t _level;
-        size_t _row;
-        size_t _col;
-        size_t _width;
-        size_t _height;
-        T *_data;
+        size_t _level = 0;
+        size_t _row = 0;
+        size_t _col = 0;
+        size_t _width = 0;
+        size_t _height = 0;
+        T *_data = nullptr;
         std::vector<std::shared_ptr<Tile<T>>> _origin = {};
 
 

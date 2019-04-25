@@ -72,8 +72,6 @@ namespace pb {
             expertMode.erase(0, pos + flagDelimiter.length());
         }
         while(pos != std::string::npos);
-        std::cout << expertMode << std::endl;
-
         return flags;
     }
 
@@ -112,8 +110,8 @@ namespace pb {
             TCLAP::ValueArg<std::string> blendingArg("b", "blending", "Blending Method", false, "overlay", "string");
             cmd.add(blendingArg);
 
-            TCLAP::ValueArg<std::string> expertArg("e", "expert", "Expert mode", false, "", "string");
-            cmd.add(expertArg);
+            TCLAP::ValueArg<std::string> expertModeArg("e", "expertmode", "Expert mode", false, "", "string");
+            cmd.add(expertModeArg);
 
             cmd.parse(argc, argv);
 
@@ -125,6 +123,7 @@ namespace pb {
             std::string depth = depthArg.getValue();
             std::string blending = blendingArg.getValue();
             uint32_t tilesize = tilesizeArg.getValue();
+            std::string expertMode = expertModeArg.getValue();
 
             if (!hasEnding(inputDir, "/")) {
                 inputDir += "/";
@@ -138,12 +137,13 @@ namespace pb {
             VLOG(1) << formatArg.getDescription() << ": " << format << std::endl;
             VLOG(1) << depthArg.getDescription() << ": " << depth << std::endl;
             VLOG(1) << blendingArg.getDescription() << ": " << blending << std::endl;
+            VLOG(1) << expertModeArg.getDescription() << ": " << blending << std::endl;
 
             ImageDepth d = parseImageDepth(depth);
             BlendingMethod b = parseBlendingMethod(blending);
 
 
-            std::string expertMode = expertArg.getValue();
+
             auto expertModeOptions = new PyramidBuilding::ExpertModeOptions(parseExpertMode(expertMode));
 
 

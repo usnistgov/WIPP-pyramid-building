@@ -28,3 +28,5 @@ benchmarks/heaptrack.*
 # container files
 dist/deps
 dist/build
+
+**/*.xdot

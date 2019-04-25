@@ -42,6 +42,11 @@ namespace pb {
                 return filename;
             }
 
+        virtual ~PartialFOV() {
+            delete fovOverlap;
+            delete tileOverlap;
+        }
+
 
     private :
             Overlap* fovOverlap;

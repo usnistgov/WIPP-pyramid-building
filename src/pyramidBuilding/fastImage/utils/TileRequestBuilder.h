@@ -38,11 +38,6 @@ namespace pb {
         std::string stitchingVectorPath;
         uint32_t pyramidTileSize;
 
-        std::map<std::pair<size_t,size_t>, FOV*> grid;
-        std::map<std::pair<size_t,size_t>, u_int8_t> fovUsageCount = {};
-        std::map<std::pair<size_t,size_t>, std::vector<std::pair<size_t,size_t>>> fovUsage = {};
-
-        std::shared_ptr<FOVMetadata> fovMetadata = nullptr;
 
         uint32_t fullFovWidth = 0;
         uint32_t fullFovHeight = 0;
@@ -50,8 +45,7 @@ namespace pb {
         uint32_t maxRow = 0;
         uint32_t maxCol = 0;
 
-        u_int8_t maxFovUsage = 0;
-
+        std::shared_ptr<FOVMetadata> fovMetadata = nullptr;
         std::map<std::pair<size_t,size_t>, FITileRequest*> tileRequests = {};
 
 
@@ -133,9 +127,10 @@ namespace pb {
 
                     TIFF *tiff = TIFFOpen((imageDirectoryPath + filename).c_str(), "r");
                     if(tiff == nullptr){
-                        std::string errorMsg = "unable to open tiff file: " + imageDirectoryPath + filename +
-                                               ". Please check that the stitching vector matches the image folder.";
-                        throw std::runtime_error(errorMsg);
+
+                        std::ostringstream err;
+                        err << "unable to open tiff file:" << imageDirectoryPath <<  filename << ". Please check that the stitching vector matches the image folder.";
+                        throw std::runtime_error(err.str());
                     }
 
                     uint32_t width = 0, height = 0, tileWidth = 0, tileHeight = 0;
@@ -247,7 +242,11 @@ namespace pb {
         }
 
         ~TileRequestBuilder(){
+            for(auto tileRequestEntry : tileRequests){
+                delete tileRequestEntry.second;
+            }
             tileRequests.clear();
+            fovMetadata.reset();
         }
 
     };
