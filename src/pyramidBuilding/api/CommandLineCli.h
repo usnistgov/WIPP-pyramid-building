@@ -62,7 +62,6 @@ namespace pb {
         do {
             pos = expertMode.find(flagDelimiter);
             flag = expertMode.substr(0, pos);
-            std::cout << flag << std::endl;
             size_t pos2 = flag.find(valueDelimiter);
             if(pos2 != std::string::npos){
                 auto key = flag.substr(0,pos2);

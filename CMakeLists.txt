@@ -63,7 +63,7 @@ endif(APPLE)
 
 link_libraries(glog)
 
-#add_definitions(-DPROFILE)
+add_definitions(-DPROFILE)
 
 include_directories(src)
 

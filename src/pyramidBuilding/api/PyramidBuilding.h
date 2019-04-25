@@ -208,30 +208,30 @@ namespace pb {
         template<typename px_t>
         void _build(){
 
+            size_t concurrentTiles = 5;
             size_t readerThreads = 2;
             size_t builderThreads =  2;
-            size_t writerThreads = 40;
             size_t downsamplerThreads = 6;
-            size_t concurrentFOVs = 5;
+            size_t writerThreads = 40;
 
             VLOG(1) << "generating pyramid..." << std::endl;
 
-
             if(expertModeOptions != nullptr){
                 VLOG(3) << "expert mode flags" << std::endl;
+                if(expertModeOptions->has("tile"))  concurrentTiles =  expertModeOptions->get("tile");
                 if(expertModeOptions->has("reader")) readerThreads = expertModeOptions->get("reader");
                 if(expertModeOptions->has("builder")) builderThreads = expertModeOptions->get("builder");
-                if(expertModeOptions->has("writer")) writerThreads = expertModeOptions->get("writer");
                 if(expertModeOptions->has("downsampler")) downsamplerThreads = expertModeOptions->get("downsampler");
-                if(expertModeOptions->has("fovs"))  concurrentFOVs =  expertModeOptions->get("fovs");
+                if(expertModeOptions->has("writer")) writerThreads = expertModeOptions->get("writer");
+
             }
 
-            VLOG(1) << "Threading :" << std::endl;
-            VLOG(1) << "reader : " << readerThreads  << std::endl;
-            VLOG(1) << "builder : " << builderThreads  << std::endl;
-            VLOG(1) << "writer : " << writerThreads  << std::endl;
-            VLOG(1) << "downsampler : " << downsamplerThreads  << std::endl;
-            VLOG(1) << "fovs : " << concurrentFOVs  << std::endl;
+            VLOG(1) << "Execution model : " << std::endl;
+            VLOG(1) << "reader threads : " << readerThreads  << std::endl;
+            VLOG(1) << "concurrent tiles : " << concurrentTiles  << std::endl;
+            VLOG(1) << "builder threads : " << builderThreads  << std::endl;
+            VLOG(1) << "downsampler threads : " << downsamplerThreads  << std::endl;
+            VLOG(1) << "writer threads : " << writerThreads  << std::endl;
 
             auto begin = std::chrono::high_resolution_clock::now();
 
@@ -242,72 +242,32 @@ namespace pb {
 
             auto tileRequestBuilder = std::make_shared<TileRequestBuilder>(_inputDir, _inputVector, pyramidTileSize);
             auto tiffImageLoader = new TiffImageLoader<px_t>(_inputDir, pyramidTileSize);
-            auto tileLoader = new PyramidTileLoader<px_t>(2, tileRequestBuilder, tiffImageLoader, pyramidTileSize);
+
+            auto tileLoader = new PyramidTileLoader<px_t>(readerThreads, tileRequestBuilder, tiffImageLoader, pyramidTileSize);
             auto *fi = new fi::FastImage<px_t>(tileLoader, 0);
-            fi->getFastImageOptions()->setNumberOfViewParallel(1);
+            fi->getFastImageOptions()->setNumberOfViewParallel((uint32_t)concurrentTiles);
             fi->configureAndRun();
 
             uint32_t numTileRow = (uint32_t)(std::ceil( (double)tileRequestBuilder->getFovMetadata()->getFullFovHeight() / pyramidTileSize));
             uint32_t numTileCol = (uint32_t)(std::ceil( (double)tileRequestBuilder->getFovMetadata()->getFullFovWidth() / pyramidTileSize));
 
-//            std::shared_ptr<StitchingVectorParser> gridGenerator = std::make_shared<StitchingVectorParser>(_inputDir, _inputVector, pyramidTileSize);
-//
-//            auto grid = gridGenerator->getGrid();
-
             auto graph = new htgs::TaskGraphConf<Tile<px_t>, VoidData>();
-//            auto loader = new TiffImageLoader<px_t>(_inputDir);
-//            auto reader = new ImageReader<px_t>(readerThreads, loader);
-//
-//            auto fovWidth = gridGenerator->getFovMetadata()->getWidth();
-//            auto fovHeight = gridGenerator->getFovMetadata()->getHeight();
-//
-//            auto tileManager = new htgs::Bookkeeper<TileRequest>();
-//            graph->setGraphConsumerTask(tileManager);
-//
-//            auto tileManagerEmptyTileRule = new EmptyTileRule<px_t>(gridGenerator);
-//            auto tileManagerRegularTileRule = new FOVTileRule(gridGenerator);
-//
-//            graph->addRuleEdge(tileManager,tileManagerRegularTileRule,reader);
-//
-//
-//            auto maxNumberOfConcurrentFOVLoaded = gridGenerator->getMaxFovUsage();
-//
-//            graph->addMemoryManagerEdge("fov", reader, new FOVAllocator<px_t>(fovWidth, fovHeight), concurrentFOVs, htgs::MMType::Static);
-//
-//            auto tileCache = new TileCache<px_t>(gridGenerator->getFullFovWidth(), gridGenerator->getFullFovHeight(), pyramidTileSize, gridGenerator->getFovUsageCount());
-//            auto tileBuilder = new TileBuilder<px_t>(builderThreads, gridGenerator->getFovMetadata(), pyramidTileSize, tileCache);
-//
-//            graph->addEdge(reader,tileBuilder);
-//
+
             size_t fullFovWidth = tileRequestBuilder->getFullFovWidth();
             size_t fullFovHeight = tileRequestBuilder->getFullFovHeight();
             int deepZoomLevel = 0;
             //calculate pyramid depth
             auto maxDim = std::max(fullFovWidth,fullFovHeight);
             deepZoomLevel = int(ceil(log2(maxDim)) + 1);
-////
-////
-////
-////            auto generator = new BaseTileGeneratorLibTiffWithCache<px_t>(gridGenerator, this->options->getBlendingMethod());
-////            auto baseTileTask = new BaseTileTask<px_t>(1, generator);
-////            graph->setGraphConsumerTask(baseTileTask);
-////
+
             auto bookkeeper = new htgs::Bookkeeper<Tile<px_t>>();
-//
 
             graph->setGraphConsumerTask(bookkeeper);
 
-//            graph->addRuleEdge(tileManager,tileManagerEmptyTileRule,bookkeeper);
-////
             auto writeRule = new WriteTileRule<px_t>();
             auto pyramidRule = new PyramidCacheRule<px_t>(numTileCol,numTileRow);
-////
             auto downsampler = new AverageDownsampler<px_t>();
             auto tileDownsampler = new TileDownsampler<px_t>(downsamplerThreads, downsampler);
-////
-////            //incoming edges from the bookeeper
-//            graph->addEdge(tileBuilder, bookkeeper); //pyramid base level tile
-////            graph->addEdge(baseTileTask, bookkeeper); //pyramid base level tile
             graph->addEdge(tileDownsampler,bookkeeper); //pyramid higher level tile
             graph->addRuleEdge(bookkeeper, pyramidRule, tileDownsampler); //caching tiles and creating a tile at higher level;
 
@@ -331,10 +291,6 @@ namespace pb {
 //
 //            //    auto tiledTiffWriteTask = new PyramidalTiffWriter<px_t>(1,_outputDir, pyramidName, options->getDepth(), gridGenerator);
 //            //    graph->addRuleEdge(bookkeeper, writeRule, tiledTiffWriteTask);
-//
-
-//            output task
-//             graph->addGraphProducerTask(writeTask);
 
             auto *runtime = new htgs::TaskGraphRuntime(graph);
 
@@ -347,34 +303,6 @@ namespace pb {
 
             runtime->executeRuntime();
 
-//           blockTraversal(graph, numTileRow, numTileCol);
-            //   diagTraversal(graph, numTileRow, numTileCol);
-            //     recursiveTraversal<px_t>(graph, numTileRow, numTileCol, (size_t)0, (size_t)0);
-
-//            size_t numFovRow = gridGenerator->getMaxRow() + 1;
-//            size_t numFovCol = gridGenerator->getMaxCol() + 1;
-
-//            fi::Traversal traversal = fi::Traversal(fi::TraversalType::DIAGONAL,numFovRow,numFovCol);
-//
-//
-//
-//            for (auto step : traversal.getTraversal()) {
-//                auto row = step.first, col = step.second;
-//                auto fov = grid.find(step)->second;
-//                VLOG(4) <<  "fov request : " << "(" << row << "," << col << ")"<< std::endl;
-//                graph->produceData(fov);
-//            }
-
-//            fi::Traversal traversal = fi::Traversal(fi::TraversalType::DIAGONAL,numTileRow,numTileCol);
-//            for (auto step : traversal.getTraversal()) {
-//                auto row = step.first, col = step.second;
-//                VLOG(4) <<  "tile request : " << "(" << row << "," << col << ")"<< std::endl;
-//       //         auto tileRequest = tileRequestBuilder->getTileRequests().at({row,col});
-//
-//         //       assert (tileRequest != nullptr);
-//
-//                graph->produceData(new TileRequest(row,col));
-//            }
 
             fi::Traversal traversal = fi::Traversal(fi::TraversalType::DIAGONAL,numTileRow,numTileCol);
             for (auto step : traversal.getTraversal()) {

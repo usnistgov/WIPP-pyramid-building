@@ -96,10 +96,7 @@ if [[ $# -lt 1 ]]; then
     exit 4
 fi
 
-export GLOG_logtostderr=1
-export GLOG_v=3
-
-echo "log level: $GLOG_v"
+echo "expert mode flags: $expertmode"
 
 DATASET_NAME=${1}
 RUNS=${2-1}
@@ -136,10 +133,11 @@ for ((i = 1; i <= $RUNS; i++))
     if [[ "$benchmark" == "exectime" ]]; then
             echo "benchmarking execution time..."
 #            ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending;
-            { sudo -u $SUDO_USER time ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending -e $expertmode; } 2>> $OUTPUT_DIR/${benchmark}_${DATASET_NAME}_${date}.txt
+            { sudo -u $SUDO_USER  GLOG_logtostderr=1 GLOG_v=3 time ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending -e $expertmode; } 2>> $OUTPUT_DIR/${benchmark}_${DATASET_NAME}_${date}.txt
+#             sudo -u $SUDO_USER GLOG_logtostderr=1 GLOG_v=3 ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending -e $expertmode;
     else
             echo "benchmarking memory consumption..."
-            { sudo -u $SUDO_USER heaptrack ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending $expertmode; } 2>> $OUTPUT_DIR/${benchmark}_${DATASET_NAME}_${date}.txt
+            { sudo -u $SUDO_USER GLOG_logtostderr=1 GLOG_v=3  heaptrack ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending -e $expertmode; } 2>> $OUTPUT_DIR/${benchmark}_${DATASET_NAME}_${date}.txt
     fi
 
 # "valgrind --tool=massif --stacks=yes --massif-out-file="
