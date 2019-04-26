@@ -49,6 +49,7 @@
 #include <pyramidBuilding/rules/EmptyTileRule.h>
 #include <pyramidBuilding/fastImage/utils/TileRequestBuilder.h>
 #include <pyramidBuilding/fastImage/PyramidTileLoader.h>
+#include <pyramidBuilding/tasks/TileResizer.h>
 #include <mem/Mem.h>
 namespace pb {
 
@@ -226,6 +227,7 @@ namespace pb {
 
             }
 
+
             VLOG(1) << "Execution model : " << std::endl;
             VLOG(1) << "reader threads : " << readerThreads  << std::endl;
             VLOG(1) << "concurrent tiles : " << concurrentTiles  << std::endl;
@@ -249,23 +251,26 @@ namespace pb {
 
             auto *fi = new fi::FastImage<px_t>(tileLoader, 0);
             fi->getFastImageOptions()->setNumberOfViewParallel((uint32_t)concurrentTiles);
-            fi->configureAndRun();
+            fi->getFastImageOptions()->setNumberOfTilesToCache(1);
+            fi->getFastImageOptions()->setTraversalType(fi::TraversalType::DIAGONAL);
+            auto fastImage = fi->configureAndMoveToTaskGraphTask("Fast Image");
 
-                //fi->getFastImageOptions()->setNumberOfTilesToCache(10);
-
-//            auto tgTask = fi->configureAndMoveToTaskGraphTask("Fast Image");
 
 
             uint32_t numTileRow = (uint32_t)(std::ceil( (double)tileRequestBuilder->getFovMetadata()->getFullFovHeight() / pyramidTileSize));
             uint32_t numTileCol = (uint32_t)(std::ceil( (double)tileRequestBuilder->getFovMetadata()->getFullFovWidth() / pyramidTileSize));
 
-            auto graph = new htgs::TaskGraphConf<Tile<px_t>, VoidData>();
+            auto graph = new htgs::TaskGraphConf<VoidData, VoidData>();
+//            graph->setGraphConsumerTask(fastImage);
+
+            auto tileResizer = new TileResizer<px_t>(1,pyramidTileSize, tileRequestBuilder);
+            graph->addEdge(fastImage, tileResizer);
+
+
+
 
             size_t fullFovWidth = tileRequestBuilder->getFullFovWidth();
             size_t fullFovHeight = tileRequestBuilder->getFullFovHeight();
-
-
-
 
             int deepZoomLevel = 0;
             //calculate pyramid depth
@@ -274,7 +279,7 @@ namespace pb {
 
             auto bookkeeper = new htgs::Bookkeeper<Tile<px_t>>();
 
-            graph->setGraphConsumerTask(bookkeeper);
+            graph->addEdge(tileResizer, bookkeeper);
 
             auto writeRule = new WriteTileRule<px_t>();
             auto pyramidRule = new PyramidCacheRule<px_t>(numTileCol,numTileRow);
@@ -304,63 +309,21 @@ namespace pb {
 //            //    auto tiledTiffWriteTask = new PyramidalTiffWriter<px_t>(1,_outputDir, pyramidName, options->getDepth(), gridGenerator);
 //            //    graph->addRuleEdge(bookkeeper, writeRule, tiledTiffWriteTask);
 
+            htgs::TaskGraphSignalHandler::registerTaskGraph(graph);
+            htgs::TaskGraphSignalHandler::registerSignal(SIGTERM);
+
             auto *runtime = new htgs::TaskGraphRuntime(graph);
 
 #ifdef NDEBUG
 #else
-            htgs::TaskGraphSignalHandler::registerTaskGraph(graph);
-                htgs::TaskGraphSignalHandler::registerSignal(SIGTERM);
+//            htgs::TaskGraphSignalHandler::registerTaskGraph(graph);
+//                htgs::TaskGraphSignalHandler::registerSignal(SIGTERM);
 #endif
 
 
             runtime->executeRuntime();
-
-
-
-
-            fi::Traversal traversal = fi::Traversal(fi::TraversalType::DIAGONAL,numTileRow,numTileCol);
-            for (auto step : traversal.getTraversal()) {
-                auto row = step.first, col = step.second;
-                fi->requestTile(row,col,false,0);
-            }
-            fi->finishedRequestingTiles();
-            graph->finishedProducingData();
-
-            //processing each tile
-            while(fi->isGraphProcessingTiles()) {
-
-                auto pview = fi->getAvailableViewBlocking();
-
-                if (pview != nullptr) {
-                    VLOG(3) << "tile received!";
-                    auto view = pview->get();
-                    auto row = view->getRow();
-                    auto col = view->getCol();
-
-                    assert(view->getPyramidLevel() == 0);
-
-                    //we copy to the view data and crop it to the tile dimension
-                    uint32_t r = (uint32_t)col * pyramidTileSize;
-                    uint32_t width = std::min(pyramidTileSize, (uint32_t)(fullFovWidth - r));
-                    uint32_t height = std::min(pyramidTileSize, (uint32_t)(fullFovHeight - row * pyramidTileSize));
-                    px_t *data = new px_t[width * height];
-                    for (auto x =0 ; x < height; x++){
-                        std::copy_n(view->getData() + x * view->getViewWidth(), width, data + x * width);
-                    }
-
-//                    cv::Mat image2(height, width, CV_8U, data);
-//                    auto path2 = "/home/gerardin/Documents/pyramidBuilding/outputs/DEBUG/tiles/" +  std::to_string(row) + "_" + std::to_string(col) + ".png";
-//                    cv::imwrite(path2, image2);
-//                    image2.release();
-
-                    auto tile = std::make_shared<Tile<px_t>>(view->getPyramidLevel(), row, col, width, height, data);
-                    graph->produceData(tile);
-                    pview->releaseMemory();
-                }
-            }
-
-
-
+            fi->requestAllTiles(true,0);
+//            graph->finishedProducingData();
 
             if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
                 std::ostringstream oss;
@@ -386,7 +349,7 @@ namespace pb {
             graph->writeDotToFile("graph", DOTGEN_COLOR_COMP_TIME);
 #endif
 
-            delete fi;
+//            delete fi;
             delete runtime;
             delete downsampler;
             delete tiffImageLoader;

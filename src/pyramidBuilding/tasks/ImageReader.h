@@ -40,8 +40,6 @@ public:
     std::string getName() override { return "Image Reader"; }
 
 
-
-
 private:
     TiffImageLoader<T>* imageLoader;
 

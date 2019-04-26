@@ -35,13 +35,13 @@ endif(APPLE)
 message(libTiff path :  ${TIFF_LIBRARIES} )
 
 #TODO Set only in debug mode
-#find_package(NVTX QUIET)
-#if(NVTX_FOUND)
-#    message(STATUS "FOUND NVTX!")
-#    add_definitions(-DUSE_NVTX)
-#    include_directories(${NVTX_INCLUDE_DIR})
-#    link_libraries(${NVTX_LIBRARIES})
-#endif()
+find_package(NVTX QUIET)
+if(NVTX_FOUND)
+    message(STATUS "FOUND NVTX!")
+    add_definitions(-DUSE_NVTX)
+    include_directories(${NVTX_INCLUDE_DIR})
+    link_libraries(${NVTX_LIBRARIES})
+endif()
 
 # FAST IMAGE pull HTGS transitively
 find_package(FastImage REQUIRED)

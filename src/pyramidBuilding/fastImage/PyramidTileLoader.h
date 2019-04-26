@@ -49,13 +49,14 @@ namespace pb {
         }
 
         uint32_t getNbPyramidLevels() const override {
-            size_t fullFovWidth = _tileRequestBuilder->getFullFovWidth();
-            size_t fullFovHeight = _tileRequestBuilder->getFullFovHeight();
-            uint32_t deepZoomLevel = 0;
-            //calculate pyramid depth
-            auto maxDim = std::max(fullFovWidth,fullFovHeight);
-            deepZoomLevel = uint32_t(ceil(log2(maxDim)) + 1);
-            return deepZoomLevel;
+            return 1;
+//            size_t fullFovWidth = _tileRequestBuilder->getFullFovWidth();
+//            size_t fullFovHeight = _tileRequestBuilder->getFullFovHeight();
+//            uint32_t deepZoomLevel = 0;
+//            //calculate pyramid depth
+//            auto maxDim = std::max(fullFovWidth,fullFovHeight);
+//            deepZoomLevel = uint32_t(ceil(log2(maxDim)) + 1);
+//            return deepZoomLevel;
         }
 
         std::string getName() override {
