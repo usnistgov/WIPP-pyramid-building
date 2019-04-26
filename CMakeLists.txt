@@ -71,4 +71,4 @@ include_directories(src)
 add_subdirectory(test)
 
 add_executable(mainFastImage main.cpp)
-add_executable(main main.cpp src/pyramidBuilding/fastImage/data/PartialFOV.h src/pyramidBuilding/fastImage/data/FITileRequest.h src/pyramidBuilding/tasks/TileResizer.h src/mem/Mem.cpp src/mem/Mem.h)
+add_executable(main main.cpp src/pyramidBuilding/fastImage/data/PartialFOV.h src/pyramidBuilding/fastImage/data/FITileRequest.h src/pyramidBuilding/tasks/TileResizer.h src/mem/Mem.cpp src/mem/Mem.h src/pyramidBuilding/memory/TileAllocator.h)

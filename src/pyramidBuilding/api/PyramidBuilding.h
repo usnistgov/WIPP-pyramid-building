@@ -27,7 +27,7 @@
 #include <pyramidBuilding/utils/AverageDownsampler.h>
 #include <pyramidBuilding/utils/deprecated/BaseTileGeneratorLibTiffWithCache.h>
 #include <pyramidBuilding/utils/StitchingVectorParser.h>
-#include <pyramidBuilding/memory/FOVAllocator.h>
+#include <pyramidBuilding/memory/TileAllocator.h>
 
 #include "pyramidBuilding/data/TileRequest.h"
 #include "pyramidBuilding/utils/deprecated/StitchingVectorParserOld.h"
@@ -267,6 +267,8 @@ namespace pb {
             graph->addEdge(fastImage, tileResizer);
 
 
+            graph->addMemoryManagerEdge("basetile",tileResizer, new TileAllocator<px_t>(pyramidTileSize , pyramidTileSize),100, htgs::MMType::Dynamic);
+
 
 
             size_t fullFovWidth = tileRequestBuilder->getFullFovWidth();
@@ -287,6 +289,7 @@ namespace pb {
             auto tileDownsampler = new TileDownsampler<px_t>(downsamplerThreads, downsampler);
             graph->addEdge(tileDownsampler,bookkeeper); //pyramid higher level tile
             graph->addRuleEdge(bookkeeper, pyramidRule, tileDownsampler); //caching tiles and creating a tile at higher level;
+            graph->addMemoryManagerEdge("tile",tileDownsampler, new TileAllocator<px_t>(pyramidTileSize , pyramidTileSize),100, htgs::MMType::Dynamic);
 
             htgs::ITask< Tile<px_t>, htgs::VoidData> *writeTask = nullptr;
             if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {

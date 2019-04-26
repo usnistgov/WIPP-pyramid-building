@@ -6,7 +6,7 @@
 #define PYRAMIDBUILDING_IMAGEREADER_H
 
 #include <htgs/api/ITask.hpp>
-#include <pyramidBuilding/rules/ReleaseFOVMemoryRule.h>
+#include <pyramidBuilding/rules/ReleaseMemoryRule.h>
 #include <pyramidBuilding/utils/TiffImageLoader.h>
 #include <pyramidBuilding/utils/StitchingVectorParser.h>
 #include <pyramidBuilding/data/FOVWithData.h>
@@ -24,7 +24,7 @@ public:
 
     void executeTask(std::shared_ptr<FOV> data) override {
         std::string filename = data->getFilename();
-        htgs::m_data_t<T> image = this->template getMemory<T>("fov", new ReleaseFOVMemoryRule(1));
+        htgs::m_data_t<T> image = this->template getMemory<T>("fov", new ReleaseMemoryRule(1));
         imageLoader->loadFullImage(image->get(), filename);
         this->addResult(new FOVWithData<T>(data,image));
     }

@@ -71,10 +71,16 @@ namespace pb {
 
                 for (int i = levelLeft -1 ; i >= 0; i--) {
 
-                    newTileData = downsampler->downsample(originalData, width, height);
+                    auto newWidth = static_cast<size_t>(ceil((double) width / 2));
+                    auto newHeight = static_cast<size_t>(ceil((double) height / 2));
 
-                    width = static_cast<size_t>(ceil((double) width / 2));
-                    height = static_cast<size_t>(ceil((double) height / 2));
+
+                    newTileData = new T[newWidth * newHeight]();
+                    downsampler->downsample(newTileData, originalData, width, height);
+
+                    width = newWidth;
+                    height = newHeight;
+
 
                     auto originalLevel = (size_t)(this->maxDeepZoomLevel - 1 - i);
 

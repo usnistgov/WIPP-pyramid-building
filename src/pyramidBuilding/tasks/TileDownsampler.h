@@ -15,6 +15,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include "../utils/Downsampler.h"
 #include "pyramidBuilding/utils/Utils.h"
+#include <pyramidBuilding/rules/ReleaseMemoryRule.h>
 
 namespace pb {
 
@@ -49,11 +50,12 @@ public:
 
         Tile<T> *tile = nullptr;
         T* newTileData = nullptr;
-        T* downsampleData = nullptr;
+        m_data_t<T> downsampleData = nullptr;
+        size_t downsampleWidth = 0, downsampleHeight = 0;
 
         size_t width = 0, height = 0;
 
-        switch (data->getType()){
+        switch (data->getType()) {
             //regular block
             case BlockType::Full:
                 width = block[0]->getWidth() + block[1]->getWidth();
@@ -65,7 +67,11 @@ public:
                 copyTileBlock(newTileData, block[2].get(), width, height, 0, block[0]->getHeight());
                 copyTileBlock(newTileData, block[3].get(), width, height, block[0]->getWidth(), block[0]->getHeight());
 
-                downsampleData = this->downsampler->downsample(newTileData, width, height);
+                downsampleWidth = static_cast<size_t>(ceil((double) width / 2));
+                downsampleHeight = static_cast<size_t>(ceil((double) height / 2));
+
+                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(2), downsampleWidth * downsampleHeight);
+                this->downsampler->downsample(downsampleData->get(), newTileData, width, height);
                 break;
             //right vertical block
             case BlockType::Vertical:
@@ -76,7 +82,11 @@ public:
                 copyTileBlock(newTileData, block[0].get(), width, height, 0, 0);
                 copyTileBlock(newTileData, block[2].get(), width, height, 0, block[0]->getHeight());
 
-                downsampleData = this->downsampler->downsample(newTileData, width, height);
+                downsampleWidth = static_cast<size_t>(ceil((double) width / 2));
+                downsampleHeight = static_cast<size_t>(ceil((double) height / 2));
+
+                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(2), downsampleWidth * downsampleHeight);
+                this->downsampler->downsample(downsampleData->get(), newTileData, width, height);
                 break;
             //bottom horizontal block
             case BlockType::Horizontal:
@@ -87,7 +97,11 @@ public:
                 copyTileBlock(newTileData, block[0].get(), width, height, 0, 0);
                 copyTileBlock(newTileData, block[1].get(), width, height, block[0]->getWidth(), 0);
 
-                downsampleData = this->downsampler->downsample(newTileData, width, height);
+                downsampleWidth = static_cast<size_t>(ceil((double) width / 2));
+                downsampleHeight = static_cast<size_t>(ceil((double) height / 2));
+
+                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(2), downsampleWidth * downsampleHeight);
+                this->downsampler->downsample(downsampleData->get(), newTileData, width, height);
                 break;
             //bottom right single block
             case BlockType::Single:
@@ -97,14 +111,15 @@ public:
                 newTileData = new T[ width * height ]();
                 copyTileBlock(newTileData, block[0].get(), width, height, 0, 0);
 
-                downsampleData = this->downsampler->downsample(newTileData, width, height);
+                downsampleWidth = static_cast<size_t>(ceil((double) width / 2));
+                downsampleHeight = static_cast<size_t>(ceil((double) height / 2));
+
+                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(2), downsampleWidth * downsampleHeight);
+                this->downsampler->downsample(downsampleData->get(), newTileData, width, height);
                 break;
-                default:
+            default:
                     throw std::runtime_error("block was malformed. Size : " + std::to_string(block.size()) );
         }
-
-        auto downsampleWidth = ceil( (double)width / 2);
-        auto downsampleHeight = ceil( (double)height / 2);
 
         std::vector<std::shared_ptr<Tile<T>>> & origin = data->getBlock();
         tile = new Tile<T>(level, row, col, downsampleWidth, downsampleHeight, downsampleData, origin);
@@ -117,7 +132,7 @@ public:
     }
 
     std::string getName() override {
-        return "Create Tile Task";
+        return "Tile Downsampler";
     }
 
     htgs::ITask<TileBlock<T>, Tile<T> > *copy() override {
@@ -125,19 +140,23 @@ public:
     }
 
 private:
-    void copyTileBlock(T *data, Tile<T>* block, size_t fullWidth, size_t fullHeight, size_t colOffset, size_t rowOffset) {
+    void copyTileBlock(T *data, Tile<T>* tile, size_t fullWidth, size_t fullHeight, size_t colOffset, size_t rowOffset) {
 
         //Faster implementation of copy. But does not change computation time because of the overlap with slow IO.
-        for(auto j = 0; j < block->getHeight(); j++){
-            std::copy_n(block->getData() + j * block->getWidth(), block->getWidth(), data + colOffset + (j + rowOffset) * fullWidth);
-        }
+//        for(auto j = 0; j < tile->getHeight(); j++){
+//            std::copy_n(tile->getData() + j * tile->getWidth(), tile->getWidth(), data + colOffset + (j + rowOffset) * fullWidth);
+//        }
         //SLOWER IMPLEMENTATION
-        //        for (size_t j = 0; j < block->getHeight(); j ++) {
-        //            for (size_t i = 0; i < block->getWidth(); i ++) {
-        //                size_t index = fullWidth * ( j + rowOffset) + colOffset + i;
-        //                data[index] = block->getData()[j * block->getWidth() + i];
-        //            }
-        //        }
+                for (size_t j = 0; j < tile->getHeight(); j ++) {
+                    for (size_t i = 0; i < tile->getWidth(); i ++) {
+                        size_t index = fullWidth * ( j + rowOffset) + colOffset + i;
+
+                        auto data2 = tile->getData();
+                        auto value = data2[j * tile->getWidth() + i];
+
+                        data[index] = tile->getData()[j * tile->getWidth() + i];
+                    }
+                }
     }
 
 };

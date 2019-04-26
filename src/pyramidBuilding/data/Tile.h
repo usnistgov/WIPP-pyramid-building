@@ -31,12 +31,18 @@ namespace pb {
          * @param _height the height of this tile.
          * @param _data the underlying data held by this tile.
          */
-        Tile(size_t _level, size_t _row, size_t _col, size_t _width, size_t _height, T *_data) : _level(_level),
+        Tile(size_t _level, size_t _row, size_t _col, size_t _width, size_t _height, m_data_t<T> _data) : _level(_level),
                                                                                                  _row(_row), _col(_col),
                                                                                                  _width(_width),
                                                                                                  _height(_height),
-                                                                                                 _data(_data) {}
+                                                                                                 _memoryData(_data) {}
 
+
+        Tile(size_t _level, size_t _row, size_t _col, size_t _width, size_t _height, T*  _data) : _level(_level),
+                                                                                                          _row(_row), _col(_col),
+                                                                                                          _width(_width),
+                                                                                                          _height(_height),
+                                                                                                          _data(_data) {}
         /***
          * Constructor for a pyramid tile level at levels above the base level.
          * We track the block of tiles which we have downsampled to produce this tile.
@@ -49,9 +55,9 @@ namespace pb {
          * @param _data the underlying data held by this tile.
          * @param origin
          */
-        Tile(size_t _level, size_t _row, size_t _col, size_t _width, size_t _height, T *_data,
+        Tile(size_t _level, size_t _row, size_t _col, size_t _width, size_t _height, m_data_t<T> _data,
              std::vector<std::shared_ptr<Tile<T>>> &origin) : _level(_level), _row(_row), _col(_col), _width(_width),
-                                                              _height(_height), _data(_data), _origin(origin) {}
+                                                              _height(_height), _memoryData(_data), _origin(origin) {}
 
         size_t getLevel() const {
             return _level;
@@ -74,7 +80,16 @@ namespace pb {
         }
 
         T *getData() const {
-            return _data;
+//            if(_data != nullptr){
+//                return _data;
+//            }
+//            else {
+                return _memoryData->get();
+//            }
+        }
+
+        m_data_t<T> getMemoryData() const {
+            return _memoryData;
         }
 
         std::vector<std::shared_ptr<Tile<T>>> &getOrigin() {
@@ -82,8 +97,12 @@ namespace pb {
         }
 
         ~Tile() {
-            delete[] _data;
-            _data = nullptr;
+            //if we stored a raw array
+            if(_data != nullptr){
+                delete _data;
+            }
+            //data must be delete before by calling data->releaseMemory()
+            _memoryData = nullptr;
             VLOG(3) << "Tile destroyed : " << getRow() << "," << getCol() << "," << getLevel() << std::endl;
         }
 
@@ -94,7 +113,8 @@ namespace pb {
         size_t _col = 0;
         size_t _width = 0;
         size_t _height = 0;
-        T *_data = nullptr;
+        m_data_t<T>_memoryData = nullptr;
+        T* _data = nullptr;
         std::vector<std::shared_ptr<Tile<T>>> _origin = {};
 
 

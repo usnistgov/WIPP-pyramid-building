@@ -10,11 +10,11 @@
 
 namespace pb {
 
-    class ReleaseFOVMemoryRule : public htgs::IMemoryReleaseRule {
+    class ReleaseMemoryRule : public htgs::IMemoryReleaseRule {
 
     public:
 
-        ReleaseFOVMemoryRule(size_t releaseCount) : releaseCount(releaseCount) {}
+        ReleaseMemoryRule(size_t releaseCount) : releaseCount(releaseCount) {}
 
         void memoryUsed() override {
             releaseCount--;

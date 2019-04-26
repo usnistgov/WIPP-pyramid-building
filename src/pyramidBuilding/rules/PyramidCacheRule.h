@@ -82,6 +82,7 @@ public:
                     value.reset(); //delete from the origin vector so it can be reclaimed.
                 }
             }
+            data->getMemoryData()->releaseMemory();
         }
 
         //generated all  levels. We are done.

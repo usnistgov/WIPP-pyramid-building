@@ -6,7 +6,7 @@
 #define PYRAMIDBUILDING_TILEBUILDER_H
 
 #include <htgs/api/ITask.hpp>
-#include <pyramidBuilding/rules/ReleaseFOVMemoryRule.h>
+#include <pyramidBuilding/rules/ReleaseMemoryRule.h>
 #include <pyramidBuilding/utils/TiffImageLoader.h>
 #include <pyramidBuilding/utils/StitchingVectorParser.h>
 #include <pyramidBuilding/data/FOVWithData.h>

@@ -36,7 +36,10 @@ class TileResizer : public htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>>
             uint32_t r = (uint32_t)col * pyramidTileSize;
             uint32_t width = std::min(pyramidTileSize, (uint32_t)(fullFovWidth - r));
             uint32_t height = std::min(pyramidTileSize, (uint32_t)(fullFovHeight - row * pyramidTileSize));
-            T *tileData = new T[width * height];
+
+            auto tileMemoryData = this-> template getDynamicMemory<T>("basetile", new ReleaseMemoryRule(2), width * height);
+            auto tileData = tileMemoryData->get();
+
             for (auto x =0 ; x < height; x++){
                 std::copy_n(view->getData() + x * view->getViewWidth(), width, tileData + x * width);
             }
@@ -46,7 +49,7 @@ class TileResizer : public htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>>
 //                    cv::imwrite(path2, image2);
 //                    image2.release();
 
-            auto tile = new Tile<T>(view->getPyramidLevel(), row, col, width, height, tileData);
+            auto tile = new Tile<T>(view->getPyramidLevel(), row, col, width, height, tileMemoryData);
             this->addResult(tile);
 
             data->releaseMemory();

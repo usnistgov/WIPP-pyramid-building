@@ -78,6 +78,8 @@ class DeepZoomTileWriter : public htgs::ITask< Tile<T>, htgs::VoidData > {
                     break;
                 }
             }
+
+            data->getMemoryData()->releaseMemory();
         }
 
         /// \brief Close the tiff file

@@ -19,7 +19,7 @@ namespace pb {
 
     public :
 
-        virtual T* downsample(T *orignalArray, size_t originalWidth, size_t originalHeight) = 0;
+        virtual void downsample(T*destinationArray, T *originalArray, size_t originalWidth, size_t originalHeight) = 0;
 
     };
 

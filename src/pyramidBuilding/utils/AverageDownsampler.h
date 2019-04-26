@@ -20,12 +20,10 @@ namespace pb {
         virtual ~AverageDownsampler() = default;
 
 
-        T* downsample(T *newTileData, size_t width, size_t height) override {
+        void downsample(T* downsampleData,T *newTileData, size_t width, size_t height) override {
 
             auto downsampleWidth = static_cast<size_t>(ceil((double) width / 2));
             auto downsampleHeight = static_cast<size_t>(ceil((double) height / 2));
-
-            T *downsampleData = new T[downsampleWidth * downsampleHeight]();
 
             for (size_t j = 0; j < downsampleHeight - 1; j++) {
                 for (size_t i = 0; i < downsampleWidth - 1; i++) {
@@ -56,8 +54,6 @@ namespace pb {
             downsampleData[downsampleWidth * downsampleHeight - 1] =
                     (newTileData[width * height - 1] + newTileData[width * (height - 1) - 1] +
                      newTileData[width * height - 2] + newTileData[width * (height - 1) - 2]) / 4;
-
-            return downsampleData;
         }
     };
 
