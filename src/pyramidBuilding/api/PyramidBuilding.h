@@ -250,7 +250,7 @@ namespace pb {
 
 
             auto *fi = new fi::FastImage<px_t>(tileLoader, 0);
-            fi->getFastImageOptions()->setNumberOfViewParallel((uint32_t)concurrentTiles);
+            fi->getFastImageOptions()->setNumberOfViewParallel((uint32_t)1);
             fi->getFastImageOptions()->setNumberOfTilesToCache(1);
             fi->getFastImageOptions()->setTraversalType(fi::TraversalType::DIAGONAL);
             auto fastImage = fi->configureAndMoveToTaskGraphTask("Fast Image");

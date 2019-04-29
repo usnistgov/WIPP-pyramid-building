@@ -57,7 +57,9 @@ namespace pb {
          */
         Tile(size_t _level, size_t _row, size_t _col, size_t _width, size_t _height, m_data_t<T> _data,
              std::vector<std::shared_ptr<Tile<T>>> &origin) : _level(_level), _row(_row), _col(_col), _width(_width),
-                                                              _height(_height), _memoryData(_data), _origin(origin) {}
+                                                              _height(_height), _memoryData(_data), _origin(origin) {
+            VLOG(3) << "TEST";
+        }
 
         size_t getLevel() const {
             return _level;
@@ -79,16 +81,16 @@ namespace pb {
             return _height;
         }
 
-        T *getData() const {
-//            if(_data != nullptr){
-//                return _data;
-//            }
-//            else {
+        T *getData() {
+            if(_data != nullptr){
+                return _data;
+            }
+            else {
                 return _memoryData->get();
-//            }
+            }
         }
 
-        m_data_t<T> getMemoryData() const {
+        m_data_t<T> getMemoryData() {
             return _memoryData;
         }
 
@@ -102,7 +104,8 @@ namespace pb {
                 delete _data;
             }
             //data must be delete before by calling data->releaseMemory()
-            _memoryData = nullptr;
+            //_memoryData = nullptr;
+//            assert (_memoryData->get() == nullptr);
             VLOG(3) << "Tile destroyed : " << getRow() << "," << getCol() << "," << getLevel() << std::endl;
         }
 

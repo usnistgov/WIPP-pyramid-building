@@ -7,6 +7,7 @@
 
 #include <math.h>
 #include "Downsampler.h"
+#include <pyramidBuilding/utils/Utils.h>
 
 namespace pb {
 
@@ -54,7 +55,11 @@ namespace pb {
             downsampleData[downsampleWidth * downsampleHeight - 1] =
                     (newTileData[width * height - 1] + newTileData[width * (height - 1) - 1] +
                      newTileData[width * height - 2] + newTileData[width * (height - 1) - 2]) / 4;
+
         }
+
+
+
     };
 
 }

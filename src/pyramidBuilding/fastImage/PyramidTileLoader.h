@@ -73,6 +73,8 @@ namespace pb {
 //                cv::imwrite(path, image);
 //                image.release();
             }
+
+            return 0;
         }
 
 

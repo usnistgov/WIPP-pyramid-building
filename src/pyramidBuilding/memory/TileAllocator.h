@@ -27,7 +27,7 @@ public:
     }
 
     void memFree(T *&memory) override {
-        delete memory;
+        delete[] memory;
     }
 
 };

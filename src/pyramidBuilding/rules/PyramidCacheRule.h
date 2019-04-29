@@ -80,9 +80,10 @@ public:
                 if(value!= nullptr) { //second value can be null for vertical block.
                     removeFromCache(l, value->getRow() * gridCol + value->getCol());
                     value.reset(); //delete from the origin vector so it can be reclaimed.
+                    data->getMemoryData()->releaseMemory();
                 }
             }
-            data->getMemoryData()->releaseMemory();
+
         }
 
         //generated all  levels. We are done.

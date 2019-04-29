@@ -17,6 +17,7 @@
 #include "pyramidBuilding/api/OptionsType.h"
 
 #include <experimental/filesystem>
+#include <pyramidBuilding/utils/Utils.h>
 
 namespace pb {
 
@@ -64,15 +65,17 @@ class DeepZoomTileWriter : public htgs::ITask< Tile<T>, htgs::VoidData > {
             VLOG(2) << "write tile (" << data->getRow() << "," << data->getCol()  << ") at level " << data->getLevel() <<
             " (deepzoom level " << level << ")"  << std::endl;
 
+            printArray("write",data->getMemoryData()->get(), data->getWidth(), data->getHeight());
+
             switch(this->imageDepth){
                 case ImageDepth::_16U : {
-                    cv::Mat image(data->getHeight(), data->getWidth(), CV_16U, data->getData());
+                    cv::Mat image(data->getHeight(), data->getWidth(), CV_16U, data->getMemoryData()->get());
                     cv::imwrite(fullImagePath.string(), image);
                     image.release();
                     break;
                 }
                 case ImageDepth::_8U : {
-                    cv::Mat image(data->getHeight(), data->getWidth(), CV_8U, data->getData());
+                    cv::Mat image(data->getHeight(), data->getWidth(), CV_8U, data->getMemoryData()->get());
                     cv::imwrite(fullImagePath.string(), image);
                     image.release();
                     break;
