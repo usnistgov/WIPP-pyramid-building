@@ -67,9 +67,9 @@ public:
                 copyTileBlock(tempBigTileData, block[2].get(), width, height, 0, block[0]->getHeight());
                 copyTileBlock(tempBigTileData, block[3].get(), width, height, block[0]->getWidth(), block[0]->getHeight());
 
-                VLOG(3) << "downsampling :" << level  << "(" << row << "," << col << ")";
-                VLOG(3) << "big image dim :" << width << "," << height;
-                printArray("tempBigImage", tempBigTileData, width, height);
+//                VLOG(3) << "downsampling :" << level  << "(" << row << "," << col << ")";
+//                VLOG(3) << "big image dim :" << width << "," << height;
+//                printArray("tempBigImage", tempBigTileData, width, height);
 
                 downsampleWidth = static_cast<size_t>(ceil((double) width / 2));
                 downsampleHeight = static_cast<size_t>(ceil((double) height / 2));
@@ -86,9 +86,9 @@ public:
                 copyTileBlock(tempBigTileData, block[0].get(), width, height, 0, 0);
                 copyTileBlock(tempBigTileData, block[2].get(), width, height, 0, block[0]->getHeight());
 
-                VLOG(3) << "downsampling :" << level  << "(" << row << "," << col << ")";
-                VLOG(3) << "big image dim :" << width << "," << height;
-                printArray("tempBigImage", tempBigTileData, width, height);
+//                VLOG(3) << "downsampling :" << level  << "(" << row << "," << col << ")";
+//                VLOG(3) << "big image dim :" << width << "," << height;
+//                printArray("tempBigImage", tempBigTileData, width, height);
 
                 downsampleWidth = static_cast<size_t>(ceil((double) width / 2));
                 downsampleHeight = static_cast<size_t>(ceil((double) height / 2));
@@ -105,9 +105,9 @@ public:
                 copyTileBlock(tempBigTileData, block[0].get(), width, height, 0, 0);
                 copyTileBlock(tempBigTileData, block[1].get(), width, height, block[0]->getWidth(), 0);
 
-                VLOG(3) << "downsampling :" << level  << "(" << row << "," << col << ")";
-                VLOG(3) << "big image dim :" << width << "," << height;
-                printArray("tempBigImage", tempBigTileData, width, height);
+//                VLOG(3) << "downsampling :" << level  << "(" << row << "," << col << ")";
+//                VLOG(3) << "big image dim :" << width << "," << height;
+//                printArray("tempBigImage", tempBigTileData, width, height);
 
                 downsampleWidth = static_cast<size_t>(ceil((double) width / 2));
                 downsampleHeight = static_cast<size_t>(ceil((double) height / 2));
@@ -122,10 +122,10 @@ public:
 
                 tempBigTileData = new T[ width * height ]();
                 copyTileBlock(tempBigTileData, block[0].get(), width, height, 0, 0);
-
-                VLOG(3) << "downsampling :" << level  << "(" << row << "," << col << ")";
-                VLOG(3) << "big image dim :" << width << "," << height;
-                printArray("tempBigImage", tempBigTileData, width, height);
+//
+//                VLOG(3) << "downsampling :" << level  << "(" << row << "," << col << ")";
+//                VLOG(3) << "big image dim :" << width << "," << height;
+//                printArray("tempBigImage", tempBigTileData, width, height);
 
                 downsampleWidth = static_cast<size_t>(ceil((double) width / 2));
                 downsampleHeight = static_cast<size_t>(ceil((double) height / 2));
@@ -147,9 +147,9 @@ public:
 
         assert(level > 0);
 
-        VLOG(3) << "downsampled dim " << downsampleWidth << "," << downsampleHeight;
-
-        printArray("downsampledImage",downsampleData->get(),downsampleWidth,downsampleHeight);
+//        VLOG(3) << "downsampled dim " << downsampleWidth << "," << downsampleHeight;
+//
+//        printArray("downsampledImage",downsampleData->get(),downsampleWidth,downsampleHeight);
 
         this->addResult(tile);
     }

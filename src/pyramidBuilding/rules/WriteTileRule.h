@@ -23,7 +23,9 @@ namespace pb {
     class WriteTileRule : public htgs::IRule<Tile < T>, Tile<T>> {
 
         public:
-            explicit WriteTileRule(size_t level = 0) : level(level) {};
+            explicit WriteTileRule(size_t level = 0) : level(level) {
+                VLOG(3) << "test write tile rule";
+            };
 
             void applyRule(std::shared_ptr<Tile < T>>data,size_t pipelineId) override {
                 size_t l = data->getLevel();

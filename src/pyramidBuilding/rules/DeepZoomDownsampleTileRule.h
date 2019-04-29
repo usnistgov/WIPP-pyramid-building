@@ -93,9 +93,13 @@ namespace pb {
                     originalData = newTileData;
 
                     this->addResult(tile);
+
+                    if(i == levelLeft -1 ){
+                        data->getMemoryData()->releaseMemory();
+                    }
                 }
 
-                data->getMemoryData()->releaseMemory();
+
                 done = true;
                 return;
             }

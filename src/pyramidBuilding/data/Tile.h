@@ -31,11 +31,12 @@ namespace pb {
          * @param _height the height of this tile.
          * @param _data the underlying data held by this tile.
          */
-        Tile(size_t _level, size_t _row, size_t _col, size_t _width, size_t _height, m_data_t<T> _data) : _level(_level),
+        Tile(size_t _level, size_t _row, size_t _col, size_t _width, size_t _height, m_data_t<T> _data, m_data_t<fi::View<T>> originalView) : _level(_level),
                                                                                                  _row(_row), _col(_col),
                                                                                                  _width(_width),
                                                                                                  _height(_height),
-                                                                                                 _memoryData(_data) {}
+                                                                                                 _memoryData(_data),
+                                                                                                 _originalView(originalView) {}
 
 
         Tile(size_t _level, size_t _row, size_t _col, size_t _width, size_t _height, T*  _data) : _level(_level),
@@ -103,6 +104,9 @@ namespace pb {
             if(_data != nullptr){
                 delete _data;
             }
+            if(_originalView != nullptr){
+                _originalView->releaseMemory();
+            }
             //data must be delete before by calling data->releaseMemory()
             //_memoryData = nullptr;
 //            assert (_memoryData->get() == nullptr);
@@ -119,6 +123,7 @@ namespace pb {
         m_data_t<T>_memoryData = nullptr;
         T* _data = nullptr;
         std::vector<std::shared_ptr<Tile<T>>> _origin = {};
+        m_data_t<fi::View<T>> _originalView = nullptr;
 
 
     };

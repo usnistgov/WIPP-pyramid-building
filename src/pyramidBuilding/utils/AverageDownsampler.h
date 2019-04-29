@@ -21,7 +21,7 @@ namespace pb {
         virtual ~AverageDownsampler() = default;
 
 
-        void downsample(T* downsampleData,T *newTileData, size_t width, size_t height) override {
+        void downsample(T* destinationArray,T *originalArray, size_t width, size_t height) override {
 
             auto downsampleWidth = static_cast<size_t>(ceil((double) width / 2));
             auto downsampleHeight = static_cast<size_t>(ceil((double) height / 2));
@@ -29,32 +29,32 @@ namespace pb {
             for (size_t j = 0; j < downsampleHeight - 1; j++) {
                 for (size_t i = 0; i < downsampleWidth - 1; i++) {
                     size_t index = j * downsampleWidth + i;
-                    downsampleData[index] =
-                            (newTileData[2 * j * width + 2 * i] + newTileData[2 * j * width + 2 * i + 1] +
-                             newTileData[2 * (j + 1) * width + 2 * i] + newTileData[2 * (j + 1) * width + 2 * i + 1]) /
+                    destinationArray[index] =
+                            (originalArray[2 * j * width + 2 * i] + originalArray[2 * j * width + 2 * i + 1] +
+                             originalArray[2 * (j + 1) * width + 2 * i] + originalArray[2 * (j + 1) * width + 2 * i + 1]) /
                             4;
                 }
             }
 
             for (size_t i = 0; i < downsampleWidth - 1; i++) {
                 size_t index = (downsampleHeight - 1) * downsampleWidth + i;
-                downsampleData[index] =
-                        (newTileData[(height - 1) * width + 2 * i] + newTileData[(height - 2) * width + 2 * i] +
-                         newTileData[(height - 1) * width + 2 * i + 1] +
-                         newTileData[(height - 2) * width + 2 * i + 1]) / 4;
+                destinationArray[index] =
+                        (originalArray[(height - 1) * width + 2 * i] + originalArray[(height - 2) * width + 2 * i] +
+                         originalArray[(height - 1) * width + 2 * i + 1] +
+                         originalArray[(height - 2) * width + 2 * i + 1]) / 4;
             }
 
             for (size_t i = 0; i < downsampleHeight - 1; i++) {
                 size_t index = downsampleWidth * i + downsampleWidth - 1;
-                downsampleData[index] =
-                        (newTileData[width * 2 * i + width - 1] + newTileData[width * 2 * i + width - 2] +
-                         newTileData[width * (2 * i + 1) + width - 1] + newTileData[width * (2 * i + 1) + width - 1]) /
+                destinationArray[index] =
+                        (originalArray[width * 2 * i + width - 1] + originalArray[width * 2 * i + width - 2] +
+                         originalArray[width * (2 * i + 1) + width - 1] + originalArray[width * (2 * i + 1) + width - 1]) /
                         4;
             }
 
-            downsampleData[downsampleWidth * downsampleHeight - 1] =
-                    (newTileData[width * height - 1] + newTileData[width * (height - 1) - 1] +
-                     newTileData[width * height - 2] + newTileData[width * (height - 1) - 2]) / 4;
+            destinationArray[downsampleWidth * downsampleHeight - 1] =
+                    (originalArray[width * height - 1] + originalArray[width * (height - 1) - 1] +
+                     originalArray[width * height - 2] + originalArray[width * (height - 1) - 2]) / 4;
 
         }
 
