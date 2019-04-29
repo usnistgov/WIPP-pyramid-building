@@ -55,11 +55,16 @@ namespace pb {
 
         void applyRule(std::shared_ptr<Tile<T>> data, size_t pipelineId) override {
 
+
+
             size_t level = data->getLevel();
 
             //We receive the tile at the top of a regular pyramid. We generate deepZoom pyramid extra level
             // by downsampling this tile over and over until we generate a 1x1 pixel tile.
             if (level == this->numLevel - 1) {
+
+                VLOG(3) << "downsampling last tile.";
+                printArray("last tile downsampling", data->getData(), data->getWidth(), data->getHeight());
 
                 T* originalData = data->getData();
                 T* newTileData = nullptr;
@@ -90,6 +95,7 @@ namespace pb {
                     this->addResult(tile);
                 }
 
+                data->getMemoryData()->releaseMemory();
                 done = true;
                 return;
             }

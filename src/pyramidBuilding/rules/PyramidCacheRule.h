@@ -69,6 +69,8 @@ public:
         auto row = data->getRow();
         auto level = data->getLevel();
 
+        VLOG(3) << "tile coming from pyramid cache.";
+        printArray("pyramidCache", data->getData(), data->getWidth(), data->getHeight());
 
         //freeing cache if the incoming tile has ancestors.
         if(level > 0) {
@@ -79,8 +81,8 @@ public:
             for(std::shared_ptr<Tile<T>>& value: data->getOrigin()) {
                 if(value!= nullptr) { //second value can be null for vertical block.
                     removeFromCache(l, value->getRow() * gridCol + value->getCol());
-                    value.reset(); //delete from the origin vector so it can be reclaimed.
-                    data->getMemoryData()->releaseMemory();
+//                    value.reset(); //delete from the origin vector so it can be reclaimed.
+                    value->getMemoryData()->releaseMemory();
                 }
             }
 

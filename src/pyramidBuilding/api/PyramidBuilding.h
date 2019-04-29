@@ -51,6 +51,7 @@
 #include <pyramidBuilding/fastImage/PyramidTileLoader.h>
 #include <pyramidBuilding/tasks/TileResizer.h>
 #include <mem/Mem.h>
+
 namespace pb {
 
     using namespace std::experimental;

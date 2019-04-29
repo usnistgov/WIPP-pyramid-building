@@ -1,4 +1,4 @@
 add_executable(libtiff testLibtiff.cpp)
 add_executable(testbasePerfMultiThreadHTGS testBasePerfMultiThreadHTGS.cpp SimpleReadAndWriteGraph.h)
-add_executable(pyramidBuildingCLITest PyramidBuildingCLITest.cpp)
+add_executable(pyramidBuildingCLITest PyramidBuildingCLITest.cpp ../src/mem/Mem.cpp)
 add_executable(testBasePerf testBasePerf.cpp testBasePerf.h)

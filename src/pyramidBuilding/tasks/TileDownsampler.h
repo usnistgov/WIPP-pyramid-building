@@ -130,6 +130,7 @@ public:
                 downsampleWidth = static_cast<size_t>(ceil((double) width / 2));
                 downsampleHeight = static_cast<size_t>(ceil((double) height / 2));
 
+
                 downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(2), downsampleWidth * downsampleHeight);
                 this->downsampler->downsample(downsampleData->get(), tempBigTileData, width, height);
                 break;
@@ -137,9 +138,7 @@ public:
                     throw std::runtime_error("block was malformed. Size : " + std::to_string(block.size()) );
         }
 
-        VLOG(3) << "downsampled dim " << downsampleWidth << "," << downsampleHeight;
 
-        printArray("downsampledImage",downsampleData->get(),downsampleWidth,downsampleHeight);
 
         std::vector<std::shared_ptr<Tile<T>>> & origin = data->getBlock();
         tile = new Tile<T>(level, row, col, downsampleWidth, downsampleHeight, downsampleData, origin);
@@ -147,6 +146,10 @@ public:
         delete[] tempBigTileData;
 
         assert(level > 0);
+
+        VLOG(3) << "downsampled dim " << downsampleWidth << "," << downsampleHeight;
+
+        printArray("downsampledImage",downsampleData->get(),downsampleWidth,downsampleHeight);
 
         this->addResult(tile);
     }
@@ -167,17 +170,13 @@ private:
 //            std::copy_n(tile->getData() + j * tile->getWidth(), tile->getWidth(), data + colOffset + (j + rowOffset) * fullWidth);
 //        }
 
-        auto data2 = tile->getMemoryData()->get();
+        auto partialData = tile->getMemoryData()->get();
 
         //SLOWER IMPLEMENTATION
                 for (size_t j = 0; j < tile->getHeight(); j ++) {
                     for (size_t i = 0; i < tile->getWidth(); i ++) {
                         size_t index = fullWidth * ( j + rowOffset) + colOffset + i;
-
-
-                        auto value = data2[j * tile->getWidth() + i];
-
-                        data2[index] = tile->getData()[j * tile->getWidth() + i];
+                        data[index] = partialData[j * tile->getWidth() + i];
                     }
                 }
     }
