@@ -67,6 +67,14 @@ public:
                 copyTileBlock(tempBigTileData, block[2].get(), width, height, 0, block[0]->getHeight());
                 copyTileBlock(tempBigTileData, block[3].get(), width, height, block[0]->getWidth(), block[0]->getHeight());
 
+//
+//                block[0].get()->getMemoryData()->releaseMemory();
+//                block[1].get()->getMemoryData()->releaseMemory();
+//                block[2].get()->getMemoryData()->releaseMemory();
+//                block[3].get()->getMemoryData()->releaseMemory();
+//
+//                VLOG(3) << "freeing block : level " << level << "(" << row << "," << col << ")";
+
 //                VLOG(3) << "downsampling :" << level  << "(" << row << "," << col << ")";
 //                VLOG(3) << "big image dim :" << width << "," << height;
 //                printArray("tempBigImage", tempBigTileData, width, height);
@@ -74,7 +82,7 @@ public:
                 downsampleWidth = static_cast<size_t>(ceil((double) width / 2));
                 downsampleHeight = static_cast<size_t>(ceil((double) height / 2));
 
-                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(1), downsampleWidth * downsampleHeight);
+                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(2), downsampleWidth * downsampleHeight);
                 this->downsampler->downsample(downsampleData->get(), tempBigTileData, width, height);
                 break;
             //right vertical block
@@ -86,6 +94,12 @@ public:
                 copyTileBlock(tempBigTileData, block[0].get(), width, height, 0, 0);
                 copyTileBlock(tempBigTileData, block[2].get(), width, height, 0, block[0]->getHeight());
 
+//                block[0].get()->getMemoryData()->releaseMemory();
+//                block[2].get()->getMemoryData()->releaseMemory();
+//
+//                VLOG(3) << "freeing block : level " << level << "(" << row << "," << col << ")";
+
+
 //                VLOG(3) << "downsampling :" << level  << "(" << row << "," << col << ")";
 //                VLOG(3) << "big image dim :" << width << "," << height;
 //                printArray("tempBigImage", tempBigTileData, width, height);
@@ -93,7 +107,7 @@ public:
                 downsampleWidth = static_cast<size_t>(ceil((double) width / 2));
                 downsampleHeight = static_cast<size_t>(ceil((double) height / 2));
 
-                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(1), downsampleWidth * downsampleHeight);
+                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(2), downsampleWidth * downsampleHeight);
                 this->downsampler->downsample(downsampleData->get(), tempBigTileData, width, height);
                 break;
             //bottom horizontal block
@@ -104,6 +118,11 @@ public:
                 tempBigTileData = new T[ width * height ]();
                 copyTileBlock(tempBigTileData, block[0].get(), width, height, 0, 0);
                 copyTileBlock(tempBigTileData, block[1].get(), width, height, block[0]->getWidth(), 0);
+//
+//                block[0].get()->getMemoryData()->releaseMemory();
+//                block[1].get()->getMemoryData()->releaseMemory();
+//
+//                VLOG(3) << "freeing block : level " << level << "(" << row << "," << col << ")";
 
 //                VLOG(3) << "downsampling :" << level  << "(" << row << "," << col << ")";
 //                VLOG(3) << "big image dim :" << width << "," << height;
@@ -112,7 +131,7 @@ public:
                 downsampleWidth = static_cast<size_t>(ceil((double) width / 2));
                 downsampleHeight = static_cast<size_t>(ceil((double) height / 2));
 
-                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(1), downsampleWidth * downsampleHeight);
+                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(2), downsampleWidth * downsampleHeight);
                 this->downsampler->downsample(downsampleData->get(), tempBigTileData, width, height);
                 break;
             //bottom right single block
@@ -123,6 +142,10 @@ public:
                 tempBigTileData = new T[ width * height ]();
                 copyTileBlock(tempBigTileData, block[0].get(), width, height, 0, 0);
 //
+//                block[0].get()->getMemoryData()->releaseMemory();
+//
+//                VLOG(3) << "freeing block : level " << level << "(" << row << "," << col << ")";
+//
 //                VLOG(3) << "downsampling :" << level  << "(" << row << "," << col << ")";
 //                VLOG(3) << "big image dim :" << width << "," << height;
 //                printArray("tempBigImage", tempBigTileData, width, height);
@@ -131,7 +154,7 @@ public:
                 downsampleHeight = static_cast<size_t>(ceil((double) height / 2));
 
 
-                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(1), downsampleWidth * downsampleHeight);
+                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(2), downsampleWidth * downsampleHeight);
                 this->downsampler->downsample(downsampleData->get(), tempBigTileData, width, height);
                 break;
             default:

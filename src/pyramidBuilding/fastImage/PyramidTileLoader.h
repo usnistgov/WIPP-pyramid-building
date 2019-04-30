@@ -64,7 +64,16 @@ namespace pb {
         }
 
         double loadTileFromFile(T *tile, uint32_t row, uint32_t col) override {
-            auto tileRequest = _tileRequestBuilder->getTileRequests().at({row,col});
+
+            auto builder = _tileRequestBuilder->getTileRequests();
+            auto tileRequest = builder[{row,col}];
+
+            //if there is a hole without any info we generate an empty tile
+            if(tileRequest == nullptr){
+                return 0;
+            }
+
+//            auto tileRequest = _tileRequestBuilder->getTileRequests().at({row,col});
 
             for(PartialFOV* fov : tileRequest->getFovs()){
                 _imageLoader->loadPartialImageIntoTile(tile,row,col,fov);

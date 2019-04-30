@@ -109,6 +109,9 @@ namespace pb {
         }
 
         ~Tile() {
+
+            VLOG(3) << "Tile destroyed : " << getRow() << "," << getCol() << "," << getLevel() << std::endl;
+
             //if we stored a raw array
             if(_data != nullptr){
                 delete _data;
@@ -117,14 +120,13 @@ namespace pb {
                 _originalView->releaseMemory();
             }
 
-            if(_memoryData  != nullptr && _memoryData->get() != nullptr){
-                _memoryData->releaseMemory();
-            }
+//            if(_memoryData  != nullptr && _memoryData->get() != nullptr){
+//                _memoryData->releaseMemory();
+//            }
 
             //data must be delete before by calling data->releaseMemory()
             //_memoryData = nullptr;
 //            assert (_memoryData->get() == nullptr);
-            VLOG(3) << "Tile destroyed : " << getRow() << "," << getCol() << "," << getLevel() << std::endl;
         }
 
 

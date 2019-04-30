@@ -41,7 +41,7 @@ public:
         levelCol = numTileCol;
         levelRow = numTileRow;
         for(size_t l=0; l<numLevel; l++){
-            std::array<size_t,2> gridSize = { (size_t)levelCol, (size_t)levelRow };
+            std::array<size_t,2> gridSize = {(size_t)levelRow ,(size_t)levelCol};
             levelGridSizes.push_back(gridSize);
             levelCol = static_cast<size_t>(ceil((double)levelCol/2));
             levelRow = static_cast<size_t>(ceil((double)levelRow /2));
@@ -74,14 +74,17 @@ public:
 
         //freeing cache if the incoming tile has ancestors.
         if(level > 0) {
-            auto gridCol = levelGridSizes[level-1][0];
+            auto gridCol = levelGridSizes[level-1][1];
 
             std::vector<std::shared_ptr<Tile<T>>> &l = this->pyramidCache.at(level - 1);
 
             for(std::shared_ptr<Tile<T>>& value: data->getOrigin()) {
                 if(value!= nullptr) { //second value can be null for vertical block.
-                    removeFromCache(l, value->getRow() * gridCol + value->getCol()); //delete from the overall cache
-//                    value->getMemoryData()->releaseMemory();
+                    auto vRow = value->getRow();
+                    auto vCol = value->getCol();
+                    removeFromCache(l, vRow * gridCol + vCol); //delete from the overall cache
+                    value->getMemoryData()->releaseMemory();
+                    VLOG(3) << "freeing tile : level " << level << "(" << row << "," << col << ")";
                     value.reset(); //delete from the origin vector so it can be reclaimed. // delete from origin vector (shuld be a weak pointer )
 
                 }
@@ -102,9 +105,8 @@ public:
                                           " - grid size at level: " << level << " (" << levelGridSizes[level][0] << "," <<  levelGridSizes[level][1] << ")";
         VLOG(3)  << oss.str() << std::endl;
 
-        auto gridCol = levelGridSizes[level][0];
-        auto gridRow = levelGridSizes[level][1];
-
+        auto gridRow = levelGridSizes[level][0];
+        auto gridCol = levelGridSizes[level][1];
 
         auto SOUTH = (row + 1) * gridCol + col;
         auto NORTH = (row - 1) * gridCol + col;

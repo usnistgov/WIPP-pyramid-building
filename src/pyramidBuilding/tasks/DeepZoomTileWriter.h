@@ -84,9 +84,10 @@ class DeepZoomTileWriter : public htgs::ITask< Tile<T>, htgs::VoidData > {
                 }
             }
 
-//            if(data->getMemoryData() != nullptr){
-//                data->getMemoryData()->releaseMemory();
-//            }
+            if(data->getMemoryData() != nullptr){
+                data->getMemoryData()->releaseMemory();
+                VLOG(3) << "freeing tile : level " << level << "(" << data->getRow() << "," << data->getCol() << ")";
+            }
         }
 
         /// \brief Close the tiff file

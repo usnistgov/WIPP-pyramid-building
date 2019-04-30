@@ -27,6 +27,7 @@ public:
     }
 
     void memFree(T *&memory) override {
+        VLOG(3) << "tile data reclaimed.";
         delete[] memory;
     }
 

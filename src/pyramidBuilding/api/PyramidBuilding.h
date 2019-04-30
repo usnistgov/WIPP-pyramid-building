@@ -264,6 +264,10 @@ namespace pb {
             uint32_t numTileRow = (uint32_t)(std::ceil( (double)tileRequestBuilder->getFovMetadata()->getFullFovHeight() / pyramidTileSize));
             uint32_t numTileCol = (uint32_t)(std::ceil( (double)tileRequestBuilder->getFovMetadata()->getFullFovWidth() / pyramidTileSize));
 
+            VLOG(2) << "number of rows at level 0 : " << numTileRow;
+            VLOG(2) << "number of cols at level 0 : " << numTileCol;
+
+
             auto graph = new htgs::TaskGraphConf<VoidData, VoidData>();
 //            graph->setGraphConsumerTask(fastImage);
 
@@ -303,10 +307,10 @@ namespace pb {
             graph->addEdge(tileDownsampler,bookkeeper); //pyramid higher level tile
             graph->addRuleEdge(bookkeeper, pyramidRule, tileDownsampler); //caching tiles and creating a tile at higher level;
 
-            auto tileCache = numTileRow / 2 * numTileCol /2 * 3 * level + 1;
-            VLOG(3) << "nb of higher level tile available in tile cache: " << tileCache;
+            auto tileCacheSize = numTileRow / 2 * numTileCol /2 * 3 * level + 1;
+            VLOG(3) << "nb of higher level tile available in tile cache: " << tileCacheSize;
 
-            graph->addMemoryManagerEdge("tile",tileDownsampler, new TileAllocator<px_t>(pyramidTileSize , pyramidTileSize), tileCache , htgs::MMType::Dynamic);
+            graph->addMemoryManagerEdge("tile",tileDownsampler, new TileAllocator<px_t>(pyramidTileSize , pyramidTileSize), tileCacheSize , htgs::MMType::Dynamic);
 
             htgs::ITask< Tile<px_t>, htgs::VoidData> *writeTask = nullptr;
             if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
