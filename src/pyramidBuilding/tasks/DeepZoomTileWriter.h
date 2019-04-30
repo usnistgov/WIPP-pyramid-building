@@ -48,6 +48,8 @@ class DeepZoomTileWriter : public htgs::ITask< Tile<T>, htgs::VoidData > {
 
         }
 
+
+
         void executeTask(std::shared_ptr<Tile<T>> data) override {
 
             filesystem::path path = _pathOut;
@@ -62,9 +64,9 @@ class DeepZoomTileWriter : public htgs::ITask< Tile<T>, htgs::VoidData > {
             auto outputFilename =  std::to_string(data->getCol()) + "_" + std::to_string(data->getRow()) + ".png";
             auto fullImagePath = dirPath / outputFilename;
 
-//            VLOG(2) << "write tile (" << data->getRow() << "," << data->getCol()  << ") at level " << data->getLevel() <<
-//            " (deepzoom level " << level << ")"  << std::endl;
-//
+            VLOG(2) << "write tile (" << data->getRow() << "," << data->getCol()  << ") at level " << data->getLevel() <<
+            " (deepzoom level " << level << ")"  << std::endl;
+
 //            printArray("write",data->getData(), data->getWidth(), data->getHeight());
 
             switch(this->imageDepth){
@@ -82,9 +84,9 @@ class DeepZoomTileWriter : public htgs::ITask< Tile<T>, htgs::VoidData > {
                 }
             }
 
-            if(data->getMemoryData() != nullptr){
-                data->getMemoryData()->releaseMemory();
-            }
+//            if(data->getMemoryData() != nullptr){
+//                data->getMemoryData()->releaseMemory();
+//            }
         }
 
         /// \brief Close the tiff file

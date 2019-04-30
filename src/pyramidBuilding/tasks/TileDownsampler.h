@@ -74,7 +74,7 @@ public:
                 downsampleWidth = static_cast<size_t>(ceil((double) width / 2));
                 downsampleHeight = static_cast<size_t>(ceil((double) height / 2));
 
-                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(2), downsampleWidth * downsampleHeight);
+                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(1), downsampleWidth * downsampleHeight);
                 this->downsampler->downsample(downsampleData->get(), tempBigTileData, width, height);
                 break;
             //right vertical block
@@ -93,7 +93,7 @@ public:
                 downsampleWidth = static_cast<size_t>(ceil((double) width / 2));
                 downsampleHeight = static_cast<size_t>(ceil((double) height / 2));
 
-                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(2), downsampleWidth * downsampleHeight);
+                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(1), downsampleWidth * downsampleHeight);
                 this->downsampler->downsample(downsampleData->get(), tempBigTileData, width, height);
                 break;
             //bottom horizontal block
@@ -112,7 +112,7 @@ public:
                 downsampleWidth = static_cast<size_t>(ceil((double) width / 2));
                 downsampleHeight = static_cast<size_t>(ceil((double) height / 2));
 
-                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(2), downsampleWidth * downsampleHeight);
+                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(1), downsampleWidth * downsampleHeight);
                 this->downsampler->downsample(downsampleData->get(), tempBigTileData, width, height);
                 break;
             //bottom right single block
@@ -131,7 +131,7 @@ public:
                 downsampleHeight = static_cast<size_t>(ceil((double) height / 2));
 
 
-                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(2), downsampleWidth * downsampleHeight);
+                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(1), downsampleWidth * downsampleHeight);
                 this->downsampler->downsample(downsampleData->get(), tempBigTileData, width, height);
                 break;
             default:

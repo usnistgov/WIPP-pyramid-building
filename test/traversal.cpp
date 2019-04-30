@@ -3,9 +3,10 @@
 //
 
 #include <iostream>
+#include <cmath>
 
-int maxRow = 6;
-int maxCol = 8;
+int maxRow = 4;
+int maxCol = 7;
 
 bool isValid(int row,int col){
     return(row < maxRow && col < maxCol);
@@ -13,16 +14,24 @@ bool isValid(int row,int col){
 
 void blockTraversal(int row, int col, int width) {
 
+    //deal with matrices not square.
     if(!isValid(row,col)){
         return;
     }
-
-    int newWidth = width / 2;
 
     if(width == 1){
         std::cout << row << "," << col << std::endl;
         return;
     }
+
+    //deal with odd dimensions.
+    int newWidth = (int)ceil((double)width / 2);
+
+    if(newWidth !=1 && newWidth % 2 != 0){
+        ++newWidth;
+    }
+
+    std::cout << "start: " << row << "," << col << std::endl;
 
     blockTraversal(row, col, newWidth);
     blockTraversal(row, col + newWidth, newWidth);
@@ -33,7 +42,8 @@ void blockTraversal(int row, int col, int width) {
 }
 
 int main(){
-    blockTraversal(0, 0,8);
+    auto maxDim = std::max(maxRow, maxCol);
+    blockTraversal(0, 0,maxDim);
 
 
 }

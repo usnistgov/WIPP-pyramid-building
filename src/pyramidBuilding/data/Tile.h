@@ -62,6 +62,15 @@ namespace pb {
             VLOG(3) << "TEST";
         }
 
+        //TODO NOT USED!
+        bool compare(const std::shared_ptr<IData> p2) const override {
+            return this->getOrder() > p2->getOrder();
+        }
+
+        size_t getOrder() const {
+            return _level;
+        }
+
         size_t getLevel() const {
             return _level;
         }
@@ -104,9 +113,14 @@ namespace pb {
             if(_data != nullptr){
                 delete _data;
             }
-            if(_originalView != nullptr){
+            if(_originalView != nullptr && _originalView->get() != nullptr){
                 _originalView->releaseMemory();
             }
+
+            if(_memoryData  != nullptr && _memoryData->get() != nullptr){
+                _memoryData->releaseMemory();
+            }
+
             //data must be delete before by calling data->releaseMemory()
             //_memoryData = nullptr;
 //            assert (_memoryData->get() == nullptr);

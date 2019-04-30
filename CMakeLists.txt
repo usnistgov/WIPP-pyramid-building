@@ -64,6 +64,7 @@ endif(APPLE)
 link_libraries(glog)
 
 add_definitions(-DPROFILE)
+#add_definitions(-DUSE_PRIORITY_QUEUE)
 
 include_directories(src)
 
@@ -71,4 +72,4 @@ include_directories(src)
 add_subdirectory(test)
 
 add_executable(mainFastImage main.cpp)
-add_executable(main main.cpp src/pyramidBuilding/fastImage/data/PartialFOV.h src/pyramidBuilding/fastImage/data/FITileRequest.h src/pyramidBuilding/tasks/TileResizer.h src/mem/Mem.cpp src/mem/Mem.h src/pyramidBuilding/memory/TileAllocator.h)
+add_executable(main main.cpp src/pyramidBuilding/fastImage/data/PartialFOV.h src/pyramidBuilding/fastImage/data/FITileRequest.h src/pyramidBuilding/tasks/TileResizer.h src/mem/Mem.cpp src/mem/Mem.h src/pyramidBuilding/memory/TileAllocator.h src/pyramidBuilding/fastImage/RecursiveBlockTraversal.h)

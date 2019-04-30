@@ -80,9 +80,9 @@ public:
 
             for(std::shared_ptr<Tile<T>>& value: data->getOrigin()) {
                 if(value!= nullptr) { //second value can be null for vertical block.
-                    removeFromCache(l, value->getRow() * gridCol + value->getCol());
-                    value->getMemoryData()->releaseMemory();
-                    value.reset(); //delete from the origin vector so it can be reclaimed.
+                    removeFromCache(l, value->getRow() * gridCol + value->getCol()); //delete from the overall cache
+//                    value->getMemoryData()->releaseMemory();
+                    value.reset(); //delete from the origin vector so it can be reclaimed. // delete from origin vector (shuld be a weak pointer )
 
                 }
             }

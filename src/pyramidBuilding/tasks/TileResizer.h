@@ -24,11 +24,16 @@ class TileResizer : public htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>>
 
     void executeTask(htgs::m_data_t<fi::View <T>> data) override {
 
+
+
+
             auto view = data->get();
             auto row = view->getRow();
             auto col = view->getCol();
             auto fullFovWidth = tileRequestBuilder->getFullFovWidth();
             auto fullFovHeight = tileRequestBuilder->getFullFovHeight();
+
+            VLOG(3) << "tile resizer: " << row << "," << col;
 
             assert(view->getPyramidLevel() == 0);
 
@@ -37,7 +42,7 @@ class TileResizer : public htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>>
             uint32_t width = std::min(pyramidTileSize, (uint32_t)(fullFovWidth - r));
             uint32_t height = std::min(pyramidTileSize, (uint32_t)(fullFovHeight - row * pyramidTileSize));
 
-            auto tileMemoryData = this-> template getDynamicMemory<T>("basetile", new ReleaseMemoryRule(2), width * height);
+            auto tileMemoryData = this-> template getDynamicMemory<T>("basetile", new ReleaseMemoryRule(1), width * height);
             auto tileData = tileMemoryData->get();
 
             for (auto x =0 ; x < height; x++){
@@ -58,6 +63,13 @@ class TileResizer : public htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>>
         htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>> *copy() override {
             return new TileResizer(this->getNumThreads(), pyramidTileSize, tileRequestBuilder);
         }
+
+
+        std::string getName() override {
+        return "Tile Resizer";
+        }
+
+
 
 
     private:
