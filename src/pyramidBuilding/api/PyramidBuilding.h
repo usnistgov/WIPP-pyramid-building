@@ -251,8 +251,8 @@ namespace pb {
 
 
             auto *fi = new fi::FastImage<px_t>(tileLoader, 0);
-            fi->getFastImageOptions()->setNumberOfViewParallel((uint32_t)1);
-            fi->getFastImageOptions()->setNumberOfTilesToCache(1);
+            fi->getFastImageOptions()->setNumberOfViewParallel((uint32_t)4);
+            fi->getFastImageOptions()->setNumberOfTilesToCache(4);
             fi->getFastImageOptions()->setTraversalType(fi::TraversalType::DIAGONAL);
             auto fastImage = fi->configureAndMoveToTaskGraphTask("Fast Image");
 
@@ -268,7 +268,7 @@ namespace pb {
             graph->addEdge(fastImage, tileResizer);
 
 
-            graph->addMemoryManagerEdge("basetile",tileResizer, new TileAllocator<px_t>(pyramidTileSize , pyramidTileSize),100, htgs::MMType::Dynamic);
+            graph->addMemoryManagerEdge("basetile",tileResizer, new TileAllocator<px_t>(pyramidTileSize , pyramidTileSize),200, htgs::MMType::Dynamic);
 
 
 
@@ -290,7 +290,7 @@ namespace pb {
             auto tileDownsampler = new TileDownsampler<px_t>(downsamplerThreads, downsampler);
             graph->addEdge(tileDownsampler,bookkeeper); //pyramid higher level tile
             graph->addRuleEdge(bookkeeper, pyramidRule, tileDownsampler); //caching tiles and creating a tile at higher level;
-            graph->addMemoryManagerEdge("tile",tileDownsampler, new TileAllocator<px_t>(pyramidTileSize , pyramidTileSize),100, htgs::MMType::Dynamic);
+            graph->addMemoryManagerEdge("tile",tileDownsampler, new TileAllocator<px_t>(pyramidTileSize , pyramidTileSize),200, htgs::MMType::Dynamic);
 
             htgs::ITask< Tile<px_t>, htgs::VoidData> *writeTask = nullptr;
             if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
@@ -326,7 +326,9 @@ namespace pb {
 
 
             runtime->executeRuntime();
-            fi->requestAllTiles(true,0);
+//            fi->requestAllTiles(true,0);
+            blockTraversal(fi,numTileRow,numTileCol);
+            fi->finishedRequestingTiles();
 //            graph->finishedProducingData();
 
             if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
@@ -365,49 +367,49 @@ namespace pb {
 
         }
 
+//        template<class px_t>
+//        void recursiveTraversal(fi::FastImage<px_t>* fi, size_t totalNumTileRow, size_t totalNumTileCol, size_t numTileRow, size_t numTileCol) {
+//
+//            if(numTileCol == totalNumTileCol && numTileRow == totalNumTileRow){
+//                return;
+//            }
+//
+//            auto min = std::min(totalNumTileRow - numTileRow, totalNumTileCol - numTileCol);
+//
+//            for (auto i = 0; i < min; i++) {
+//                for (auto j = 0; j < i; j++) {
+//                    auto row = numTileRow + i;
+//                    auto col = numTileCol + j;
+//                    auto tileRequest = new TileRequest(row, col);
+//                    VLOG(2) <<  "(" << row << "," << col << ")" << std::endl;
+//                    graph->produceData(tileRequest);
+//                }
+//                for (auto j = 0; j <= i; j++) {
+//                    auto row = numTileRow + j;
+//                    auto col = numTileCol + i;
+//                    auto tileRequest = new TileRequest(row, col);
+//                    VLOG(2) <<  "(" << row << "," << col << ")"<< std::endl;
+//                    graph->produceData(tileRequest);
+//                }
+//            }
+//
+//            auto colLeft = totalNumTileCol - numTileCol;
+//            auto rowLeft = totalNumTileRow - numTileRow;
+//
+//
+//            if( colLeft > rowLeft){
+//                recursiveTraversal(graph, totalNumTileRow, totalNumTileCol, numTileRow, numTileCol + min);
+//            }
+//            else if( colLeft < rowLeft){
+//                recursiveTraversal(graph, totalNumTileRow, totalNumTileCol, numTileRow + min, numTileCol);
+//            }
+//            else {
+//                recursiveTraversal(graph, totalNumTileRow, totalNumTileCol, numTileRow + min, numTileCol + min);
+//            }
+//        }
+
         template<class px_t>
-        void recursiveTraversal(htgs::TaskGraphConf<TileRequest, Tile<px_t>>* graph, size_t totalNumTileRow, size_t totalNumTileCol, size_t numTileRow, size_t numTileCol) {
-
-            if(numTileCol == totalNumTileCol && numTileRow == totalNumTileRow){
-                return;
-            }
-
-            auto min = std::min(totalNumTileRow - numTileRow, totalNumTileCol - numTileCol);
-
-            for (auto i = 0; i < min; i++) {
-                for (auto j = 0; j < i; j++) {
-                    auto row = numTileRow + i;
-                    auto col = numTileCol + j;
-                    auto tileRequest = new TileRequest(row, col);
-                    VLOG(2) <<  "(" << row << "," << col << ")" << std::endl;
-                    graph->produceData(tileRequest);
-                }
-                for (auto j = 0; j <= i; j++) {
-                    auto row = numTileRow + j;
-                    auto col = numTileCol + i;
-                    auto tileRequest = new TileRequest(row, col);
-                    VLOG(2) <<  "(" << row << "," << col << ")"<< std::endl;
-                    graph->produceData(tileRequest);
-                }
-            }
-
-            auto colLeft = totalNumTileCol - numTileCol;
-            auto rowLeft = totalNumTileRow - numTileRow;
-
-
-            if( colLeft > rowLeft){
-                recursiveTraversal(graph, totalNumTileRow, totalNumTileCol, numTileRow, numTileCol + min);
-            }
-            else if( colLeft < rowLeft){
-                recursiveTraversal(graph, totalNumTileRow, totalNumTileCol, numTileRow + min, numTileCol);
-            }
-            else {
-                recursiveTraversal(graph, totalNumTileRow, totalNumTileCol, numTileRow + min, numTileCol + min);
-            }
-        }
-
-        template<class px_t>
-        void blockTraversal(htgs::TaskGraphConf<TileRequest, Tile<px_t>>* graph, size_t numTileRow, size_t numTileCol) {
+        void blockTraversal(fi::FastImage<px_t>* fi, size_t numTileRow, size_t numTileCol) {
 
             size_t numberBlockHeight,numberBlockWidth = 0;
 
@@ -418,26 +420,29 @@ namespace pb {
             for(size_t j = 0; j < numberBlockHeight; j++){
                 for(size_t i = 0; i < numberBlockWidth; i++){
                     if(2*i < numTileCol && 2*j < numTileRow) {
-                        VLOG(2) << "requesting tile (" << 2*j << "," << 2*i << ")" << std::endl;
-                        auto tileRequest = new TileRequest(2 * j, 2 * i);
-                        graph->produceData(tileRequest);
+//                        VLOG(4) << "requesting tile (" << 2*j << "," << 2*i << ")" << std::endl;
+                  //      auto tileRequest = new TileRequest(2 * j, 2 * i);
+                        fi->requestTile(2*j, 2*i,false,0);
                     }
                     if(2*i+1 < numTileCol) {
-                        VLOG(2) << "requesting tile ("  << 2 * j << "," << 2 * i + 1 << ")" << std::endl;
+//                        VLOG(4) << "requesting tile ("  << 2 * j << "," << 2 * i + 1 << ")" << std::endl;
                         auto tileRequest = new TileRequest(2 * j, 2 * i + 1);
-                        graph->produceData(tileRequest);
+                        fi->requestTile(2*j, 2*i + 1,false,0);
+//                        graph->produceData(tileRequest);
                     }
 
                     if(2*j+1 < numTileRow) {
-                        VLOG(2) << "requesting tile ("  << 2 * j + 1 << "," << 2 * i << ")" << std::endl;
+//                        VLOG(4) << "requesting tile ("  << 2 * j + 1 << "," << 2 * i << ")" << std::endl;
                         auto tileRequest = new TileRequest(2 * j + 1, 2 * i);
-                        graph->produceData(tileRequest);
+                        fi->requestTile(2*j + 1, 2*i,false,0);
+//                        graph->produceData(tileRequest);
                     }
 
                     if(2*j+1 < numTileRow && 2*i+1 < numTileCol) {
-                        VLOG(2) << "requesting tile ("  << 2 * j + 1 << "," << 2 * i + 1 << ")" << std::endl;
+//                        VLOG(4) << "requesting tile ("  << 2 * j + 1 << "," << 2 * i + 1 << ")" << std::endl;
                         auto tileRequest = new TileRequest(2 * j + 1, 2 * i + 1);
-                        graph->produceData(tileRequest);
+                        fi->requestTile(2*j + 1, 2*i + 1,false,0);
+                        //                        graph->produceData(tileRequest);
                     }
                 }
             }

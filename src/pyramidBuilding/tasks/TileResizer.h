@@ -49,10 +49,10 @@ class TileResizer : public htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>>
 //                    cv::imwrite(path2, image2);
 //                    image2.release();
 
-            auto tile = new Tile<T>(view->getPyramidLevel(), row, col, width, height, tileMemoryData);
+            auto tile = new Tile<T>(view->getPyramidLevel(), row, col, width, height, tileMemoryData, data);
             this->addResult(tile);
 
-            data->releaseMemory();
+//            data->releaseMemory();
         }
 
         htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>> *copy() override {
