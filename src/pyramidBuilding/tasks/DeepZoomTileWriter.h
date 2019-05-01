@@ -86,7 +86,7 @@ class DeepZoomTileWriter : public htgs::ITask< Tile<T>, htgs::VoidData > {
 
             if(data->getMemoryData() != nullptr){
                 data->getMemoryData()->releaseMemory();
-                VLOG(3) << "freeing tile : level " << level << "(" << data->getRow() << "," << data->getCol() << ")";
+                VLOG(3) << "freeing tile : level " << data->getLevel() << "(" << data->getRow() << "," << data->getCol() << ")";
             }
         }
 

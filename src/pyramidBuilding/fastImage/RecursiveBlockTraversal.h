@@ -43,7 +43,7 @@ namespace pb {
                 ++newWidth;
             }
 
-//            std::cout << "start: " << row << "," << col << std::endl;
+            std::cout << "start: " << row << "," << col << std::endl;
 
             blockTraversal(row, col, newWidth);
             blockTraversal(row, col + newWidth, newWidth);

@@ -59,6 +59,8 @@ public:
 
     }
 
+    ~PyramidCacheRule() = default;
+
     std::string getName() override {
         return "Pyramid Rule - Cache";
     }
@@ -83,7 +85,7 @@ public:
                     auto vRow = value->getRow();
                     auto vCol = value->getCol();
                     removeFromCache(l, vRow * gridCol + vCol); //delete from the overall cache
-                    value->getMemoryData()->releaseMemory();
+//                    value->getMemoryData()->releaseMemory();
                     VLOG(3) << "freeing tile : level " << level << "(" << row << "," << col << ")";
                     value.reset(); //delete from the origin vector so it can be reclaimed. // delete from origin vector (shuld be a weak pointer )
 
@@ -108,6 +110,8 @@ public:
         auto gridRow = levelGridSizes[level][0];
         auto gridCol = levelGridSizes[level][1];
 
+        pyramidCache.at(level).at(row * gridCol + col) = data;
+
         auto SOUTH = (row + 1) * gridCol + col;
         auto NORTH = (row - 1) * gridCol + col;
         auto EAST = row * gridCol + col + 1;
@@ -117,7 +121,7 @@ public:
         auto SOUTH_WEST = (row +1) * gridCol + col - 1;
         auto SOUTH_EAST = (row +1) * gridCol + col + 1;
 
-        pyramidCache.at(level).at(row * gridCol + col) = data;
+
 
         if(col >= gridCol -1 && row >= gridRow -1 && col % 2 ==0 && row % 2 ==0) {
             VLOG(4) << "corner case : block size 1 " << std::endl;
@@ -166,7 +170,8 @@ public:
                 //sendTile
                 VLOG(4) << "new tile! " << std::endl;
                 std::vector<std::shared_ptr<Tile<T>>> block{ data, pyramidCache.at(level).at(EAST), pyramidCache.at(level).at(SOUTH), pyramidCache.at(level).at(SOUTH_EAST)};
-                this->addResult(new TileBlock<T>(block));
+                auto tileBlock = new TileBlock<T>(block);
+                this->addResult(tileBlock);
             };
         }
 
@@ -179,7 +184,8 @@ public:
                 //sendTile
                 VLOG(4) << "new tile! " << std::endl;
                 std::vector<std::shared_ptr<Tile<T>>> block{ pyramidCache.at(level).at(WEST), data, pyramidCache.at(level).at(SOUTH_WEST), pyramidCache.at(level).at(SOUTH)};
-                this->addResult(new TileBlock<T>(block));
+                auto tileBlock = new TileBlock<T>(block);
+                this->addResult(tileBlock);
             }
         }
 
@@ -192,7 +198,8 @@ public:
                 //sendTile
                 VLOG(4) << "new tile! " << std::endl;
                 std::vector<std::shared_ptr<Tile<T>>> block{ pyramidCache.at(level).at(NORTH), pyramidCache.at(level).at(NORTH_EAST), data, pyramidCache.at(level).at(EAST)};
-                this->addResult(new TileBlock<T>(block));
+                auto tileBlock = new TileBlock<T>(block);
+                this->addResult(tileBlock);
             }
         }
 
@@ -205,7 +212,8 @@ public:
                 //sendTile
                 VLOG(4) << "new tile! " << std::endl;
                 std::vector<std::shared_ptr<Tile<T>>> block{ pyramidCache.at(level).at(NORTH_WEST), pyramidCache.at(level).at(NORTH), pyramidCache.at(level).at(WEST), data};
-                this->addResult(new TileBlock<T>(block));
+                auto tileBlock = new TileBlock<T>(block);
+                this->addResult(tileBlock);
             }
         }
 

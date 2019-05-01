@@ -307,7 +307,7 @@ namespace pb {
             graph->addEdge(tileDownsampler,bookkeeper); //pyramid higher level tile
             graph->addRuleEdge(bookkeeper, pyramidRule, tileDownsampler); //caching tiles and creating a tile at higher level;
 
-            auto tileCacheSize = numTileRow / 2 * numTileCol /2 * 3 * level + 1;
+            auto tileCacheSize = numTileRow * numTileCol * level; //(numTileRow / 2) * (numTileCol /2) * 3 * level + 1;
             VLOG(3) << "nb of higher level tile available in tile cache: " << tileCacheSize;
 
             graph->addMemoryManagerEdge("tile",tileDownsampler, new TileAllocator<px_t>(pyramidTileSize , pyramidTileSize), tileCacheSize , htgs::MMType::Dynamic);

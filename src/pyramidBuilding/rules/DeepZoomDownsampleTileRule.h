@@ -99,7 +99,7 @@ namespace pb {
 //                    }
                 }
 
-
+                data->getMemoryData()->releaseMemory();
                 done = true;
                 return;
             }

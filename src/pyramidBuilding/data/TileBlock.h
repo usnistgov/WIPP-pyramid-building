@@ -32,7 +32,7 @@ namespace pb {
                 auto t = block[0]; //top left tile gives us the block coordinates
                 row = t->getRow() / 2;
                 col = t->getCol() / 2;
-                level = t->getLevel();
+                level = t->getLevel() + 1;
 
                 switch (block.size()) {
                     case 1:

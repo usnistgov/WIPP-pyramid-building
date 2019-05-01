@@ -67,13 +67,13 @@ public:
                 copyTileBlock(tempBigTileData, block[2].get(), width, height, 0, block[0]->getHeight());
                 copyTileBlock(tempBigTileData, block[3].get(), width, height, block[0]->getWidth(), block[0]->getHeight());
 
-//
-//                block[0].get()->getMemoryData()->releaseMemory();
-//                block[1].get()->getMemoryData()->releaseMemory();
-//                block[2].get()->getMemoryData()->releaseMemory();
-//                block[3].get()->getMemoryData()->releaseMemory();
-//
-//                VLOG(3) << "freeing block : level " << level << "(" << row << "," << col << ")";
+                
+                block[0].get()->getMemoryData()->releaseMemory();
+                block[1].get()->getMemoryData()->releaseMemory();
+                block[2].get()->getMemoryData()->releaseMemory();
+                block[3].get()->getMemoryData()->releaseMemory();
+
+                VLOG(3) << "freeing block : level " << level << "(" << row << "," << col << ")";
 
 //                VLOG(3) << "downsampling :" << level  << "(" << row << "," << col << ")";
 //                VLOG(3) << "big image dim :" << width << "," << height;
@@ -94,10 +94,10 @@ public:
                 copyTileBlock(tempBigTileData, block[0].get(), width, height, 0, 0);
                 copyTileBlock(tempBigTileData, block[2].get(), width, height, 0, block[0]->getHeight());
 
-//                block[0].get()->getMemoryData()->releaseMemory();
-//                block[2].get()->getMemoryData()->releaseMemory();
-//
-//                VLOG(3) << "freeing block : level " << level << "(" << row << "," << col << ")";
+                block[0].get()->getMemoryData()->releaseMemory();
+                block[2].get()->getMemoryData()->releaseMemory();
+
+                VLOG(3) << "freeing block : level " << level << "(" << row << "," << col << ")";
 
 
 //                VLOG(3) << "downsampling :" << level  << "(" << row << "," << col << ")";
@@ -118,11 +118,11 @@ public:
                 tempBigTileData = new T[ width * height ]();
                 copyTileBlock(tempBigTileData, block[0].get(), width, height, 0, 0);
                 copyTileBlock(tempBigTileData, block[1].get(), width, height, block[0]->getWidth(), 0);
-//
-//                block[0].get()->getMemoryData()->releaseMemory();
-//                block[1].get()->getMemoryData()->releaseMemory();
-//
-//                VLOG(3) << "freeing block : level " << level << "(" << row << "," << col << ")";
+
+                block[0].get()->getMemoryData()->releaseMemory();
+                block[1].get()->getMemoryData()->releaseMemory();
+
+                VLOG(3) << "freeing block : level " << level << "(" << row << "," << col << ")";
 
 //                VLOG(3) << "downsampling :" << level  << "(" << row << "," << col << ")";
 //                VLOG(3) << "big image dim :" << width << "," << height;
@@ -141,10 +141,10 @@ public:
 
                 tempBigTileData = new T[ width * height ]();
                 copyTileBlock(tempBigTileData, block[0].get(), width, height, 0, 0);
-//
-//                block[0].get()->getMemoryData()->releaseMemory();
-//
-//                VLOG(3) << "freeing block : level " << level << "(" << row << "," << col << ")";
+
+                block[0].get()->getMemoryData()->releaseMemory();
+
+                VLOG(3) << "freeing block : level " << level << "(" << row << "," << col << ")";
 //
 //                VLOG(3) << "downsampling :" << level  << "(" << row << "," << col << ")";
 //                VLOG(3) << "big image dim :" << width << "," << height;

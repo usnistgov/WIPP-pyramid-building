@@ -31,12 +31,13 @@ namespace pb {
          * @param _height the height of this tile.
          * @param _data the underlying data held by this tile.
          */
-        Tile(size_t _level, size_t _row, size_t _col, size_t _width, size_t _height, m_data_t<T> _data, m_data_t<fi::View<T>> originalView) : _level(_level),
+        Tile(size_t _level, size_t _row, size_t _col, size_t _width, size_t _height, m_data_t<T> _data) : _level(_level),
                                                                                                  _row(_row), _col(_col),
                                                                                                  _width(_width),
                                                                                                  _height(_height),
-                                                                                                 _memoryData(_data),
-                                                                                                 _originalView(originalView) {}
+                                                                                                 _memoryData(_data) {
+            VLOG(3) << "TEST";
+        }
 
 
         Tile(size_t _level, size_t _row, size_t _col, size_t _width, size_t _height, T*  _data) : _level(_level),
@@ -116,9 +117,9 @@ namespace pb {
             if(_data != nullptr){
                 delete _data;
             }
-            if(_originalView != nullptr && _originalView->get() != nullptr){
-                _originalView->releaseMemory();
-            }
+//            if(_originalView != nullptr && _originalView->get() != nullptr){
+//                _originalView->releaseMemory();
+//            }
 
 //            if(_memoryData  != nullptr && _memoryData->get() != nullptr){
 //                _memoryData->releaseMemory();
@@ -139,7 +140,7 @@ namespace pb {
         m_data_t<T>_memoryData = nullptr;
         T* _data = nullptr;
         std::vector<std::shared_ptr<Tile<T>>> _origin = {};
-        m_data_t<fi::View<T>> _originalView = nullptr;
+//        m_data_t<fi::View<T>> _originalView = nullptr;
 
 
     };

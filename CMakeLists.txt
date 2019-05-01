@@ -71,5 +71,57 @@ include_directories(src)
 #TODO add only for tests
 add_subdirectory(test)
 
-add_executable(mainFastImage main.cpp)
-add_executable(main main.cpp src/pyramidBuilding/fastImage/data/PartialFOV.h src/pyramidBuilding/fastImage/data/FITileRequest.h src/pyramidBuilding/tasks/TileResizer.h src/mem/Mem.cpp src/mem/Mem.h src/pyramidBuilding/memory/TileAllocator.h src/pyramidBuilding/fastImage/RecursiveBlockTraversal.h)
+set(SRC_FILES
+        src/mem/Mem.cpp
+        src/mem/Mem.h
+        src/pyramidBuilding/api/CommandLineCli.h
+        src/pyramidBuilding/api/OptionsType.h
+        src/pyramidBuilding/api/PyramidBuilding.h
+        src/pyramidBuilding/data/deprecated/PartialFovOld.h
+        src/pyramidBuilding/data/BlockType.h
+        src/pyramidBuilding/data/FOV.h
+        src/pyramidBuilding/data/FOVMetadata.h
+        src/pyramidBuilding/data/FOVWithData.h
+        src/pyramidBuilding/data/Tile.h
+        src/pyramidBuilding/data/TileBlock.h
+        src/pyramidBuilding/data/TileRequest.h
+        src/pyramidBuilding/fastImage/data/FITileRequest.h
+        src/pyramidBuilding/fastImage/data/PartialFOV.h
+        src/pyramidBuilding/fastImage/utils/TileRequestBuilder.h
+        src/pyramidBuilding/fastImage/PyramidTileLoader.h
+        src/pyramidBuilding/fastImage/RecursiveBlockTraversal.h
+        src/pyramidBuilding/memory/FOVAllocator.h
+        src/pyramidBuilding/memory/TileAllocator.h
+        src/pyramidBuilding/rules/DeepZoomDownsampleTileRule.h
+        src/pyramidBuilding/rules/EmptyTileRule.h
+        src/pyramidBuilding/rules/FOVTileRule.h
+        src/pyramidBuilding/rules/PyramidCacheRule.h
+        src/pyramidBuilding/rules/ReleaseMemoryRule.h
+        src/pyramidBuilding/rules/WriteTileRule.h
+        src/pyramidBuilding/tasks/deprecated
+        src/pyramidBuilding/tasks/deprecated/BaseTileTask.h
+        src/pyramidBuilding/tasks/DeepZoomTileWriter.h
+        src/pyramidBuilding/tasks/ImageReader.h
+        src/pyramidBuilding/tasks/PyramidalTiffWriter.h
+        src/pyramidBuilding/tasks/TileBuilder.h
+        src/pyramidBuilding/tasks/TileDownsampler.h
+        src/pyramidBuilding/tasks/TileResizer.h
+        src/pyramidBuilding/utils/deprecated/BaseTileGenerator.h
+        src/pyramidBuilding/utils/deprecated/BaseTileGeneratorFastImage.h
+        src/pyramidBuilding/utils/deprecated/BaseTileGeneratorLibTiff.h
+        src/pyramidBuilding/utils/deprecated/BaseTileGeneratorLibTiffWithCache.h
+        src/pyramidBuilding/utils/deprecated/Blender.h
+        src/pyramidBuilding/utils/deprecated/StitchedFOVTileLoader.h
+        src/pyramidBuilding/utils/deprecated/StitchingVectorParserOld.h
+        src/pyramidBuilding/utils/deprecated/TileCache.h
+        src/pyramidBuilding/utils/AverageDownsampler.h
+        src/pyramidBuilding/utils/Downsampler.h
+        src/pyramidBuilding/utils/FOVCache.h
+        src/pyramidBuilding/utils/StitchingVectorParser.h
+        src/pyramidBuilding/utils/TiffImageLoader.h
+        src/pyramidBuilding/utils/Utils.h)
+
+#add_executable(mainFastImage main.cpp)
+add_executable(main main.cpp
+        ${SRC_FILES}
+        src/pyramidBuilding/fastImage/data/PartialFOV.h src/pyramidBuilding/fastImage/data/FITileRequest.h src/pyramidBuilding/tasks/TileResizer.h src/mem/Mem.cpp src/mem/Mem.h src/pyramidBuilding/memory/TileAllocator.h src/pyramidBuilding/fastImage/RecursiveBlockTraversal.h)
