@@ -13,8 +13,8 @@ int main(){
 //    auto numTileRow = 61;
 //    auto numTileCol = 88;
 
-    auto numTileRow = 12;
-    auto numTileCol = 8;
+    uint32_t numTileRow = 12;
+    uint32_t numTileCol = 8;
 
     auto count = 0;
 
