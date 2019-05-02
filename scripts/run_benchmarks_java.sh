@@ -19,8 +19,8 @@ if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
     exit 1
 fi
 
-OPTIONS=i:v:o:t:d:n:b
-LONGOPTS=images:,vector:,output:,tilesize:,depth:,name:,blending:,cache:,threads:,
+OPTIONS=i:v:o:t:d:n:b:k:
+LONGOPTS=images:,vector:,output:,tilesize:,depth:,name:,blending:,benchmark:,cache:,threads:,
 
 # -use ! and PIPESTATUS to get exit code with errexit set
 # -temporarily store output to be able to check for errors
@@ -37,7 +37,8 @@ eval set -- "$PARSED"
 
 echo $PARSED
 
-images="" vector="" output="" tilesize=256 depth="8U" name="output" blending="max" cache=0,threads=10
+images="" vector="" output="" tilesize=256 depth="8U" name="output" blending="max" blending="overlay" benchmark="exectime"
+cache=0 threads=10
 # now enjoy the options in order and nicely split until we see --
 while true; do
     case "$1" in
@@ -69,6 +70,10 @@ while true; do
             blending="$2"
             shift 2
             ;;
+        -k|--benchmark)
+            benchmark="$2"
+            shift 2
+            ;;
         --cache)
             cache="$2"
             shift 2
@@ -88,59 +93,80 @@ while true; do
     esac
 done
 
+
+
 # handle non-option arguments
-if [[ $# -ne 4 ]]; then
+if [[ $# -lt 1 ]]; then
     echo "$0: Problem parsing command line. Unparsed : $@"
     exit 4
 fi
 
-export GLOG_logtostderr=1;
-export GLOG_v=0
+mkdir -p results
+mkdir -p results/massif
 
-echo "exec path: " $3
+date=$(date +"%m_%d_%Y_%T")
+
+CLEAR_CACHE=0;
+export GLOG_logtostderr=1;
+export GLOG_v=4
+
+
 EXEC_PATH=$3
 EXEC_NAME=pyramidio-1.1.1-SNAPSHOT-jar-with-dependencies.jar
+DATASET_NAME=${1}
+RUNS=${2-1}
+OUTPUT_DIR=$4
+MASSIF_DIR=massif
+
+OUTPUT_FILE=$OUTPUT_DIR/${DATASET_NAME}_${date}.txt
+
+echo "exec path: " $3
+echo "output dir: " $4
+echo "output file: " $OUTPUT_FILE
+
+for ((i = 1; i <= $RUNS; i++))
+    do
+        if [[ "$OSTYPE" == "linux-gnu" ]]; then
+            echo "linux detected - can clear cache";
+            CLEAR_CACHE=1;
+        else
+            echo "not a linux OS - cannot clear cache";
+        fi
+
+        if [[ "$CLEAR_CACHE" == "1" ]]; then
+                sudo bash -c "sync; echo 1 > /proc/sys/vm/drop_caches"
+        fi
+
+        echo "checking if sources need to be recompiled..."
+        echo "[TODO - NOT IMPLEMENTED]"
+
+        echo "images: $images" >> $OUTPUT_FILE
+        echo "stitching vector: $vector" >> $OUTPUT_FILE
+        echo "output: $output" >> $OUTPUT_FILE
+        echo "tilesize: $tilesize, imageCache: $cache, threads: $threads " >> $OUTPUT_FILE
+
+    if [[ "$benchmark" == "exectime" ]]; then
+            echo "benchmarking execution time..."
+            cd $EXEC_PATH;
+            { java -jar pyramidio-1.1.1-SNAPSHOT-jar-with-dependencies.jar $images $vector $output $tilesize $cache $threads ; }
+#             { time  java -jar pyramidio-1.1.1-SNAPSHOT-jar-with-dependencies.jar $images $vector $output $tilesize $cache $threads ; } 2>> $OUTPUT_DIR/${benchmark}_${DATASET_NAME}_${date}.txt
+#             sudo -u $SUDO_USER GLOG_logtostderr=1 GLOG_v=3 ../cmake-build-release/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending -e $expertmode;
+    else
+            echo "benchmarking memory consumption..."
+
+    fi
+
+# "valgrind --tool=massif --stacks=yes --massif-out-file="
+#            { valgrind --tool=massif --stacks=yes --massif-out-file=$OUTPUT_DIR/$MASSIF_DIR/${DATASET_NAME}_${date}.txt ../cmake-build-debug/main -i $images -v $vector -o $output -t $tilesize -d $depth -n $name -b $blending; } 2>> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
+
+echo "benchmarks completed."
+
+done
+
+
+
+
 
 
 
 #java -jar pyramidio-1.1.1-SNAPSHOT-jar-with-dependencies.jar /home/gerardin/Documents/images/dataset7/tiled-images /home/gerardin/Documents/images/dataset7/img-global-positions-0.txt /home/gerardin/Documents/pyramidio-java/outputs
-
-DATASET_NAME=${1}
-RUNS=${2-1}
-OUTPUT_DIR=$4
-
-mkdir -p results
-
-date=$(date +"%m_%d_%Y_%T")
-
-
-if [[ "$OSTYPE" == "linux-gnu" ]]; then
-    echo "linux detected - can clear cache";
-    CLEAR_CACHE=1;
-else
-    echo "not a linux OS - cannot clear cache";
-fi
-
-#if [[ "$CLEAR_CACHE" == "1" ]]; then
-#        sudo bash -c "sync; echo 1 > /proc/sys/vm/drop_caches"
-#fi
-
-echo "ok? $RUNS"
-
-for ((i = 1; i <= $RUNS; i++))
-    do
-            if [[ "$CLEAR_CACHE" == "1" ]]; then
-                        sudo bash -c "sync; echo 1 > /proc/sys/vm/drop_caches"
-            fi
-
-                cd ${EXEC_PATH}
-                 echo `pwd`
-#                  { java -jar pyramidio-1.1.1-SNAPSHOT-jar-with-dependencies.jar $images $vector $output -t $tilesize ; }
-                echo "images: $images" >> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
-                echo "stitching vector: $vector" >> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
-                echo "output: $output" >> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
-                echo "tilesize: $tilesize, imageCache: $cache, threads: $threads " >> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
-             { time  java -jar pyramidio-1.1.1-SNAPSHOT-jar-with-dependencies.jar $images $vector $output $tilesize $cache $threads ; } 2>> $OUTPUT_DIR/${DATASET_NAME}_${date}.txt
-done
-
-echo "done"

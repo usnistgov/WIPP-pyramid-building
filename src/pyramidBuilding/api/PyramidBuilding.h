@@ -246,6 +246,7 @@ namespace pb {
             std::string format = "png";
 
             auto tileRequestBuilder = std::make_shared<TileRequestBuilder>(_inputDir, _inputVector, pyramidTileSize);
+
             auto tiffImageLoader = new TiffImageLoader<px_t>(_inputDir, pyramidTileSize);
 
             auto tileLoader = new PyramidTileLoader<px_t>(readerThreads, tileRequestBuilder, tiffImageLoader, pyramidTileSize);
@@ -253,8 +254,8 @@ namespace pb {
 
 
             auto *fi = new fi::FastImage<px_t>(tileLoader, 0);
-            fi->getFastImageOptions()->setNumberOfViewParallel((uint32_t)4);
-            fi->getFastImageOptions()->setNumberOfTilesToCache(4);
+            fi->getFastImageOptions()->setNumberOfViewParallel((uint32_t)concurrentTiles);
+            fi->getFastImageOptions()->setNumberOfTilesToCache(concurrentTiles);
             fi->getFastImageOptions()->setTraversalType(fi::TraversalType::DIAGONAL);
             fi->getFastImageOptions()->setPreserveOrder(true);
             auto fastImage = fi->configureAndMoveToTaskGraphTask("Fast Image");
@@ -263,7 +264,7 @@ namespace pb {
 
             uint32_t numTileRow = (uint32_t)(std::ceil( (double)tileRequestBuilder->getFovMetadata()->getFullFovHeight() / pyramidTileSize));
             uint32_t numTileCol = (uint32_t)(std::ceil( (double)tileRequestBuilder->getFovMetadata()->getFullFovWidth() / pyramidTileSize));
-
+            auto pyramid = new Pyramid(numTileRow,numTileCol);
             VLOG(2) << "number of rows at level 0 : " << numTileRow;
             VLOG(2) << "number of cols at level 0 : " << numTileCol;
 
@@ -271,11 +272,11 @@ namespace pb {
             auto graph = new htgs::TaskGraphConf<VoidData, VoidData>();
 //            graph->setGraphConsumerTask(fastImage);
 
-            auto tileResizer = new TileResizer<px_t>(1,pyramidTileSize, tileRequestBuilder);
+            auto tileResizer = new TileResizer<px_t>(builderThreads,pyramidTileSize, tileRequestBuilder);
             graph->addEdge(fastImage, tileResizer);
 
 
-            graph->addMemoryManagerEdge("basetile",tileResizer, new TileAllocator<px_t>(pyramidTileSize , pyramidTileSize),4, htgs::MMType::Dynamic);
+            graph->addMemoryManagerEdge("basetile",tileResizer, new TileAllocator<px_t>(pyramidTileSize , pyramidTileSize),concurrentTiles, htgs::MMType::Dynamic);
 
 
 
@@ -307,7 +308,8 @@ namespace pb {
             graph->addEdge(tileDownsampler,bookkeeper); //pyramid higher level tile
             graph->addRuleEdge(bookkeeper, pyramidRule, tileDownsampler); //caching tiles and creating a tile at higher level;
 
-            auto tileCacheSize = numTileRow * numTileCol * level; //(numTileRow / 2) * (numTileCol /2) * 3 * level + 1;
+//            auto tileCacheSize = numTileRow * numTileCol * level; //(numTileRow / 2) * (numTileCol /2) * 3 * level + 1;
+            auto tileCacheSize = (3 * (pyramid->getNumLevel() -1 ) + 1 ) * concurrentTiles / 4;
             VLOG(3) << "nb of higher level tile available in tile cache: " << tileCacheSize;
 
             graph->addMemoryManagerEdge("tile",tileDownsampler, new TileAllocator<px_t>(pyramidTileSize , pyramidTileSize), tileCacheSize , htgs::MMType::Dynamic);
@@ -349,7 +351,7 @@ namespace pb {
 
 
     //        fi->requestAllTiles(true,0);
-            auto traversal = new RecursiveBlockTraversal(numTileRow,numTileCol);
+            auto traversal = new RecursiveBlockTraversal(pyramid);
             for(auto step : traversal->getTraversal()){
                 auto row = step.first;
                 auto col = step.second;

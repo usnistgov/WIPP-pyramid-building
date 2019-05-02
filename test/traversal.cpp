@@ -13,12 +13,14 @@ int main(){
 //    auto numTileRow = 61;
 //    auto numTileCol = 88;
 
-    uint32_t numTileRow = 12;
-    uint32_t numTileCol = 8;
+    uint32_t numTileRow = 8;
+    uint32_t numTileCol = 11;
 
     auto count = 0;
 
-    auto traversal = new pb::RecursiveBlockTraversal(numTileRow,numTileCol);
+    auto pyramid = new pb::Pyramid(numTileRow, numTileCol);
+
+    auto traversal = new pb::RecursiveBlockTraversal(pyramid);
 
     for(auto step : traversal->getTraversal()){
         count++;

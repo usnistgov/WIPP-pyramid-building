@@ -119,7 +119,7 @@ set(SRC_FILES
         src/pyramidBuilding/utils/FOVCache.h
         src/pyramidBuilding/utils/StitchingVectorParser.h
         src/pyramidBuilding/utils/TiffImageLoader.h
-        src/pyramidBuilding/utils/Utils.h)
+        src/pyramidBuilding/utils/Utils.h src/pyramidBuilding/data/Pyramid.h)
 
 #add_executable(mainFastImage main.cpp)
 add_executable(main main.cpp
