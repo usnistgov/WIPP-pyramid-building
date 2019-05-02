@@ -80,11 +80,11 @@ set(SRC_FILES
         src/pyramidBuilding/data/FOVMetadata.h
         src/pyramidBuilding/data/Tile.h
         src/pyramidBuilding/data/TileBlock.h
-        src/pyramidBuilding/fastImage/data/FITileRequest.h
-        src/pyramidBuilding/fastImage/data/PartialFOV.h
-        src/pyramidBuilding/fastImage/utils/PyramidBuilder.h
-        src/pyramidBuilding/fastImage/PyramidTileLoader.h
-        src/pyramidBuilding/fastImage/RecursiveBlockTraversal.h
+        src/pyramidBuilding/pyramid/data/TileRequest.h
+        src/pyramidBuilding/pyramid/data/PartialFOV.h
+        src/pyramidBuilding/pyramid/PyramidBuilder.h
+        src/pyramidBuilding/pyramid/fastImage/PyramidTileLoader.h
+        src/pyramidBuilding/pyramid/RecursiveBlockTraversal.h
         src/pyramidBuilding/memory/TileAllocator.h
         src/pyramidBuilding/rules/DeepZoomDownsampleTileRule.h
         src/pyramidBuilding/rules/PyramidCacheRule.h
@@ -97,10 +97,10 @@ set(SRC_FILES
         src/pyramidBuilding/utils/deprecated/Blender.h
         src/pyramidBuilding/utils/AverageDownsampler.h
         src/pyramidBuilding/utils/Downsampler.h
-        src/pyramidBuilding/utils/TiffImageLoader.h
+        src/pyramidBuilding/pyramid/TiffImageLoader.h
         src/pyramidBuilding/utils/Utils.h src/pyramidBuilding/data/Pyramid.h src/pyramidBuilding/data/BlockType.h)
 
 #add_executable(mainFastImage main.cpp)
 add_executable(main main.cpp
         ${SRC_FILES}
-        src/pyramidBuilding/fastImage/data/PartialFOV.h src/pyramidBuilding/fastImage/data/FITileRequest.h src/pyramidBuilding/tasks/TileResizer.h src/mem/Mem.cpp src/mem/Mem.h src/pyramidBuilding/memory/TileAllocator.h src/pyramidBuilding/fastImage/RecursiveBlockTraversal.h)
+        src/pyramidBuilding/pyramid/data/PartialFOV.h src/pyramidBuilding/pyramid/data/TileRequest.h src/pyramidBuilding/tasks/TileResizer.h src/mem/Mem.cpp src/mem/Mem.h src/pyramidBuilding/memory/TileAllocator.h src/pyramidBuilding/pyramid/RecursiveBlockTraversal.h)

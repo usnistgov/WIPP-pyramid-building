@@ -35,10 +35,10 @@
 #include "pyramidBuilding/tasks/TileDownsampler.h"
 #include "pyramidBuilding/data/Tile.h"
 #include "pyramidBuilding/utils/AverageDownsampler.h"
-#include <pyramidBuilding/fastImage/utils/PyramidBuilder.h>
-#include <pyramidBuilding/fastImage/PyramidTileLoader.h>
+#include <pyramidBuilding/pyramid/PyramidBuilder.h>
+#include <pyramidBuilding/pyramid/fastImage/PyramidTileLoader.h>
 #include <pyramidBuilding/tasks/TileResizer.h>
-#include <pyramidBuilding/fastImage/RecursiveBlockTraversal.h>
+#include <pyramidBuilding/pyramid/RecursiveBlockTraversal.h>
 #include <mem/Mem.h>
 
 namespace pb {

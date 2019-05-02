@@ -18,7 +18,7 @@
 #include "pyramidBuilding/api/OptionsType.h"
 
 #include <experimental/filesystem>
-#include <pyramidBuilding/fastImage/utils/PyramidBuilder.h>
+#include <pyramidBuilding/pyramid/PyramidBuilder.h>
 #include <pyramidBuilding/data/Pyramid.h>
 
 namespace pb {

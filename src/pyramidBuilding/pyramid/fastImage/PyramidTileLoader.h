@@ -7,10 +7,10 @@
 
 #include <FastImage/api/FastImage.h>
 #include <FastImage/api/ATileLoader.h>
-#include <pyramidBuilding/utils/TiffImageLoader.h>
-#include <pyramidBuilding/fastImage/utils/PyramidBuilder.h>
-#include <pyramidBuilding/fastImage/data/PartialFOV.h>
-#include <pyramidBuilding/fastImage/data/FITileRequest.h>
+#include <pyramidBuilding/pyramid/TiffImageLoader.h>
+#include <pyramidBuilding/pyramid/PyramidBuilder.h>
+#include <pyramidBuilding/pyramid/data/PartialFOV.h>
+#include <pyramidBuilding/pyramid/data/TileRequest.h>
 
 namespace pb {
 

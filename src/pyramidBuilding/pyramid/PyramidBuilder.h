@@ -23,8 +23,8 @@
 #include <glog/logging.h>
 #include <pyramidBuilding/api/OptionsType.h>
 #include <pyramidBuilding/data/FOVMetadata.h>
-#include <pyramidBuilding/fastImage/data/PartialFOV.h>
-#include <pyramidBuilding/fastImage/data/FITileRequest.h>
+#include <pyramidBuilding/pyramid/data/PartialFOV.h>
+#include <pyramidBuilding/pyramid/data/TileRequest.h>
 #include <pyramidBuilding/api/PyramidBuilding.h>
 #include <pyramidBuilding/data/Pyramid.h>
 
@@ -47,7 +47,7 @@ namespace pb {
         uint32_t maxCol = 0;
 
         std::shared_ptr<FOVMetadata> fovMetadata = nullptr;
-        std::map<std::pair<size_t,size_t>, FITileRequest*> tileRequests = {};
+        std::map<std::pair<size_t,size_t>, TileRequest*> tileRequests = {};
         Pyramid pyramid;
 
 
@@ -194,7 +194,7 @@ namespace pb {
                         }
                         else {
                             std::vector<PartialFOV*> fovs({fov});
-                            tileRequests.insert(std::make_pair(index, new FITileRequest(tileRow, tileCol, fovs)));
+                            tileRequests.insert(std::make_pair(index, new TileRequest(tileRow, tileCol, fovs)));
                         }
                     }
                 }
@@ -250,7 +250,7 @@ namespace pb {
             return maxCol;
         }
 
-        const std::map<std::pair<size_t, size_t>, FITileRequest *> &getTileRequests() const {
+        const std::map<std::pair<size_t, size_t>, TileRequest *> &getTileRequests() const {
             return tileRequests;
         }
 

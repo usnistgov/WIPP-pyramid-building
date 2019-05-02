@@ -13,7 +13,7 @@
 #include <glog/logging.h>
 #include <tiffio.h>
 #include <experimental/filesystem>
-#include <pyramidBuilding/fastImage/data/PartialFOV.h>
+#include <pyramidBuilding/pyramid/data/PartialFOV.h>
 #include "htgs/api/MemoryData.hpp"
 
 namespace pb {

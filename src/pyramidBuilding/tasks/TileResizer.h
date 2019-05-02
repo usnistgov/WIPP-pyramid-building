@@ -7,7 +7,7 @@
 
 #include <pyramidBuilding/data/Tile.h>
 #include <htgs/api/ITask.hpp>
-#include <pyramidBuilding/fastImage/utils/PyramidBuilder.h>
+#include <pyramidBuilding/pyramid/PyramidBuilder.h>
 
 namespace pb {
 
