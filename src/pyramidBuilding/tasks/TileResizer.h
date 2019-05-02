@@ -7,7 +7,7 @@
 
 #include <pyramidBuilding/data/Tile.h>
 #include <htgs/api/ITask.hpp>
-#include <pyramidBuilding/fastImage/utils/TileRequestBuilder.h>
+#include <pyramidBuilding/fastImage/utils/PyramidBuilder.h>
 
 namespace pb {
 
@@ -19,7 +19,7 @@ class TileResizer : public htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>>
 
     public:
 
-        TileResizer(size_t numThreads, uint32_t pyramidTileSize, const std::shared_ptr<TileRequestBuilder> &tileRequestBuilder) : htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>> (numThreads), pyramidTileSize(pyramidTileSize), tileRequestBuilder(tileRequestBuilder) {}
+        TileResizer(size_t numThreads, uint32_t pyramidTileSize, const std::shared_ptr<PyramidBuilder> &tileRequestBuilder) : htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>> (numThreads), pyramidTileSize(pyramidTileSize), tileRequestBuilder(tileRequestBuilder) {}
 
 
     void executeTask(htgs::m_data_t<fi::View <T>> data) override {
@@ -74,7 +74,7 @@ class TileResizer : public htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>>
 
     private:
         uint32_t pyramidTileSize = 0;
-        std::shared_ptr<TileRequestBuilder> tileRequestBuilder;
+        std::shared_ptr<PyramidBuilder> tileRequestBuilder;
 
 };
 

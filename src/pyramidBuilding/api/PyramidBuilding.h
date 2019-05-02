@@ -23,15 +23,8 @@
 #include <sstream>
 #include <experimental/filesystem>
 #include <glog/logging.h>
-#include <pyramidBuilding/utils/deprecated/BaseTileGeneratorFastImage.h>
 #include <pyramidBuilding/utils/AverageDownsampler.h>
-#include <pyramidBuilding/utils/deprecated/BaseTileGeneratorLibTiffWithCache.h>
-#include <pyramidBuilding/utils/StitchingVectorParser.h>
 #include <pyramidBuilding/memory/TileAllocator.h>
-
-#include "pyramidBuilding/data/TileRequest.h"
-#include "pyramidBuilding/utils/deprecated/StitchingVectorParserOld.h"
-#include "pyramidBuilding/utils/deprecated/BaseTileGeneratorLibTiff.h"
 #include "pyramidBuilding/tasks/DeepZoomTileWriter.h"
 #include "pyramidBuilding/rules/DeepZoomDownsampleTileRule.h"
 #include "OptionsType.h"
@@ -40,14 +33,9 @@
 #include "pyramidBuilding/rules/WriteTileRule.h"
 #include "pyramidBuilding/rules/PyramidCacheRule.h"
 #include "pyramidBuilding/tasks/TileDownsampler.h"
-#include "pyramidBuilding/tasks/deprecated/BaseTileTask.h"
 #include "pyramidBuilding/data/Tile.h"
 #include "pyramidBuilding/utils/AverageDownsampler.h"
-#include "pyramidBuilding/tasks/ImageReader.h"
-#include <pyramidBuilding/tasks/TileBuilder.h>
-#include <pyramidBuilding/rules/FOVTileRule.h>
-#include <pyramidBuilding/rules/EmptyTileRule.h>
-#include <pyramidBuilding/fastImage/utils/TileRequestBuilder.h>
+#include <pyramidBuilding/fastImage/utils/PyramidBuilder.h>
 #include <pyramidBuilding/fastImage/PyramidTileLoader.h>
 #include <pyramidBuilding/tasks/TileResizer.h>
 #include <pyramidBuilding/fastImage/RecursiveBlockTraversal.h>
@@ -229,6 +217,10 @@ namespace pb {
 
             }
 
+            if(concurrentTiles < 4) {
+                VLOG(1) << "WARNING : System be configured with at least 4 concurrent tiles. Default to 4 tiles.";
+                concurrentTiles = 4;
+            }
 
 
             VLOG(1) << "Execution model : " << std::endl;
@@ -245,85 +237,55 @@ namespace pb {
             uint32_t overlap = 0;
             std::string format = "png";
 
-            auto tileRequestBuilder = std::make_shared<TileRequestBuilder>(_inputDir, _inputVector, pyramidTileSize);
+            //parse the stitching vector and create the problem representation
+            auto pyramidBuilder = std::make_shared<PyramidBuilder>(_inputDir, _inputVector, pyramidTileSize);
 
+            //INIT
+            auto graph = new htgs::TaskGraphConf<VoidData, VoidData>();
+            //basic info
+            auto pyramid = pyramidBuilder->getPyramid();
+            auto numTileRow = pyramid.getNumTileRow(0);
+            auto numTileCol = pyramid.getNumTileCol(0);
+            size_t fullFovWidth = pyramidBuilder->getFullFovWidth();
+            size_t fullFovHeight = pyramidBuilder->getFullFovHeight();
+            auto level = pyramid.getNumLevel();
+            auto maxDim = std::max(fullFovWidth,fullFovHeight);
+            auto deepZoomLevel = int(ceil(log2(maxDim)) + 1);
+
+            //GENERATING TILES
             auto tiffImageLoader = new TiffImageLoader<px_t>(_inputDir, pyramidTileSize);
-
-            auto tileLoader = new PyramidTileLoader<px_t>(readerThreads, tileRequestBuilder, tiffImageLoader, pyramidTileSize);
-
-
-
+            auto tileLoader = new PyramidTileLoader<px_t>(readerThreads, pyramidBuilder, tiffImageLoader, pyramidTileSize);
             auto *fi = new fi::FastImage<px_t>(tileLoader, 0);
             fi->getFastImageOptions()->setNumberOfViewParallel((uint32_t)concurrentTiles);
-            fi->getFastImageOptions()->setNumberOfTilesToCache(concurrentTiles);
-            fi->getFastImageOptions()->setTraversalType(fi::TraversalType::DIAGONAL);
+            fi->getFastImageOptions()->setNumberOfTilesToCache((uint32_t)concurrentTiles);
             fi->getFastImageOptions()->setPreserveOrder(true);
             auto fastImage = fi->configureAndMoveToTaskGraphTask("Fast Image");
 
-
-
-            uint32_t numTileRow = (uint32_t)(std::ceil( (double)tileRequestBuilder->getFovMetadata()->getFullFovHeight() / pyramidTileSize));
-            uint32_t numTileCol = (uint32_t)(std::ceil( (double)tileRequestBuilder->getFovMetadata()->getFullFovWidth() / pyramidTileSize));
-            auto pyramid = new Pyramid(numTileRow,numTileCol);
-            VLOG(2) << "number of rows at level 0 : " << numTileRow;
-            VLOG(2) << "number of cols at level 0 : " << numTileCol;
-
-
-            auto graph = new htgs::TaskGraphConf<VoidData, VoidData>();
-//            graph->setGraphConsumerTask(fastImage);
-
-            auto tileResizer = new TileResizer<px_t>(builderThreads,pyramidTileSize, tileRequestBuilder);
+            //RESIZING TILES
+            auto tileResizer = new TileResizer<px_t>(builderThreads,pyramidTileSize, pyramidBuilder);
             graph->addEdge(fastImage, tileResizer);
 
-
-            graph->addMemoryManagerEdge("basetile",tileResizer, new TileAllocator<px_t>(pyramidTileSize , pyramidTileSize),concurrentTiles, htgs::MMType::Dynamic);
-
-
-
-            size_t fullFovWidth = tileRequestBuilder->getFullFovWidth();
-            size_t fullFovHeight = tileRequestBuilder->getFullFovHeight();
-
-            int deepZoomLevel = 0;
-            //calculate pyramid depth
-            auto maxDim = std::max(fullFovWidth,fullFovHeight);
-            deepZoomLevel = int(ceil(log2(maxDim)) + 1);
-
-
-
-            int level = 0;
-            auto maxGridDim = std::max(numTileRow,numTileCol);
-            level = ceil(log2(maxGridDim));
-
-//            writerThreads = 20;
-
-
+            //CACHE
             auto bookkeeper = new htgs::Bookkeeper<Tile<px_t>>();
-
             graph->addEdge(tileResizer, bookkeeper);
-
             auto writeRule = new WriteTileRule<px_t>();
             auto pyramidRule = new PyramidCacheRule<px_t>(numTileCol,numTileRow);
+
+            //DOWNSAMPLING TILES
             auto downsampler = new AverageDownsampler<px_t>();
             auto tileDownsampler = new TileDownsampler<px_t>(downsamplerThreads, downsampler);
-            graph->addEdge(tileDownsampler,bookkeeper); //pyramid higher level tile
             graph->addRuleEdge(bookkeeper, pyramidRule, tileDownsampler); //caching tiles and creating a tile at higher level;
+            graph->addEdge(tileDownsampler,bookkeeper); //pyramid higher level tile
 
-//            auto tileCacheSize = numTileRow * numTileCol * level; //(numTileRow / 2) * (numTileCol /2) * 3 * level + 1;
-            auto tileCacheSize = (3 * (pyramid->getNumLevel() -1 ) + 1 ) * concurrentTiles / 4;
-            VLOG(3) << "nb of higher level tile available in tile cache: " << tileCacheSize;
-
-            graph->addMemoryManagerEdge("tile",tileDownsampler, new TileAllocator<px_t>(pyramidTileSize , pyramidTileSize), tileCacheSize , htgs::MMType::Dynamic);
-
+            //WRITING TILE
             htgs::ITask< Tile<px_t>, htgs::VoidData> *writeTask = nullptr;
             if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
                 auto outputPath = filesystem::path(_outputDir) / (pyramidName + "_files");
                 writeTask = new DeepZoomTileWriter<px_t>(writerThreads, outputPath, deepZoomLevel, this->options->getDepth());
             }
-            graph->addRuleEdge(bookkeeper, writeRule, writeTask); //exiting the graph;
+            graph->addRuleEdge(bookkeeper, writeRule, writeTask);
 
-
-            //TODO CHECK for now we link to the writeTask but do not use it. We could.
-            // If large latency in write, it could be worthwhile. Otherwise thread management will dominate.
+            //DOWNSAMPLING LAST TILE FOR DEEPZOOM COMPATIBILITY
             if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
                 auto outputPath = filesystem::path(_outputDir) / (pyramidName + "_files");
                 auto deepzoomDownsamplingRule = new DeepZoomDownsampleTileRule<px_t>(numTileCol, numTileRow, deepZoomLevel,
@@ -335,6 +297,15 @@ namespace pb {
 //            //    auto tiledTiffWriteTask = new PyramidalTiffWriter<px_t>(1,_outputDir, pyramidName, options->getDepth(), gridGenerator);
 //            //    graph->addRuleEdge(bookkeeper, writeRule, tiledTiffWriteTask);
 
+            //MEMORY MANAGEMENT
+            graph->addMemoryManagerEdge("basetile",tileResizer, new TileAllocator<px_t>(pyramidTileSize , pyramidTileSize),concurrentTiles, htgs::MMType::Dynamic);
+            //dimension to not deadlock for each branch of recursive block traversal
+            auto tileCacheSize = (3 * (pyramid.getNumLevel() -1 ) + 1 ) * concurrentTiles / 4;
+            VLOG(3) << "nb of higher level tile available in tile cache: " << tileCacheSize;
+            graph->addMemoryManagerEdge("tile",tileDownsampler, new TileAllocator<px_t>(pyramidTileSize , pyramidTileSize), tileCacheSize , htgs::MMType::Dynamic);
+
+
+            //DEBUG
             htgs::TaskGraphSignalHandler::registerTaskGraph(graph);
             htgs::TaskGraphSignalHandler::registerSignal(SIGTERM);
 
@@ -349,8 +320,7 @@ namespace pb {
 
             runtime->executeRuntime();
 
-
-    //        fi->requestAllTiles(true,0);
+            //REQUEST TILES
             auto traversal = new RecursiveBlockTraversal(pyramid);
             for(auto step : traversal->getTraversal()){
                 auto row = step.first;
@@ -358,16 +328,16 @@ namespace pb {
 //                VLOG(3) << row << "," << col;
                 fi->requestTile(row,col,false,0);
             }
-
             fi->finishedRequestingTiles();
             graph->finishedProducingData();
 
+            //GENERATING DEEPZOOM METADATA FILE
             if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
                 std::ostringstream oss;
                 oss << R"(<?xml version="1.0" encoding="utf-8"?><Image TileSize=")" << pyramidTileSize << "\" Overlap=\""
                     << overlap
                     << "\" Format=\"" << format << R"(" xmlns="http://schemas.microsoft.com/deepzoom/2008"><Size Width=")"
-                    << tileRequestBuilder->getFullFovWidth() << "\" Height=\"" << tileRequestBuilder->getFullFovHeight()
+                    << pyramidBuilder->getFullFovWidth() << "\" Height=\"" << pyramidBuilder->getFullFovHeight()
                     << "\"/></Image>";
 
                 std::ofstream outFile;
@@ -375,7 +345,6 @@ namespace pb {
                 outFile << oss.str();
                 outFile.close();
             }
-
 
             runtime->waitForRuntime();
 

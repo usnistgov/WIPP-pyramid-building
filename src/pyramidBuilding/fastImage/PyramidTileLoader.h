@@ -8,7 +8,7 @@
 #include <FastImage/api/FastImage.h>
 #include <FastImage/api/ATileLoader.h>
 #include <pyramidBuilding/utils/TiffImageLoader.h>
-#include <pyramidBuilding/fastImage/utils/TileRequestBuilder.h>
+#include <pyramidBuilding/fastImage/utils/PyramidBuilder.h>
 #include <pyramidBuilding/fastImage/data/PartialFOV.h>
 #include <pyramidBuilding/fastImage/data/FITileRequest.h>
 
@@ -19,21 +19,21 @@ namespace pb {
 
     public:
 
-        PyramidTileLoader(size_t numThreads, std::shared_ptr<TileRequestBuilder> tileRequestBuilder, TiffImageLoader<T>* imageLoader, size_t pyramidTileSize) : fi::ATileLoader<T>("", numThreads), _tileRequestBuilder(tileRequestBuilder), _imageLoader(imageLoader), _pyramidTileSize(pyramidTileSize) {
+        PyramidTileLoader(size_t numThreads, std::shared_ptr<PyramidBuilder> pyramidBuilder, TiffImageLoader<T>* imageLoader, size_t pyramidTileSize) : fi::ATileLoader<T>("", numThreads), _pyramidBuilder(pyramidBuilder), _imageLoader(imageLoader), _pyramidTileSize(pyramidTileSize) {
 
         }
 
         //TODO CHECK. Problem might occur when duplicating this loader.
         fi::ATileLoader<T> *copyTileLoader() override {
-            return new PyramidTileLoader(this->getNumThreads(), this->_tileRequestBuilder, this->_imageLoader, this->_pyramidTileSize);
+            return new PyramidTileLoader(this->getNumThreads(), this->_pyramidBuilder, this->_imageLoader, this->_pyramidTileSize);
         }
 
         uint32_t getImageHeight(uint32_t level) const override {
-            return _tileRequestBuilder->getFullFovHeight();
+            return _pyramidBuilder->getFullFovHeight();
         }
 
         uint32_t getImageWidth(uint32_t level) const override {
-            return _tileRequestBuilder->getFullFovWidth();
+            return _pyramidBuilder->getFullFovWidth();
         }
 
         uint32_t getTileWidth(uint32_t level) const override {
@@ -45,13 +45,13 @@ namespace pb {
         }
 
         short getBitsPerSample() const override {
-            return _tileRequestBuilder->getFovMetadata()->getBitsPerSample();
+            return _pyramidBuilder->getFovMetadata()->getBitsPerSample();
         }
 
         uint32_t getNbPyramidLevels() const override {
             return 1;
-//            size_t fullFovWidth = _tileRequestBuilder->getFullFovWidth();
-//            size_t fullFovHeight = _tileRequestBuilder->getFullFovHeight();
+//            size_t fullFovWidth = _pyramidBuilder->getFullFovWidth();
+//            size_t fullFovHeight = _pyramidBuilder->getFullFovHeight();
 //            uint32_t deepZoomLevel = 0;
 //            //calculate pyramid depth
 //            auto maxDim = std::max(fullFovWidth,fullFovHeight);
@@ -65,7 +65,7 @@ namespace pb {
 
         double loadTileFromFile(T *tile, uint32_t row, uint32_t col) override {
 
-            auto builder = _tileRequestBuilder->getTileRequests();
+            auto builder = _pyramidBuilder->getTileRequests();
             auto tileRequest = builder[{row,col}];
 
             //if there is a hole without any info we generate an empty tile
@@ -73,7 +73,7 @@ namespace pb {
                 return 0;
             }
 
-//            auto tileRequest = _tileRequestBuilder->getTileRequests().at({row,col});
+//            auto tileRequest = _pyramidBuilder->getTileRequests().at({row,col});
 
             for(PartialFOV* fov : tileRequest->getFovs()){
                 _imageLoader->loadPartialImageIntoTile(tile,row,col,fov);
@@ -92,7 +92,7 @@ namespace pb {
 
     private:
 
-        std::shared_ptr<TileRequestBuilder> _tileRequestBuilder;
+        std::shared_ptr<PyramidBuilder> _pyramidBuilder;
         TiffImageLoader<T>* _imageLoader;
         size_t _pyramidTileSize;
 

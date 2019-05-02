@@ -7,7 +7,7 @@
 
 #include <htgs/api/ITask.hpp>
 #include <FastImage/api/FastImage.h>
-#include "pyramidBuilding/data/TileBlock.h"
+#include <pyramidBuilding/data/TileBlock.h>
 #include <opencv/cv.h>
 #include <opencv2/imgproc.hpp>
 
@@ -15,7 +15,8 @@
 #include <opencv2/imgcodecs.hpp>
 #include "../utils/Downsampler.h"
 #include "pyramidBuilding/utils/Utils.h"
-#include <pyramidBuilding/rules/ReleaseMemoryRule.h>
+#include <pyramidBuilding/memory/ReleaseMemoryRule.h>
+#include <pyramidBuilding/data/BlockType.h>
 
 namespace pb {
 

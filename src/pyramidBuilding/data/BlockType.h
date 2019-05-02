@@ -1,5 +1,5 @@
 //
-// Created by Gerardin, Antoine D. (Assoc) on 12/27/18.
+// Created by gerardin on 5/2/19.
 //
 
 #ifndef PYRAMIDBUILDING_BLOCKTYPE_H
@@ -8,6 +8,7 @@
 #include <string>
 
 namespace pb {
+
 
     enum class BlockType {
         Single, //single block (bottom right or top-level)
@@ -30,6 +31,8 @@ namespace pb {
                 return "block error";
         }
     }
+
 }
+
 
 #endif //PYRAMIDBUILDING_BLOCKTYPE_H

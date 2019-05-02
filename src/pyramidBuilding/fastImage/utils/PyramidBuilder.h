@@ -2,8 +2,8 @@
 // Created by Gerardin, Antoine D. (Assoc) on 4/9/19.
 //
 
-#ifndef PYRAMIDBUILDING_STITCHINGVECTORPARSER_H
-#define PYRAMIDBUILDING_STITCHINGVECTORPARSER_H
+#ifndef PYRAMIDBUILDING_TILEREQUESTBUILDER_H
+#define PYRAMIDBUILDING_TILEREQUESTBUILDER_H
 
 #include <sstream>
 #include <string>
@@ -23,12 +23,14 @@
 #include <glog/logging.h>
 #include <pyramidBuilding/api/OptionsType.h>
 #include <pyramidBuilding/data/FOVMetadata.h>
-#include <pyramidBuilding/data/FOV.h>
+#include <pyramidBuilding/fastImage/data/PartialFOV.h>
+#include <pyramidBuilding/fastImage/data/FITileRequest.h>
 #include <pyramidBuilding/api/PyramidBuilding.h>
+#include <pyramidBuilding/data/Pyramid.h>
 
 namespace pb {
 
-    class StitchingVectorParser {
+    class PyramidBuilder {
 
 
     private:
@@ -37,11 +39,6 @@ namespace pb {
         std::string stitchingVectorPath;
         uint32_t pyramidTileSize;
 
-        std::map<std::pair<size_t,size_t>, FOV*> grid;
-        std::map<std::pair<size_t,size_t>, u_int8_t> fovUsageCount = {};
-        std::map<std::pair<size_t,size_t>, std::vector<std::pair<size_t,size_t>>> fovUsage = {};
-
-        std::shared_ptr<FOVMetadata> fovMetadata = nullptr;
 
         uint32_t fullFovWidth = 0;
         uint32_t fullFovHeight = 0;
@@ -49,7 +46,9 @@ namespace pb {
         uint32_t maxRow = 0;
         uint32_t maxCol = 0;
 
-        u_int8_t maxFovUsage = 0;
+        std::shared_ptr<FOVMetadata> fovMetadata = nullptr;
+        std::map<std::pair<size_t,size_t>, FITileRequest*> tileRequests = {};
+        Pyramid pyramid;
 
 
 
@@ -59,7 +58,7 @@ namespace pb {
          * @param imageDirectoryPath where to locate the FOVs
          * @param stitchingVectorPath  where to locate the corresponding stitching vector.
          */
-        StitchingVectorParser(const std::string &imageDirectoryPath,
+        PyramidBuilder(const std::string &imageDirectoryPath,
                                  const std::string &stitchingVectorPath, uint32_t pyramidTileSize) :
                 imageDirectoryPath(imageDirectoryPath),
                 stitchingVectorPath(stitchingVectorPath),
@@ -130,9 +129,10 @@ namespace pb {
 
                     TIFF *tiff = TIFFOpen((imageDirectoryPath + filename).c_str(), "r");
                     if(tiff == nullptr){
-                        std::string errorMsg = "unable to open tiff file: " + imageDirectoryPath + filename +
-                                               ". Please check that the stitching vector matches the image folder.";
-                        throw std::runtime_error(errorMsg);
+
+                        std::ostringstream err;
+                        err << "unable to open tiff file:" << imageDirectoryPath <<  filename << ". Please check that the stitching vector matches the image folder.";
+                        throw std::runtime_error(err.str());
                     }
 
                     uint32_t width = 0, height = 0, tileWidth = 0, tileHeight = 0;
@@ -159,11 +159,6 @@ namespace pb {
                     fovMetadata->setTileHeight(tileHeight);
                 }
 
-                //Coordinates are inversed to keep consistency => (row,col)
-                std::pair<size_t,size_t> index= std::make_pair(row,col);
-
-                auto fov = new FOV(filename,row,col,fovGlobalX,fovGlobalY, fovMetadata);
-
                 uint32_t colMin = fovGlobalX / pyramidTileSize;
                 uint32_t rowMin = fovGlobalY / pyramidTileSize;
                 uint32_t colMax = (fovGlobalX + fovMetadata->getWidth() - 1) / pyramidTileSize;
@@ -171,19 +166,41 @@ namespace pb {
 
                 for(auto tileCol = colMin; tileCol <= colMax; tileCol++){
                     for (auto tileRow = rowMin; tileRow <= rowMax; tileRow++){
-                        fovUsageCount[{tileRow,tileCol}] += 1;
-                        if(fovUsageCount[{tileRow,tileCol}] > maxFovUsage){ maxFovUsage = fovUsageCount[{tileRow,tileCol}];}
 
-                        //if big_mode
-                        auto originX = tileCol * pyramidTileSize - fovGlobalX;
-                        auto originY = tileRow * pyramidTileSize - fovGlobalY;
-                        auto width = colMax - colMin;
-                        auto height = rowMax - rowMin;
+                        std::pair<size_t,size_t> index = std::make_pair(tileRow,tileCol);
 
-                        fovUsage[{tileRow,tileCol}].push_back({row,col});
+                        auto startX = std::max(tileCol * pyramidTileSize, fovGlobalX);
+                        auto startY = std::max(tileRow * pyramidTileSize, fovGlobalY);
+                        auto endX = std::min(fovGlobalX + fovMetadata->getWidth(), (tileCol + 1) * pyramidTileSize);
+                        auto endY = std::min(fovGlobalY + fovMetadata->getHeight(), (tileRow + 1) * pyramidTileSize);
+
+                        auto width = endX - startX;
+                        auto height = endY - startY;
+
+                        auto fovOverlap = new PartialFOV::Overlap(startX - fovGlobalX, startY - fovGlobalY, width, height);
+
+
+                        auto tileOverlapX = startX - tileCol * pyramidTileSize;
+                        auto tileOverlapY = startY - tileRow * pyramidTileSize;
+
+                        auto tileOverlap = new PartialFOV::Overlap(tileOverlapX,tileOverlapY, width, height);
+
+                        auto fov = new PartialFOV(filename, fovOverlap, tileOverlap);
+
+                        auto it = tileRequests.find(index);
+
+                        if(it != tileRequests.end()) {
+                            it->second->getFovs().push_back(fov);
+                        }
+                        else {
+                            std::vector<PartialFOV*> fovs({fov});
+                            tileRequests.insert(std::make_pair(index, new FITileRequest(tileRow, tileCol, fovs)));
+                        }
                     }
                 }
             }
+
+            infile.close();
 
             //dimensions of the fullFOV
             fullFovWidth = maxFovGlobalX + fovMetadata->getWidth();
@@ -194,19 +211,24 @@ namespace pb {
             fovMetadata->setMaxRow(maxRow);
             fovMetadata->setMaxCol(maxCol);
 
+            pyramid = Pyramid(fullFovWidth,fullFovHeight, pyramidTileSize);
+
             VLOG(3) << "parsing info : " << std::endl;
             VLOG(3) << "fov grid max row : " << maxRow << std::endl;
             VLOG(3) << "fov grid max col : " << maxCol << std::endl;
             VLOG(3) << "full fov width : " << fullFovWidth << std::endl;
             VLOG(3) << "full fov height : " << fullFovHeight << std::endl;
-
-            infile.close();
         }
 
 
-        const std::map<std::pair<size_t, size_t>, FOV *> &getGrid() const {
-            return grid;
+        ~PyramidBuilder(){
+            for(auto tileRequestEntry : tileRequests){
+                delete tileRequestEntry.second;
+            }
+            tileRequests.clear();
+            fovMetadata.reset();
         }
+
 
         const std::shared_ptr<FOVMetadata> getFovMetadata() const {
             return fovMetadata;
@@ -228,32 +250,15 @@ namespace pb {
             return maxCol;
         }
 
-        std::map<std::pair<size_t, size_t>, u_int8_t> &getFovUsageCount() {
-            return fovUsageCount;
+        const std::map<std::pair<size_t, size_t>, FITileRequest *> &getTileRequests() const {
+            return tileRequests;
         }
 
-        u_int8_t getMaxFovUsage() const {
-            return maxFovUsage;
+        const Pyramid &getPyramid() const {
+            return pyramid;
         }
-
-        const std::map<std::pair<size_t, size_t>, std::vector<std::pair<size_t, size_t>>> &getFovUsage() const {
-            return fovUsage;
-        }
-
-        uint32_t getPyramidTileSize() const {
-            return pyramidTileSize;
-        }
-
-        //FOV are passed to the graph as shared_ptr and are destroyed when the FOV data is copied to each overlapping
-        //tile. Thus no call to destructor is necessary
-        ~StitchingVectorParser(){
-            grid.clear();
-            fovUsageCount.clear();
-            fovUsage.clear();
-        }
-
     };
 
 }
 
-#endif //PYRAMIDBUILDING_STITCHINGVECTORPARSER_H
+#endif //PYRAMIDBUILDING_TILEREQUESTBUILDER_H

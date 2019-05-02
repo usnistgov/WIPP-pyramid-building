@@ -16,9 +16,10 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include "pyramidBuilding/api/OptionsType.h"
-#include "pyramidBuilding/utils/deprecated/StitchingVectorParserOld.h"
 
 #include <experimental/filesystem>
+#include <pyramidBuilding/fastImage/utils/PyramidBuilder.h>
+#include <pyramidBuilding/data/Pyramid.h>
 
 namespace pb {
 
@@ -30,12 +31,12 @@ class PyramidalTiffWriter : public htgs::ITask< Tile<T>, htgs::VoidData > {
 public:
     PyramidalTiffWriter(
             size_t numThreads, const std::string &_pathOut, const std::string &pyramidName,
-            const ImageDepth imageDepth, const StitchingVectorParserOld *gridGenerator) :
+            const ImageDepth imageDepth, const Pyramid *pyramid) :
             htgs::ITask<Tile<T>, Tile<T>>(numThreads),
             _pathOut(_pathOut),
             pyramidName(pyramidName),
             imageDepth(imageDepth),
-            info(gridGenerator) {
+            info(pyramid) {
 
         //create the images directory structure
         filesystem::path path = _pathOut;
@@ -64,10 +65,10 @@ public:
                 _tiff = TIFFOpen(file, "w");
             }
 
-            TIFFSetField(_tiff, TIFFTAG_IMAGEWIDTH, info->getFullFovWidthAtLevel(l));
-            TIFFSetField(_tiff, TIFFTAG_IMAGELENGTH, info->getFullFovHeightAtLevel(l));
-            TIFFSetField(_tiff, TIFFTAG_TILELENGTH, info->getPyramidTileSize());
-            TIFFSetField(_tiff, TIFFTAG_TILEWIDTH, info->getPyramidTileSize());
+            TIFFSetField(_tiff, TIFFTAG_IMAGEWIDTH, info->getPyramidWidth(l));
+            TIFFSetField(_tiff, TIFFTAG_IMAGELENGTH, info->getPyramidHeight(l));
+            TIFFSetField(_tiff, TIFFTAG_TILELENGTH, info->getTileSize());
+            TIFFSetField(_tiff, TIFFTAG_TILEWIDTH, info->getTileSize());
             TIFFSetField(_tiff, TIFFTAG_BITSPERSAMPLE,bitsPerSample);
             TIFFSetField(_tiff, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
             TIFFSetField(_tiff, TIFFTAG_ROWSPERSTRIP, 1);
@@ -76,7 +77,7 @@ public:
             TIFFSetField(_tiff, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
             TIFFSetField(_tiff, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
 
-            auto buf = new T[info->getFullFovWidthAtLevel(l) * info->getFullFovHeightAtLevel(l)];
+            auto buf = new T[info->getPyramidWidth(l) * info->getPyramidHeight(l)];
             TIFFWriteTile(_tiff, (tdata_t)buf, 0, 0, 0, 0);
             delete[] buf;
             TIFFWriteDirectory(_tiff);
@@ -86,7 +87,7 @@ public:
 
     void executeTask(std::shared_ptr<Tile<T>> data) override {
 
-        size_t tileSize = info->getPyramidTileSize();
+        size_t tileSize = info->getTileSize();
         size_t x = data->getCol() * tileSize;
         size_t y = data->getRow() * tileSize;
         size_t level = data->getLevel();
@@ -105,7 +106,7 @@ public:
         T* tile = nullptr;
 
         //tiff only process tiles of the same size. If we process a border tile, we need to redimension it.
-        if(data->getRow() == info->getGridMaxRow(level) || data->getCol() == info->getGridMaxCol(level)) {
+        if(data->getRow() == info->getNumTileRow(level) || data->getCol() == info->getNumTileCol(level)) {
             T *tile = new T[tileSize * tileSize]();
             for (uint32_t row = 0; row < data->get_height(); ++row) {
                 std::copy_n(data->getData() + row * originalWidth, originalWidth, tile + row * tileSize);
@@ -120,7 +121,7 @@ public:
 
         TIFFRewriteDirectory(_tiff);
 
-        if(data->getRow() == info->getGridMaxRow(level) && data->getCol() == info->getGridMaxCol(level)){
+        if(data->getRow() == info->getNumTileRow(level) && data->getCol() == info->getNumTileCol(level)){
             TIFFCheckpointDirectory(_tiff);
         }
 
@@ -145,7 +146,7 @@ private:
     const std::string pyramidName;
     const std::string _pathOut;
     const ImageDepth imageDepth;
-    const StitchingVectorParserOld *info;
+    const Pyramid *info;
     TIFF* _tiff;
 
 

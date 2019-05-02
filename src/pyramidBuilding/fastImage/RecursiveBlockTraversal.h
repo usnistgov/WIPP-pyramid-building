@@ -16,13 +16,13 @@ namespace pb {
     class RecursiveBlockTraversal {
 
     public:
-        RecursiveBlockTraversal(Pyramid *pyramid) : pyramid(pyramid) {
-            blockTraversal(0,0, pyramid->getNumLevel()-1);
+        RecursiveBlockTraversal(Pyramid &pyramid) : pyramid(pyramid) {
+            blockTraversal(0,0, pyramid.getNumLevel()-1);
         }
 
 
         bool isValid(size_t row,size_t col, size_t level){
-            return ( row < pyramid->getNumTileRow(level) && col < pyramid->getNumTileCol(level));
+            return ( row < pyramid.getNumTileRow(level) && col < pyramid.getNumTileCol(level));
 
         }
 
@@ -52,7 +52,7 @@ namespace pb {
 
     private:
 
-        Pyramid *pyramid;
+        Pyramid pyramid;
         std::vector<std::pair<uint32_t ,int32_t>> traversal;
 
 

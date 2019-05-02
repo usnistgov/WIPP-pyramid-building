@@ -23,6 +23,7 @@ namespace pb {
     class TileBlock : public htgs::IData {
 
     public:
+
         TileBlock(const std::vector<std::shared_ptr<Tile<T>>> &block) :
         block(block) {
 
