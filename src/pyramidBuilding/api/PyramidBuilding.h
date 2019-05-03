@@ -251,6 +251,10 @@ namespace pb {
             auto level = pyramid.getNumLevel();
             auto maxDim = std::max(fullFovWidth,fullFovHeight);
             auto deepZoomLevel = int(ceil(log2(maxDim)) + 1);
+            VLOG(2) << "full FOV width : " << fullFovWidth  << std::endl;
+            VLOG(2) << "full FOV height : " << fullFovHeight  << std::endl;
+            VLOG(2) << "numTileRow : " << numTileRow  << std::endl;
+            VLOG(2) << "numTileCol : " << numTileCol  << std::endl;
 
             //GENERATING TILES
             auto tiffImageLoader = new TiffImageLoader<px_t>(_inputDir, pyramidTileSize);
@@ -258,7 +262,7 @@ namespace pb {
             auto *fi = new fi::FastImage<px_t>(tileLoader, 0);
             fi->getFastImageOptions()->setNumberOfViewParallel((uint32_t)concurrentTiles);
             fi->getFastImageOptions()->setNumberOfTilesToCache((uint32_t)concurrentTiles);
-            fi->getFastImageOptions()->setPreserveOrder(true);
+//            fi->getFastImageOptions()->setPreserveOrder(true);
             auto fastImage = fi->configureAndMoveToTaskGraphTask("Fast Image");
 
             //RESIZING TILES

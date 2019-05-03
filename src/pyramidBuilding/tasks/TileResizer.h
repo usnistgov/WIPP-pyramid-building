@@ -33,7 +33,7 @@ class TileResizer : public htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>>
             auto fullFovWidth = tileRequestBuilder->getFullFovWidth();
             auto fullFovHeight = tileRequestBuilder->getFullFovHeight();
 
-            VLOG(3) << "tile resizer: " << row << "," << col;
+            VLOG(2) << "tile resizer: " << row << "," << col;
 
             assert(view->getPyramidLevel() == 0);
 

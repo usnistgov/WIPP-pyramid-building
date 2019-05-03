@@ -5,20 +5,19 @@
 #include <iostream>
 #include <cmath>
 #include <glog/logging.h>
-#include <pyramidBuilding/fastImage/RecursiveBlockTraversal.h>
+#include <pyramidBuilding/pyramid/RecursiveBlockTraversal.h>
 #include <assert.h>
 
 int main(){
 
-//    auto numTileRow = 61;
-//    auto numTileCol = 88;
 
-    uint32_t numTileRow = 8;
-    uint32_t numTileCol = 11;
+    size_t width = 111009;
+    size_t height = 108972;
+    size_t tileSize =1024;
 
     auto count = 0;
 
-    auto pyramid = new pb::Pyramid(numTileRow, numTileCol);
+    auto pyramid = pb::Pyramid(width, height, tileSize);
 
     auto traversal = new pb::RecursiveBlockTraversal(pyramid);
 
@@ -30,9 +29,10 @@ int main(){
 
     }
 
-    VLOG(1) << numTileRow * numTileCol;
+    VLOG(1) << pyramid.getPyramidWidth(0);
+    VLOG(1) << pyramid.getPyramidHeight(0);
     VLOG(1) << count;
-    assert(count == numTileRow * numTileCol);
+    assert(count == pyramid.getPyramidWidth(0) * pyramid.getPyramidHeight(0));
 
 
 
