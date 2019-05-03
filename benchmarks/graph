@@ -1,0 +1,33 @@
+digraph { rankdir="TB"
+forcelabels=true;
+node[shape=record, fontsize=10, fontname="Verdana"];
+edge[fontsize=10, fontname="Verdana"];
+graph [compound=true, labelloc=top, labeljust=left, label="Compute time: 46.237354 s\nCreation time: 0.054222 s\n",pad="0.5", nodesep="0.5", ranksep="0"];
+x0x556c3a2ec960;
+x0x556c3a2ebbe0;
+x0x556c3abfa1b0 -> x0x556c3a2ebbe0[label="get", color=sienna];
+x0x556c3ab4e600 -> x0x556c3abfa1b0[color=sienna];
+x0x556c3abfa1b0[label="unsigned char",style=filled,shape=oval,width=.2,height=.2, fillcolor=sienna, color=sienna];
+x0x556c3ab4e600;
+x0x556c3a2f9bd0;
+x0x556c3a2eb870;
+x0x556c3a2e9be0;
+x0x556c3acfe220;
+x0x556c3a2ec960 -> x0x556c3a2ebbe0[label="Unnamed IRule"];
+x0x556c3a2ec960 -> x0x556c3a2eb870[label="Unnamed IRule"];
+x0x556c3a2f7310 -> x0x556c3a2ec960;
+x0x556c3a2ebbe0 -> x0x556c3a2f9bd0;
+x0x556c3a2f9bd0 -> x0x556c3a2eb870;
+x0x556c3a2eb870 -> x0x556c3a2e9be0[label="Pyramid Rule - Cache"];
+x0x556c3a2eb870 -> x0x556c3acfe220[label="Write Tile Rule"];
+x0x556c3a2eb870 -> x0x556c3acfe220[label="DeepZoomDownsampling Rule"];
+x0x556c3a2e9be0 -> x0x556c3a2eb870;
+x0x556c3a2ec960[label="Bookkeeper x1\n",shape=box,style=filled,fillcolor=white, color=black,width=.2,height=.2];
+x0x556c3a2ebbe0[label="Image Reader x2\n",shape=box,style=filled,fillcolor=white, color=black,width=.2,height=.2];
+x0x556c3ab4e600[label="MM(static): fov x1\n\nMemory Pool Size = 5\n",shape=box,style=filled,fillcolor=sienna, color=black,width=.2,height=.2];
+x0x556c3a2f9bd0[label="Empty Tile Rule x2\n",shape=box,style=filled,fillcolor=white, color=black,width=.2,height=.2];
+x0x556c3a2eb870[label="Bookkeeper x1\n",shape=box,style=filled,fillcolor=white, color=black,width=.2,height=.2];
+x0x556c3acfe220[label="DeepZoomWriteTask x40\n",shape=box,style=filled,fillcolor=white, color=black,width=.2,height=.2];
+x0x556c3a2e9be0[label="Create Tile Task x6\n",shape=box,style=filled,fillcolor=white, color=black,width=.2,height=.2];
+x0x556c3a2f7310[label="Graph Input\n0"];
+}

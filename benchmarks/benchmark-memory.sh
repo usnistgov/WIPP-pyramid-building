@@ -33,4 +33,4 @@
 -v /home/gerardin/Documents/images/dataset7/manualStitching/img-global-positions-0.txt \
 -i /home/gerardin/Documents/images/dataset7/tiled-images \
 -o /home/gerardin/Documents/pyramidBuilding/outputs \
--t 1024 -d 8U -n dataset7 -e "reader=2;builder=1;writer=20;downsampler=2;tile=4;"
+-t 1024 -d 8U -n dataset7 -e "reader=2;builder=1;writer=5;downsampler=4;tile=16;"

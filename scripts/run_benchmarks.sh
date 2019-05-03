@@ -112,8 +112,6 @@ date=$(date +"%m_%d_%Y_%T")
 CLEAR_CACHE=0;
 
 
-
-
 for ((i = 1; i <= $RUNS; i++))
     do
         if [[ "$OSTYPE" == "linux-gnu" ]]; then

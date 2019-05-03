@@ -199,11 +199,13 @@ namespace pb {
         template<typename px_t>
         void _build(){
 
-            size_t concurrentTiles = 5;
-            size_t readerThreads = 2;
-            size_t builderThreads =  2;
-            size_t downsamplerThreads = 6;
-            size_t writerThreads = 40;
+            bool LOW_FOOTPRINT = true; //make that an option?
+
+            size_t concurrentTiles = 4;
+            size_t readerThreads = 5;
+            size_t builderThreads =  1;
+            size_t downsamplerThreads = 4;
+            size_t writerThreads = 5;
 
             VLOG(1) << "generating pyramid..." << std::endl;
 
@@ -217,9 +219,15 @@ namespace pb {
 
             }
 
-            if(concurrentTiles < 4) {
-                VLOG(1) << "WARNING : System be configured with at least 4 concurrent tiles. Default to 4 tiles.";
-                concurrentTiles = 4;
+
+            if(LOW_FOOTPRINT && concurrentTiles < 4 + builderThreads) {
+                    concurrentTiles = 4 + builderThreads;
+                    VLOG(1) << "WARNING : System needs to be configured with at least 4 concurrent tiles plus one additional"
+                               "tile per tile resizer threads Set to :" << concurrentTiles;
+            }
+            else if ( concurrentTiles < 4 * builderThreads ) {
+                    concurrentTiles = 4 * builderThreads;
+                VLOG(1) << "WARNING : System needs more tiles to prevent deadlock. Set to :" << concurrentTiles;
             }
 
 
@@ -262,7 +270,9 @@ namespace pb {
             auto *fi = new fi::FastImage<px_t>(tileLoader, 0);
             fi->getFastImageOptions()->setNumberOfViewParallel((uint32_t)concurrentTiles);
             fi->getFastImageOptions()->setNumberOfTilesToCache((uint32_t)concurrentTiles);
-//            fi->getFastImageOptions()->setPreserveOrder(true);
+            if(LOW_FOOTPRINT){
+                fi->getFastImageOptions()->setPreserveOrder(true);
+            }
             auto fastImage = fi->configureAndMoveToTaskGraphTask("Fast Image");
 
             //RESIZING TILES
@@ -360,12 +370,9 @@ namespace pb {
             graph->writeDotToFile("graph", DOTGEN_COLOR_COMP_TIME);
 #endif
 
-//            delete fi;
             delete runtime;
             delete downsampler;
             delete tiffImageLoader;
-
-            std::cout << getPeakRSS() << std::endl;
 
             auto end = std::chrono::high_resolution_clock::now();
             VLOG(1) << "Execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " mS" << std::endl;

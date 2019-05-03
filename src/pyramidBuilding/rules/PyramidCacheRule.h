@@ -80,17 +80,17 @@ public:
 
             std::vector<std::shared_ptr<Tile<T>>> &l = this->pyramidCache.at(level - 1);
 
-            for(std::shared_ptr<Tile<T>>& value: data->getOrigin()) {
-                if(value!= nullptr) { //second value can be null for vertical block.
-                    auto vRow = value->getRow();
-                    auto vCol = value->getCol();
-                    removeFromCache(l, vRow * gridCol + vCol); //delete from the overall cache
-//                    value->getMemoryData()->releaseMemory();
-                    VLOG(3) << "freeing tile : level " << level << "(" << row << "," << col << ")";
-                    value.reset(); //delete from the origin vector so it can be reclaimed. // delete from origin vector (shuld be a weak pointer )
-
-                }
-            }
+//            for(std::shared_ptr<Tile<T>>& value: data->getOrigin()) {
+//                if(value!= nullptr) { //second value can be null for vertical block.
+//                    auto vRow = value->getRow();
+//                    auto vCol = value->getCol();
+//                    removeFromCache(l, vRow * gridCol + vCol); //delete from the overall cache
+////                    value->getMemoryData()->releaseMemory();
+//                    VLOG(3) << "freeing tile : level " << level << "(" << row << "," << col << ")";
+//                    value.reset(); //delete from the origin vector so it can be reclaimed. // delete from origin vector (shuld be a weak pointer )
+//
+//                }
+//            }
 
         }
 
