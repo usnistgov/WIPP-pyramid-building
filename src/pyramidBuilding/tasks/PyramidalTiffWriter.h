@@ -31,8 +31,8 @@ class PyramidalTiffWriter : public htgs::ITask< Tile<T>, htgs::VoidData > {
 public:
     PyramidalTiffWriter(
             size_t numThreads, const std::string &_pathOut, const std::string &pyramidName,
-            const ImageDepth imageDepth, const Pyramid *pyramid) :
-            htgs::ITask<Tile<T>, Tile<T>>(numThreads),
+            const ImageDepth imageDepth, const Pyramid &pyramid) :
+            htgs::ITask<Tile<T>, htgs::VoidData >(numThreads),
             _pathOut(_pathOut),
             pyramidName(pyramidName),
             imageDepth(imageDepth),
@@ -57,7 +57,7 @@ public:
         }
 
 
-        for(size_t l = 0;  l< info->getNumLevel(); l++){
+        for(size_t l = 0;  l< info.getNumLevel(); l++){
             auto fullPath = path / (pyramidName + ".tif");
             auto file = fullPath.c_str();
 
@@ -65,10 +65,10 @@ public:
                 _tiff = TIFFOpen(file, "w");
             }
 
-            TIFFSetField(_tiff, TIFFTAG_IMAGEWIDTH, info->getPyramidWidth(l));
-            TIFFSetField(_tiff, TIFFTAG_IMAGELENGTH, info->getPyramidHeight(l));
-            TIFFSetField(_tiff, TIFFTAG_TILELENGTH, info->getTileSize());
-            TIFFSetField(_tiff, TIFFTAG_TILEWIDTH, info->getTileSize());
+            TIFFSetField(_tiff, TIFFTAG_IMAGEWIDTH, info.getPyramidWidth(l));
+            TIFFSetField(_tiff, TIFFTAG_IMAGELENGTH, info.getPyramidHeight(l));
+            TIFFSetField(_tiff, TIFFTAG_TILELENGTH, info.getTileSize());
+            TIFFSetField(_tiff, TIFFTAG_TILEWIDTH, info.getTileSize());
             TIFFSetField(_tiff, TIFFTAG_BITSPERSAMPLE,bitsPerSample);
             TIFFSetField(_tiff, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
             TIFFSetField(_tiff, TIFFTAG_ROWSPERSTRIP, 1);
@@ -77,7 +77,7 @@ public:
             TIFFSetField(_tiff, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
             TIFFSetField(_tiff, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
 
-            auto buf = new T[info->getPyramidWidth(l) * info->getPyramidHeight(l)];
+            auto buf = new T[info.getPyramidWidth(l) * info.getPyramidHeight(l)];
             TIFFWriteTile(_tiff, (tdata_t)buf, 0, 0, 0, 0);
             delete[] buf;
             TIFFWriteDirectory(_tiff);
@@ -87,12 +87,12 @@ public:
 
     void executeTask(std::shared_ptr<Tile<T>> data) override {
 
-        size_t tileSize = info->getTileSize();
+        size_t tileSize = info.getTileSize();
         size_t x = data->getCol() * tileSize;
         size_t y = data->getRow() * tileSize;
         size_t level = data->getLevel();
 
-        size_t originalWidth = data->get_width();
+        size_t originalWidth = data->getWidth();
 
         auto dir = TIFFSetDirectory(_tiff, (uint16_t)level);
 
@@ -106,9 +106,9 @@ public:
         T* tile = nullptr;
 
         //tiff only process tiles of the same size. If we process a border tile, we need to redimension it.
-        if(data->getRow() == info->getNumTileRow(level) || data->getCol() == info->getNumTileCol(level)) {
+        if(data->getRow() == info.getNumTileRow(level) || data->getCol() == info.getNumTileCol(level)) {
             T *tile = new T[tileSize * tileSize]();
-            for (uint32_t row = 0; row < data->get_height(); ++row) {
+            for (uint32_t row = 0; row < data->getHeight(); ++row) {
                 std::copy_n(data->getData() + row * originalWidth, originalWidth, tile + row * tileSize);
             }
             TIFFWriteTile(tiff, (tdata_t)tile, (uint32)x, (uint32)y, 0, 0);
@@ -121,11 +121,14 @@ public:
 
         TIFFRewriteDirectory(_tiff);
 
-        if(data->getRow() == info->getNumTileRow(level) && data->getCol() == info->getNumTileCol(level)){
+        if(data->getRow() == info.getNumTileRow(level) && data->getCol() == info.getNumTileCol(level)){
             TIFFCheckpointDirectory(_tiff);
         }
 
-        this->addResult(data);
+        if(data->getMemoryData() != nullptr){
+            data->getMemoryData()->releaseMemory();
+            VLOG(3) << "freeing tile : level " << data->getLevel() << "(" << data->getRow() << "," << data->getCol() << ")";
+        }
     }
 
     /// \brief Close the tiff file
@@ -146,7 +149,7 @@ private:
     const std::string pyramidName;
     const std::string _pathOut;
     const ImageDepth imageDepth;
-    const Pyramid *info;
+    const Pyramid info;
     TIFF* _tiff;
 
 

@@ -42,7 +42,7 @@ class TileResizer : public htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>>
             uint32_t width = std::min(pyramidTileSize, (uint32_t)(fullFovWidth - r));
             uint32_t height = std::min(pyramidTileSize, (uint32_t)(fullFovHeight - row * pyramidTileSize));
 
-            auto tileMemoryData = this-> template getDynamicMemory<T>("basetile", new ReleaseMemoryRule(2), width * height);
+            auto tileMemoryData = this-> template getDynamicMemory<T>("basetile", new ReleaseMemoryRule(3), width * height);
             auto tileData = tileMemoryData->get();
 
             for (auto x =0 ; x < height; x++){

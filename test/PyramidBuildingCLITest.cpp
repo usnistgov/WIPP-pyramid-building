@@ -22,6 +22,12 @@ int main(int argc, const char** argv)
 //    std::string inputDirectory = "/home/gerardin/Documents/pyramidBuilding/resources/dataset1/tiled-images/";
 //    uint32_t tilesize = 256;
 
+    std::string vector = "/home/gerardin/Documents/pyramidBuilding/resources/dataset1/stitching_vector/img-global-positions-1.txt";
+    std::string inputDirectory = "/home/gerardin/Documents/pyramidBuilding/resources/dataset1/tiled-images/";
+    uint32_t tilesize = 256;
+
+
+
 
 //    std::string vector = "/home/gerardin/Documents/pyramidBuilding/resources/dataset02/stitching_vector/img-global-positions-1.txt";
 //    std::string inputDirectory = "/home/gerardin/Documents/pyramidBuilding/resources/dataset02/images/";
@@ -66,11 +72,13 @@ int main(int argc, const char** argv)
 //    uint32_t tilesize = 1024;
 
 
-    std::string vector = "/home/gerardin/Documents/images/dataset7/manualStitching/img-global-positions-0.txt";
-    std::string inputDirectory = "/home/gerardin/Documents/images/dataset7/tiled-images/";
-    uint32_t tilesize = 1024;
+//    std::string vector = "/home/gerardin/Documents/images/dataset7/manualStitching/img-global-positions-0.txt";
+//    std::string inputDirectory = "/home/gerardin/Documents/images/dataset7/tiled-images/";
+//    uint32_t tilesize = 1024;
 
     std::string outputDirectory = (filesystem::current_path() / "outputs").string() ;
+
+    VLOG(3) << "output to : " << outputDirectory;
 
     std::string images = "-i " + inputDirectory;
     std::string output = "-o " + outputDirectory;

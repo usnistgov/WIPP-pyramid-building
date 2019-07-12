@@ -307,9 +307,10 @@ namespace pb {
                 graph->addRuleEdge(bookkeeper, deepzoomDownsamplingRule,
                                    writeTask); //generating extra tiles up to 1x1 pixel to satisfy deepzoom format
             }
-//
-//            //    auto tiledTiffWriteTask = new PyramidalTiffWriter<px_t>(1,_outputDir, pyramidName, options->getDepth(), gridGenerator);
-//            //    graph->addRuleEdge(bookkeeper, writeRule, tiledTiffWriteTask);
+
+            auto writeRule2 = new WriteTileRule<px_t>();
+            auto tiledTiffWriteTask = new PyramidalTiffWriter<px_t>(1,_outputDir, pyramidName, options->getDepth(), pyramid);
+            graph->addRuleEdge(bookkeeper, writeRule2, tiledTiffWriteTask);
 
             //MEMORY MANAGEMENT
             graph->addMemoryManagerEdge("basetile",tileResizer, new TileAllocator<px_t>(pyramidTileSize , pyramidTileSize),concurrentTiles, htgs::MMType::Dynamic);
