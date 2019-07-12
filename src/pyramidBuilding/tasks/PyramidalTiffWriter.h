@@ -106,8 +106,9 @@ public:
         T* tile = nullptr;
 
         //tiff only process tiles of the same size. If we process a border tile, we need to redimension it.
-        if(data->getRow() == info.getNumTileRow(level) || data->getCol() == info.getNumTileCol(level)) {
+        if(data->getRow() != info.getNumTileRow(level) || data->getCol() != info.getNumTileCol(level)) {
             T *tile = new T[tileSize * tileSize]();
+           // memset(tile, 0, sizeof(tile)); //not necessary. Array seems init to 0 by default
             for (uint32_t row = 0; row < data->getHeight(); ++row) {
                 std::copy_n(data->getData() + row * originalWidth, originalWidth, tile + row * tileSize);
             }
