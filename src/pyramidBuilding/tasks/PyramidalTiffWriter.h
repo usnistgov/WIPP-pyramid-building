@@ -62,7 +62,7 @@ public:
             auto file = fullPath.c_str();
 
             if(l == 0){
-                _tiff = TIFFOpen(file, "w");
+                _tiff = TIFFOpen(file, "w8");
             }
 
             TIFFSetField(_tiff, TIFFTAG_IMAGEWIDTH, info.getPyramidWidth(l));
@@ -71,6 +71,7 @@ public:
             TIFFSetField(_tiff, TIFFTAG_TILEWIDTH, info.getTileSize());
             TIFFSetField(_tiff, TIFFTAG_BITSPERSAMPLE,bitsPerSample);
             TIFFSetField(_tiff, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
+            TIFFSetField(_tiff, TIFFTAG_SAMPLESPERPIXEL, 1);
             TIFFSetField(_tiff, TIFFTAG_ROWSPERSTRIP, 1);
             TIFFSetField(_tiff, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
             TIFFSetField(_tiff, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
