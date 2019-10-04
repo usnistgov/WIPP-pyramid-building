@@ -17,7 +17,6 @@
 #undef uint64
 #undef int64
 
-#include <opencv/cv.h>
 #include <map>
 #include <assert.h>
 #include <glog/logging.h>

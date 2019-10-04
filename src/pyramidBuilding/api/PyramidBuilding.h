@@ -199,7 +199,7 @@ namespace pb {
         template<typename px_t>
         void _build(){
 
-            bool LOW_FOOTPRINT = true; //make that an option?
+            bool LOW_FOOTPRINT = false; //make that an option?
 
             size_t concurrentTiles = 4;
             size_t readerThreads = 5;
@@ -216,6 +216,7 @@ namespace pb {
                 if(expertModeOptions->has("builder")) builderThreads = expertModeOptions->get("builder");
                 if(expertModeOptions->has("downsampler")) downsamplerThreads = expertModeOptions->get("downsampler");
                 if(expertModeOptions->has("writer")) writerThreads = expertModeOptions->get("writer");
+                if(expertModeOptions->has("lowfootprint")) LOW_FOOTPRINT = (expertModeOptions->get("lowfootprint") == 1);
 
             }
 
@@ -237,6 +238,7 @@ namespace pb {
             VLOG(1) << "builder threads : " << builderThreads  << std::endl;
             VLOG(1) << "downsampler threads : " << downsamplerThreads  << std::endl;
             VLOG(1) << "writer threads : " << writerThreads  << std::endl;
+            VLOG(1) << "low footprint (preserving order) : " << LOW_FOOTPRINT  << std::endl;
 
             auto begin = std::chrono::high_resolution_clock::now();
 

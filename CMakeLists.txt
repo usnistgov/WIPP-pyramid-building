@@ -49,7 +49,7 @@ include_directories(${HTGS_INCLUDE_DIR})
 include_directories(${FastImage_INCLUDE_DIR})
 link_libraries(${FastImage_LIBRARIES})
 
-find_package(OpenCV 3 REQUIRED)
+find_package(OpenCV REQUIRED)
 link_libraries(${OpenCV_LIBRARIES} )
 message("OpenCV Version: ${OpenCV_VERSION}")
 

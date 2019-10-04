@@ -8,7 +8,6 @@
 #include <htgs/api/ITask.hpp>
 #include <FastImage/api/FastImage.h>
 #include <pyramidBuilding/data/TileBlock.h>
-#include <opencv/cv.h>
 #include <opencv2/imgproc.hpp>
 
 #include <opencv2/core/mat.hpp>
