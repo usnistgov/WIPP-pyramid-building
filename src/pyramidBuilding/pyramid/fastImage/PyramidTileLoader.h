@@ -19,7 +19,7 @@ namespace pb {
 
     public:
 
-        PyramidTileLoader(size_t numThreads, std::shared_ptr<PyramidBuilder> pyramidBuilder, TiffImageLoader<T>* imageLoader, size_t pyramidTileSize) : fi::ATileLoader<T>("", numThreads), _pyramidBuilder(pyramidBuilder), _imageLoader(imageLoader), _pyramidTileSize(pyramidTileSize) {
+        PyramidTileLoader(size_t numThreads, std::shared_ptr<PyramidBuilder> &pyramidBuilder, TiffImageLoader<T>* imageLoader, size_t pyramidTileSize) : fi::ATileLoader<T>("", numThreads), _pyramidBuilder(pyramidBuilder), _imageLoader(imageLoader), _pyramidTileSize(pyramidTileSize) {
 
         }
 

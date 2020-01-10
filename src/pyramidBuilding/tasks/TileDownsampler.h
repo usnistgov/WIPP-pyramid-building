@@ -171,7 +171,6 @@ public:
         assert(level > 0);
 
 //        VLOG(3) << "downsampled dim " << downsampleWidth << "," << downsampleHeight;
-//
 //        printArray("downsampledImage",downsampleData->get(),downsampleWidth,downsampleHeight);
 
         this->addResult(tile);

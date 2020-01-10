@@ -250,10 +250,15 @@ namespace pb {
             //parse the stitching vector and create the problem representation
             auto pyramidBuilder = std::make_shared<PyramidBuilder>(_inputDir, _inputVector, pyramidTileSize);
 
+
             //INIT
             auto graph = new htgs::TaskGraphConf<VoidData, VoidData>();
             //basic info
             auto pyramid = pyramidBuilder->getPyramid();
+
+            concurrentTiles =  3 * (pyramid.getNumLevel() -1 ) + 1;
+            VLOG(1) << "concurrent tiles updated to : " << concurrentTiles;
+
             auto numTileRow = pyramid.getNumTileRow(0);
             auto numTileCol = pyramid.getNumTileCol(0);
             size_t fullFovWidth = pyramidBuilder->getFullFovWidth();
@@ -271,9 +276,10 @@ namespace pb {
             auto tileLoader = new PyramidTileLoader<px_t>(readerThreads, pyramidBuilder, tiffImageLoader, pyramidTileSize);
             auto *fi = new fi::FastImage<px_t>(tileLoader, 0);
             fi->getFastImageOptions()->setNumberOfViewParallel((uint32_t)concurrentTiles);
+            //we could multiply this number by the average number of PartialFOVs per Tile.
             fi->getFastImageOptions()->setNumberOfTilesToCache((uint32_t)concurrentTiles);
             if(LOW_FOOTPRINT){
-                fi->getFastImageOptions()->setPreserveOrder(true);
+                fi->getFastImageOptions()->setPreserveOrder(true); //otherwise deadlock can occur
             }
             auto fastImage = fi->configureAndMoveToTaskGraphTask("Fast Image");
 
@@ -317,7 +323,7 @@ namespace pb {
             //MEMORY MANAGEMENT
             graph->addMemoryManagerEdge("basetile",tileResizer, new TileAllocator<px_t>(pyramidTileSize , pyramidTileSize),concurrentTiles, htgs::MMType::Dynamic);
             //dimension to not deadlock for each branch of recursive block traversal
-            auto tileCacheSize = (3 * (pyramid.getNumLevel() -1 ) + 1 ) * concurrentTiles / 4;
+            auto tileCacheSize = 3 * (pyramid.getNumLevel() -1 ) + 1 ;
             VLOG(3) << "nb of higher level tile available in tile cache: " << tileCacheSize;
             graph->addMemoryManagerEdge("tile",tileDownsampler, new TileAllocator<px_t>(pyramidTileSize , pyramidTileSize), tileCacheSize , htgs::MMType::Dynamic);
 

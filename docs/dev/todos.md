@@ -1,5 +1,12 @@
 # TODOS
 
+## Implementation
+
+Release rules count are dependent on the computation made.
+The count must be 2 if don't write the pyramidal tiff or 3 if we do.
+make this customizable.
+
+
 ## Checks
 
 Check google style guide.
@@ -15,6 +22,8 @@ FastImage uses uint32, openCV uses uint32
 * Other forms of blending?
 * Overlap
 * Support for non tiled images? (from big dataset)
+
+
 
 
 ## FAST IMAGE VERSION

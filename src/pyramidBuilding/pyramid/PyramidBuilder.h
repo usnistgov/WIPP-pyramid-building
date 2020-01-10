@@ -53,8 +53,8 @@ namespace pb {
 
     public:
         /**
-         *
-         * @param imageDirectoryPath where to locate the FOVs
+         * Build the problem representation we will use to stitch tile at the base level.
+         * @param imageDirectoryPath where to locate the FOVs.
          * @param stitchingVectorPath  where to locate the corresponding stitching vector.
          */
         PyramidBuilder(const std::string &imageDirectoryPath,
@@ -103,7 +103,7 @@ namespace pb {
                                 if (fovGlobalX > maxFovGlobalX) maxFovGlobalX = fovGlobalX;
                                 if (fovGlobalY > maxFovGlobalY) maxFovGlobalY = fovGlobalY;
                             } else {
-                                throw "position coordinates cannot be converted to 32bits signed integer";
+                                throw std::runtime_error("position coordinates cannot be converted to 32bits signed integer");
                             }
                         } else if (key == "file") {
                             filename = val;
@@ -229,7 +229,7 @@ namespace pb {
         }
 
 
-        const std::shared_ptr<FOVMetadata> getFovMetadata() const {
+        std::shared_ptr<FOVMetadata> getFovMetadata() const {
             return fovMetadata;
         }
 

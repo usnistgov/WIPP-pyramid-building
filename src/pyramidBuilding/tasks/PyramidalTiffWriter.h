@@ -21,6 +21,16 @@
 #include <pyramidBuilding/pyramid/PyramidBuilder.h>
 #include <pyramidBuilding/data/Pyramid.h>
 
+
+/***
+ * Writing pyramidal tiled tiff is tricky. Please see http://www.libtiff.org/man/TIFFWriteDirectory.3t.html for an overview
+ * of different possibility.
+ * One way to initialize a pyramidal tiled tiff is to instantiate each level as a directory (a subfile)
+ * and write an empty image of the correct size.
+ * Then at each new tile, we retrieve this subfile and write to it.
+ * Finally we write the directory back to disk.
+ */
+
 namespace pb {
 
 using namespace std::experimental;
@@ -55,6 +65,7 @@ public:
                 bitsPerSample = sizeof(uint16) * 8;
                 break;
         }
+
 
 
         for(size_t l = 0;  l< info.getNumLevel(); l++){
@@ -108,7 +119,7 @@ public:
 
         //tiff only process tiles of the same size. If we process a border tile, we need to redimension it.
         if(data->getRow() != info.getNumTileRow(level) || data->getCol() != info.getNumTileCol(level)) {
-            T *tile = new T[tileSize * tileSize]();
+            tile = new T[tileSize * tileSize]();
            // memset(tile, 0, sizeof(tile)); //not necessary. Array seems init to 0 by default
             for (uint32_t row = 0; row < data->getHeight(); ++row) {
                 std::copy_n(data->getData() + row * originalWidth, originalWidth, tile + row * tileSize);
@@ -121,10 +132,10 @@ public:
             TIFFWriteTile(tiff, (tdata_t)tile, (uint32)x, (uint32)y, 0, 0);
         }
 
-        TIFFRewriteDirectory(_tiff);
+        TIFFRewriteDirectory(_tiff); //TODO TEST WRITEDIRECTORY SHOULD BE ENOUGH
 
         if(data->getRow() == info.getNumTileRow(level) && data->getCol() == info.getNumTileCol(level)){
-            TIFFCheckpointDirectory(_tiff);
+            TIFFCheckpointDirectory(_tiff); //TEST - NOT NECESSARY BECAUSE WE ALREADY REWRITE ANYWAY
         }
 
         if(data->getMemoryData() != nullptr){

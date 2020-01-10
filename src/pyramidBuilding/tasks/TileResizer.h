@@ -7,6 +7,7 @@
 
 #include <pyramidBuilding/data/Tile.h>
 #include <htgs/api/ITask.hpp>
+#include <utility>
 #include <pyramidBuilding/pyramid/PyramidBuilder.h>
 
 namespace pb {
@@ -19,14 +20,10 @@ class TileResizer : public htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>>
 
     public:
 
-        TileResizer(size_t numThreads, uint32_t pyramidTileSize, const std::shared_ptr<PyramidBuilder> &tileRequestBuilder) : htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>> (numThreads), pyramidTileSize(pyramidTileSize), tileRequestBuilder(tileRequestBuilder) {}
+        TileResizer(size_t numThreads, uint32_t pyramidTileSize, std::shared_ptr<PyramidBuilder> tileRequestBuilder) : htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>> (numThreads), pyramidTileSize(pyramidTileSize), tileRequestBuilder(std::move(tileRequestBuilder)) {}
 
 
     void executeTask(htgs::m_data_t<fi::View <T>> data) override {
-
-
-
-
             auto view = data->get();
             auto row = view->getRow();
             auto col = view->getCol();
@@ -42,6 +39,7 @@ class TileResizer : public htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>>
             uint32_t width = std::min(pyramidTileSize, (uint32_t)(fullFovWidth - r));
             uint32_t height = std::min(pyramidTileSize, (uint32_t)(fullFovHeight - row * pyramidTileSize));
 
+            //release count depends on how many write rules we have
             auto tileMemoryData = this-> template getDynamicMemory<T>("basetile", new ReleaseMemoryRule(3), width * height);
             auto tileData = tileMemoryData->get();
 

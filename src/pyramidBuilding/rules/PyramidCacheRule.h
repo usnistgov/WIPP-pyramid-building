@@ -6,9 +6,7 @@
 #define PYRAMIDBUILDING_PYRAMIDCACHERULE_H
 
 #include <FastImage/api/FastImage.h>
-#include <math.h>
 #include <array>
-#include <assert.h>
 #include <pyramidBuilding/data/Tile.h>
 #include <pyramidBuilding/data/TileBlock.h>
 
@@ -71,28 +69,10 @@ public:
         auto row = data->getRow();
         auto level = data->getLevel();
 
-//        VLOG(3) << "tile coming from pyramid cache.";
-//        printArray("pyramidCache", data->getData(), data->getWidth(), data->getHeight());
-
-        //freeing cache if the incoming tile has ancestors.
-        if(level > 0) {
-            auto gridCol = levelGridSizes[level-1][1];
-
-            std::vector<std::shared_ptr<Tile<T>>> &l = this->pyramidCache.at(level - 1);
-
-//            for(std::shared_ptr<Tile<T>>& value: data->getOrigin()) {
-//                if(value!= nullptr) { //second value can be null for vertical block.
-//                    auto vRow = value->getRow();
-//                    auto vCol = value->getCol();
-//                    removeFromCache(l, vRow * gridCol + vCol); //delete from the overall cache
-////                    value->getMemoryData()->releaseMemory();
-//                    VLOG(3) << "freeing tile : level " << level << "(" << row << "," << col << ")";
-//                    value.reset(); //delete from the origin vector so it can be reclaimed. // delete from origin vector (shuld be a weak pointer )
-//
-//                }
-//            }
-
-        }
+        //We used to delete cache entry here.
+        //This bookkeeping slows down the pipeline, but it is not necessary :
+        //let's keep the metadata and let's rely on the releaseMemory mechanism to
+        //delete the tile data.
 
         //generated all  levels. We are done.
         if(level == this->numLevel -1){
@@ -112,6 +92,7 @@ public:
 
         pyramidCache.at(level).at(row * gridCol + col) = data;
 
+        //LET'S CHECK IF WE CAN GENERATE A TILE AT THE NEXT LEVEL OF THE PYRAMID
         auto SOUTH = (row + 1) * gridCol + col;
         auto NORTH = (row - 1) * gridCol + col;
         auto EAST = row * gridCol + col + 1;
@@ -120,8 +101,6 @@ public:
         auto NORTH_EAST = (row -1) * gridCol + col + 1;
         auto SOUTH_WEST = (row +1) * gridCol + col - 1;
         auto SOUTH_EAST = (row +1) * gridCol + col + 1;
-
-
 
         if(col >= gridCol -1 && row >= gridRow -1 && col % 2 ==0 && row % 2 ==0) {
             VLOG(4) << "corner case : block size 1 " << std::endl;
