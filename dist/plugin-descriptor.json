@@ -50,6 +50,12 @@
       "type": "string",
       "required": "false",
       "description": "Blending Method : strategy to handle the blending of overlapping tiles."
+    },
+    {
+      "name": "expert",
+      "type": "string",
+      "required": "false",
+      "description": "Advanced Options : customize the execution scheme."
     }
 
   ],
@@ -91,6 +97,10 @@
     {
       "key": "inputs.blending",
       "title": "Blending Method"
+    },
+        {
+      "key": "inputs.expert",
+      "title": "Advanced Options"
     }
   ]
 }
