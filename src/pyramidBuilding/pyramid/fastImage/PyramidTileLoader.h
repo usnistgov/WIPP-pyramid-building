@@ -65,6 +65,13 @@ namespace pb {
 
         double loadTileFromFile(T *tile, uint32_t row, uint32_t col) override {
 
+            //TODO is there a more efficient way to reinit the tile?
+            for(uint32_t tileRow = 0; tileRow < getTileHeight(0); tileRow++){
+                for(uint32_t tileCol = 0; tileCol < getTileWidth(0); tileCol++) {
+                    tile[tileRow * getTileWidth(0) + tileCol ] = 0;
+                }
+            }
+
             auto builder = _pyramidBuilder->getTileRequests();
             auto tileRequest = builder[{row,col}];
 

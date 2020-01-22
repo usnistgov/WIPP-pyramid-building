@@ -6,5 +6,4 @@ webapp-test
 tools
 docs
 dist
-cmake-build-*
 build

@@ -63,7 +63,7 @@ endif(APPLE)
 
 link_libraries(glog)
 
-add_definitions(-DPROFILE)
+#add_definitions(-DPROFILE)
 #add_definitions(-DUSE_PRIORITY_QUEUE)
 
 include_directories(src)
@@ -98,9 +98,10 @@ set(SRC_FILES
         src/pyramidBuilding/utils/AverageDownsampler.h
         src/pyramidBuilding/utils/Downsampler.h
         src/pyramidBuilding/pyramid/TiffImageLoader.h
-        src/pyramidBuilding/utils/Utils.h src/pyramidBuilding/data/Pyramid.h src/pyramidBuilding/data/BlockType.h)
+        src/pyramidBuilding/utils/Utils.h src/pyramidBuilding/data/Pyramid.h src/pyramidBuilding/data/BlockType.h
+        )
 
-#add_executable(mainFastImage main.cpp)
-add_executable(main main.cpp
+
+add_executable(commandLineCli commandLineCli.cpp
         ${SRC_FILES}
-        src/pyramidBuilding/pyramid/data/PartialFOV.h src/pyramidBuilding/pyramid/data/TileRequest.h src/pyramidBuilding/tasks/TileResizer.h src/mem/Mem.cpp src/mem/Mem.h src/pyramidBuilding/memory/TileAllocator.h src/pyramidBuilding/pyramid/RecursiveBlockTraversal.h)
+        )

@@ -35,16 +35,15 @@ class TileResizer : public htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>>
             assert(view->getPyramidLevel() == 0);
 
             //we copy to the view data and crop it to the tile dimension
-            uint32_t r = (uint32_t)col * pyramidTileSize;
-            uint32_t width = std::min(pyramidTileSize, (uint32_t)(fullFovWidth - r));
+            uint32_t width = std::min(pyramidTileSize, (uint32_t)(fullFovWidth - col * pyramidTileSize));
             uint32_t height = std::min(pyramidTileSize, (uint32_t)(fullFovHeight - row * pyramidTileSize));
 
             //release count depends on how many write rules we have
             auto tileMemoryData = this-> template getDynamicMemory<T>("basetile", new ReleaseMemoryRule(3), width * height);
             auto tileData = tileMemoryData->get();
 
-            for (auto x =0 ; x < height; x++){
-                std::copy_n(view->getData() + x * view->getViewWidth(), width, tileData + x * width);
+            for (uint32_t tileRow = 0 ;tileRow < height; tileRow++){
+                std::copy_n(view->getData() + tileRow * view->getViewWidth(), width, tileData + tileRow * width);
             }
 
 //                    cv::Mat image2(height, width, CV_8U, data);
