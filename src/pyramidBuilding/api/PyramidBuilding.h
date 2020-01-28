@@ -283,8 +283,11 @@ namespace pb {
             }
             auto fastImage = fi->configureAndMoveToTaskGraphTask("Fast Image");
 
+            //HOW MANY TIMES WE WILL USE A TILE DEPENDS ON HOW MANY TIMES WE WRITE IT
+            size_t tileReferenceCount = (this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM_AND_PYRAMIDAL_TIFF) ? 3 : 2;
+
             //RESIZING TILES
-            auto tileResizer = new TileResizer<px_t>(builderThreads,pyramidTileSize, pyramidBuilder);
+            auto tileResizer = new TileResizer<px_t>(builderThreads,pyramidTileSize, pyramidBuilder, tileReferenceCount);
             graph->addEdge(fastImage, tileResizer);
 
             //CACHE
@@ -295,30 +298,44 @@ namespace pb {
 
             //DOWNSAMPLING TILES
             auto downsampler = new AverageDownsampler<px_t>();
-            auto tileDownsampler = new TileDownsampler<px_t>(downsamplerThreads, downsampler);
+            auto tileDownsampler = new TileDownsampler<px_t>(downsamplerThreads, downsampler, tileReferenceCount);
             graph->addRuleEdge(bookkeeper, pyramidRule, tileDownsampler); //caching tiles and creating a tile at higher level;
             graph->addEdge(tileDownsampler,bookkeeper); //pyramid higher level tile
 
             //WRITING TILE
             htgs::ITask< Tile<px_t>, htgs::VoidData> *writeTask = nullptr;
-            if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
+            if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM || this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM_AND_PYRAMIDAL_TIFF) {
+
+                //write tiles in the deepzoom directory layout
                 auto outputPath = filesystem::path(_outputDir) / (pyramidName + "_files");
                 writeTask = new DeepZoomTileWriter<px_t>(writerThreads, outputPath, deepZoomLevel, this->options->getDepth());
-            }
-            graph->addRuleEdge(bookkeeper, writeRule, writeTask);
+                graph->addRuleEdge(bookkeeper, writeRule, writeTask);
 
-            //DOWNSAMPLING LAST TILE FOR DEEPZOOM COMPATIBILITY
-            if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
-                auto outputPath = filesystem::path(_outputDir) / (pyramidName + "_files");
+                //generating extra tiles up to 1x1 pixel to satisfy deepzoom format
                 auto deepzoomDownsamplingRule = new DeepZoomDownsampleTileRule<px_t>(numTileCol, numTileRow, deepZoomLevel,
-                                                                                   outputPath, this->options->getDepth(), downsampler);
+                                                                                     outputPath, this->options->getDepth(), downsampler);
                 graph->addRuleEdge(bookkeeper, deepzoomDownsamplingRule,
-                                   writeTask); //generating extra tiles up to 1x1 pixel to satisfy deepzoom format
-            }
+                                   writeTask);
 
-            auto writeRule2 = new WriteTileRule<px_t>();
-            auto tiledTiffWriteTask = new PyramidalTiffWriter<px_t>(1,_outputDir, pyramidName, options->getDepth(), pyramid);
-            graph->addRuleEdge(bookkeeper, writeRule2, tiledTiffWriteTask);
+               //generating the dzi manifest
+                std::ostringstream oss;
+                oss << R"(<?xml version="1.0" encoding="utf-8"?><Image TileSize=")" << pyramidTileSize << "\" Overlap=\""
+                    << overlap
+                    << "\" Format=\"" << format << R"(" xmlns="http://schemas.microsoft.com/deepzoom/2008"><Size Width=")"
+                    << pyramidBuilder->getFullFovWidth() << "\" Height=\"" << pyramidBuilder->getFullFovHeight()
+                    << "\"/></Image>";
+
+                std::ofstream outFile;
+                outFile.open(filesystem::path(_outputDir) / (pyramidName + ".dzi"));
+                outFile << oss.str();
+                outFile.close();
+            }
+            if(this->options->getPyramidFormat() == PyramidFormat::PYRAMIDAL_TIFF || this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM_AND_PYRAMIDAL_TIFF) {
+                auto writePyramidalTiffRule = new WriteTileRule<px_t>();
+                auto tiledTiffWriteTask = new PyramidalTiffWriter<px_t>(1, _outputDir, pyramidName, options->getDepth(),
+                                                                        pyramid);
+                graph->addRuleEdge(bookkeeper, writePyramidalTiffRule, tiledTiffWriteTask);
+            }
 
             //MEMORY MANAGEMENT
             graph->addMemoryManagerEdge("basetile",tileResizer, new TileAllocator<px_t>(pyramidTileSize , pyramidTileSize),concurrentTiles, htgs::MMType::Dynamic);
@@ -354,20 +371,6 @@ namespace pb {
             fi->finishedRequestingTiles();
             graph->finishedProducingData();
 
-            //GENERATING DEEPZOOM METADATA FILE
-            if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM) {
-                std::ostringstream oss;
-                oss << R"(<?xml version="1.0" encoding="utf-8"?><Image TileSize=")" << pyramidTileSize << "\" Overlap=\""
-                    << overlap
-                    << "\" Format=\"" << format << R"(" xmlns="http://schemas.microsoft.com/deepzoom/2008"><Size Width=")"
-                    << pyramidBuilder->getFullFovWidth() << "\" Height=\"" << pyramidBuilder->getFullFovHeight()
-                    << "\"/></Image>";
-
-                std::ofstream outFile;
-                outFile.open(filesystem::path(_outputDir) / (pyramidName + ".dzi"));
-                outFile << oss.str();
-                outFile.close();
-            }
 
             runtime->waitForRuntime();
 

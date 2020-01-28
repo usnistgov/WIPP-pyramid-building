@@ -40,6 +40,12 @@
       "description": "TileSize : The width/length (in pixel) of the square tiles we generate in output."
     },
     {
+      "name": "format",
+      "type": "string",
+      "required": "false",
+      "description": "Output Format :  deepzoom, tiff, all (generates both formats)."
+    },
+    {
       "name": "name",
       "type": "string",
       "required": "false",
@@ -95,10 +101,14 @@
       "title": "Image Depth"
     },
     {
+      "key": "inputs.format",
+      "title": "Output Format"
+    },
+    {
       "key": "inputs.blending",
       "title": "Blending Method"
     },
-        {
+    {
       "key": "inputs.expert",
       "title": "Advanced Options"
     }

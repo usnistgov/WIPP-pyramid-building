@@ -1,0 +1,5 @@
+FROM wipp/pyramid-building:1.1.1
+
+ADD ./cmake-build-release/commandLineCli /tmp/commandLineCli
+
+ENTRYPOINT ["/tmp/commandLineCli"]

@@ -13,6 +13,8 @@ namespace pb {
 
     enum class PyramidFormat {
         DEEPZOOM,
+        PYRAMIDAL_TIFF,
+        DEEPZOOM_AND_PYRAMIDAL_TIFF
     };
 
     enum class BlendingMethod {

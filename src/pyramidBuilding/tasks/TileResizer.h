@@ -15,12 +15,9 @@ namespace pb {
     template<class T>
 class TileResizer : public htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>> {
 
-
-
-
     public:
 
-        TileResizer(size_t numThreads, uint32_t pyramidTileSize, std::shared_ptr<PyramidBuilder> tileRequestBuilder) : htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>> (numThreads), pyramidTileSize(pyramidTileSize), tileRequestBuilder(std::move(tileRequestBuilder)) {}
+        TileResizer(size_t numThreads, uint32_t pyramidTileSize, std::shared_ptr<PyramidBuilder> tileRequestBuilder, size_t referenceCount) : htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>> (numThreads), pyramidTileSize(pyramidTileSize), tileRequestBuilder(std::move(tileRequestBuilder)), referenceCount(referenceCount) {}
 
 
     void executeTask(htgs::m_data_t<fi::View <T>> data) override {
@@ -39,7 +36,7 @@ class TileResizer : public htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>>
             uint32_t height = std::min(pyramidTileSize, (uint32_t)(fullFovHeight - row * pyramidTileSize));
 
             //release count depends on how many write rules we have
-            auto tileMemoryData = this-> template getDynamicMemory<T>("basetile", new ReleaseMemoryRule(3), width * height);
+            auto tileMemoryData = this-> template getDynamicMemory<T>("basetile", new ReleaseMemoryRule(referenceCount), width * height);
             auto tileData = tileMemoryData->get();
 
             for (uint32_t tileRow = 0 ;tileRow < height; tileRow++){
@@ -58,7 +55,7 @@ class TileResizer : public htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>>
         }
 
         htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>> *copy() override {
-            return new TileResizer(this->getNumThreads(), pyramidTileSize, tileRequestBuilder);
+            return new TileResizer(this->getNumThreads(), pyramidTileSize, tileRequestBuilder, referenceCount);
         }
 
 
@@ -72,6 +69,7 @@ class TileResizer : public htgs::ITask<htgs::MemoryData<fi::View <T>>, Tile <T>>
     private:
         uint32_t pyramidTileSize = 0;
         std::shared_ptr<PyramidBuilder> tileRequestBuilder;
+        size_t referenceCount;
 
 };
 

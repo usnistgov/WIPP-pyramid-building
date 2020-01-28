@@ -22,12 +22,12 @@ CONTAINER_DIR_INPUTS=/tmp/inputs
 CONTAINER_DIR_OUTPUTS=/tmp/outputs
 
 # image name
-CONTAINER_IMAGE=wipp/pyramid-building:1.1.1
+CONTAINER_IMAGE=wipp/pyramid-building:1.1.3
 
 # Full command
 docker run -v $INPUT_DIR_HOST:$CONTAINER_DIR_INPUTS  -v $OUTPUT_DIR_HOST:$CONTAINER_DIR_OUTPUTS \
 -e GLOG_v=3 -e GLOG_logtostderr=1 $CONTAINER_IMAGE \
- -i $CONTAINER_DIR_INPUTS/$IMAGES_RELATIVE_PATH -o $CONTAINER_DIR_OUTPUTS -n containerTest \
+ -i $CONTAINER_DIR_INPUTS/$IMAGES_RELATIVE_PATH -o $CONTAINER_DIR_OUTPUTS -n containerTest -f "all"\
  -v $CONTAINER_DIR_INPUTS/$VECTOR_RELATIVE_PATH -t 256 -d 8U
 
 ### ========================

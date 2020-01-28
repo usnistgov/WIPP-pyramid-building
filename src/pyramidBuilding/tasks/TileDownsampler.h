@@ -33,10 +33,11 @@ class TileDownsampler : public htgs::ITask<TileBlock<T>, Tile<T> > {
 
 private:
     Downsampler<T> *downsampler;
+    size_t referenceCount;
 
 public:
 
-    TileDownsampler(size_t numThreads, Downsampler<T> *downsampler) : ITask<TileBlock<T>, Tile<T>>(numThreads), downsampler(downsampler) {}
+    TileDownsampler(size_t numThreads, Downsampler<T> *downsampler, size_t referenceCount) : ITask<TileBlock<T>, Tile<T>>(numThreads), downsampler(downsampler), referenceCount(referenceCount) {}
 
     void executeTask(std::shared_ptr<TileBlock<T>> data) override {
 
@@ -82,7 +83,7 @@ public:
                 downsampleWidth = static_cast<size_t>(ceil((double) width / 2));
                 downsampleHeight = static_cast<size_t>(ceil((double) height / 2));
 
-                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(3), downsampleWidth * downsampleHeight);
+                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(referenceCount), downsampleWidth * downsampleHeight);
                 this->downsampler->downsample(downsampleData->get(), tempBigTileData, width, height);
                 break;
             //right vertical block
@@ -107,7 +108,7 @@ public:
                 downsampleWidth = static_cast<size_t>(ceil((double) width / 2));
                 downsampleHeight = static_cast<size_t>(ceil((double) height / 2));
 
-                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(3), downsampleWidth * downsampleHeight);
+                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(referenceCount), downsampleWidth * downsampleHeight);
                 this->downsampler->downsample(downsampleData->get(), tempBigTileData, width, height);
                 break;
             //bottom horizontal block
@@ -131,7 +132,7 @@ public:
                 downsampleWidth = static_cast<size_t>(ceil((double) width / 2));
                 downsampleHeight = static_cast<size_t>(ceil((double) height / 2));
 
-                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(3), downsampleWidth * downsampleHeight);
+                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(referenceCount), downsampleWidth * downsampleHeight);
                 this->downsampler->downsample(downsampleData->get(), tempBigTileData, width, height);
                 break;
             //bottom right single block
@@ -154,7 +155,7 @@ public:
                 downsampleHeight = static_cast<size_t>(ceil((double) height / 2));
 
 
-                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(3), downsampleWidth * downsampleHeight);
+                downsampleData = this-> template getDynamicMemory<T>("tile", new ReleaseMemoryRule(referenceCount), downsampleWidth * downsampleHeight);
                 this->downsampler->downsample(downsampleData->get(), tempBigTileData, width, height);
                 break;
             default:
@@ -181,7 +182,7 @@ public:
     }
 
     htgs::ITask<TileBlock<T>, Tile<T> > *copy() override {
-        return new TileDownsampler(this->getNumThreads(), this->downsampler);
+        return new TileDownsampler(this->getNumThreads(), this->downsampler, this->referenceCount);
     }
 
 private:

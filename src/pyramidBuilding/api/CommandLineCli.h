@@ -39,6 +39,18 @@ namespace pb {
         }
     }
 
+    PyramidFormat parseFormat(const std::string &format) {
+        if (format == "deepzoom") {
+            return PyramidFormat::DEEPZOOM;
+        } else if (format == "tiff") {
+            return PyramidFormat::PYRAMIDAL_TIFF;
+        } else if (format == "all") {
+            return PyramidFormat::DEEPZOOM_AND_PYRAMIDAL_TIFF;
+        } else {
+            throw std::invalid_argument("format not recognized. Should  be one of : deepzoom, tiff, all");
+        }
+    }
+
 
     BlendingMethod parseBlendingMethod(const std::string &blending) {
         if (blending == "max") {
@@ -102,8 +114,7 @@ namespace pb {
             TCLAP::ValueArg<std::string> depthArg("d", "depth", "Image Depth", false, "16U", "string");
             cmd.add(depthArg);
 
-            //TODO CHECK. unused. Check best way to handle different format. PyramidBuilding expects DeepZoom.
-            TCLAP::ValueArg<std::string> formatArg("f", "format", "Image Format", false, "png", "string");
+            TCLAP::ValueArg<std::string> formatArg("f", "format", "Output Format", false, "deepzoom", "string");
             cmd.add(formatArg);
 
             TCLAP::ValueArg<std::string> blendingArg("b", "blending", "Blending Method", false, "overlay", "string");
@@ -140,9 +151,7 @@ namespace pb {
 
             ImageDepth d = parseImageDepth(depth);
             BlendingMethod b = parseBlendingMethod(blending);
-
-
-
+            auto f = parseFormat(format);
             auto expertModeOptions = new PyramidBuilding::ExpertModeOptions(parseExpertMode(expertMode));
 
 
@@ -150,7 +159,7 @@ namespace pb {
             options->setTilesize(tilesize);
             options->setPyramidName(pyramidName);
             options->setOverlap(0);
-            options->setPyramidFormat(PyramidFormat::DEEPZOOM);
+            options->setPyramidFormat(f);
             options->setDownsamplingType(DownsamplingType::NEIGHBORS_AVERAGE);
             options->setBlendingMethod(b);
             options->setDepth(d);
