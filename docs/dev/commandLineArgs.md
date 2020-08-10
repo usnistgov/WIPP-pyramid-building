@@ -1,4 +1,4 @@
--v /home/gerardin/Documents/pyramidBuilding/resources/dataset1/stitching_vector/img-global-positions-1.txt
+    -v /home/gerardin/Documents/pyramidBuilding/resources/dataset1/stitching_vector/img-global-positions-1.txt
 -i /home/gerardin/Documents/pyramidBuilding/resources/dataset1/tiled-images
 -o /home/gerardin/Documents/pyramidBuilding/outputs
 -t 256 -d 8U -n testFI2 
