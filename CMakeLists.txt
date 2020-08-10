@@ -5,6 +5,7 @@ project(pyramidBuilding CXX)
 set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
+set(LOG ON)
 
 #TODO Set this flag only in debug
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pedantic -Wno-reorder -Wno-unused-parameter" )
@@ -13,11 +14,18 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -funwind-tables -g")
 
 
-#TODO DOES NOT USEFUL. REMOVE
-# make_unique is not available on current OSX libc++
-if(APPLE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y")
-endif(APPLE)
+# Detect compiler
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    # using regular Clang or AppleClang
+    set(CMAKE_COMPILER_IS_CLANGCXX 1)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_COMPILER_IS_GNUCXX 1)
+    # using GCC
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+    # using Intel C++
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    # using Visual Studio C++
+endif()
 
 # IMPORTANT to allow CMAKE to find HTGS and FAST IMAGE
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules")
@@ -45,25 +53,30 @@ find_package(NVTX QUIET)
 
 # FAST IMAGE pull HTGS transitively
 find_package(FastImage REQUIRED)
+
 include_directories(${HTGS_INCLUDE_DIR})
 include_directories(${FastImage_INCLUDE_DIR})
 link_libraries(${FastImage_LIBRARIES})
 
-find_package(OpenCV REQUIRED)
+find_package(OpenCV 3 REQUIRED)
 link_libraries(${OpenCV_LIBRARIES} )
 message("OpenCV Version: ${OpenCV_VERSION}")
 
-# Necessary to use experimental filesystem lib
-if(APPLE)
-    link_directories(/usr/local/Cellar/llvm/7.0.1/lib/)
-    link_libraries(c++fs)
-else(APPLE)
-    link_libraries(stdc++fs)
-endif(APPLE)
+set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${FastLoader_CXX_FLAGS})
 
-link_libraries(glog)
+if (NOT CMAKE_COMPILER_IS_CLANGCXX)
+    list(APPEND FAST_VIZ_LIBS "stdc++fs")
+endif(NOT CMAKE_COMPILER_IS_CLANGCXX)
 
-#add_definitions(-DPROFILE)
+# Enable logs
+if (LOG)
+    find_package(GLOG REQUIRED)
+    message(STATUS "GLOG found")
+    include_directories(${GLOG_INCLUDE_DIRS})
+    link_libraries(${GLOG_LIBRARIES})
+endif(LOG)
+
+add_definitions(-DPROFILE)
 #add_definitions(-DUSE_PRIORITY_QUEUE)
 
 include_directories(src)
@@ -98,10 +111,21 @@ set(SRC_FILES
         src/pyramidBuilding/utils/AverageDownsampler.h
         src/pyramidBuilding/utils/Downsampler.h
         src/pyramidBuilding/pyramid/TiffImageLoader.h
-        src/pyramidBuilding/utils/Utils.h src/pyramidBuilding/data/Pyramid.h src/pyramidBuilding/data/BlockType.h
+        src/pyramidBuilding/utils/Utils.h src/pyramidBuilding/data/Pyramid.h
+        src/pyramidBuilding/data/BlockType.h
+        src/pyramidBuilding/pyramid/data/PartialFOV.h
+        src/pyramidBuilding/pyramid/data/TileRequest.h
+        src/pyramidBuilding/tasks/TileResizer.h
+        src/mem/Mem.cpp
+        src/mem/Mem.h
+        src/pyramidBuilding/memory/TileAllocator.h
+        src/pyramidBuilding/pyramid/RecursiveBlockTraversal.h
         )
 
-
-add_executable(commandLineCli commandLineCli.cpp
+#add_executable(mainFastImage main.cpp)
+add_executable(main main.cpp
         ${SRC_FILES}
         )
+
+
+target_link_libraries(main)

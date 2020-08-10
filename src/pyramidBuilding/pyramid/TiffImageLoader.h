@@ -55,6 +55,18 @@ namespace pb {
                 TIFFGetField(tiff, TIFFTAG_SAMPLESPERPIXEL, &_samplePerPixel);
                 TIFFGetField(tiff, TIFFTAG_BITSPERSAMPLE, &_bitsPerSample);
                 TIFFGetField(tiff, TIFFTAG_SAMPLEFORMAT, &_sampleFormat);
+                if(_sampleFormat == 0) {
+                    _sampleFormat = 1;
+                    LOG(WARNING) << "sampleFormat tag is missing. Defaulting to : " << this->_sampleFormat << std::endl;
+                }
+                if(_samplePerPixel == 0) {
+                    _samplePerPixel = 1;
+                    LOG(WARNING) << "samplePerPixel tag is missing. Defaulting to : " << this->_samplePerPixel << std::endl;
+                }
+                if(_bitsPerSample == 0) {
+                    _bitsPerSample = 1;
+                    LOG(WARNING) << "bitsPerSample tag is missing. Defaulting to : " << this->_bitsPerSample << std::endl;
+                }
         }
 
 
