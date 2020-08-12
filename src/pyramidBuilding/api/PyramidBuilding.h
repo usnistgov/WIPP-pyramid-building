@@ -21,7 +21,7 @@
 #include <assert.h>
 #include <string>
 #include <sstream>
-#include <experimental/filesystem>
+#include <filesystem>
 #include <glog/logging.h>
 #include <pyramidBuilding/utils/AverageDownsampler.h>
 #include <pyramidBuilding/memory/TileAllocator.h>
@@ -43,7 +43,7 @@
 
 namespace pb {
 
-    using namespace std::experimental;
+     using namespace std::__fs;
 
     /***
      *  @class The pyramid building algorithm.
@@ -162,13 +162,13 @@ namespace pb {
                         const std::string &outputDirectory,
                         Options* options) :
                 _inputDir(inputDirectory), _inputVector(stitching_vector), _outputDir(outputDirectory), options(options) {
-            if(!std::experimental::filesystem::exists(inputDirectory)) {
+            if(!std::__fs::filesystem::exists(inputDirectory)) {
                 throw std::invalid_argument("Images directory does not exists. Was : " + inputDirectory);
             }
-            if(!std::experimental::filesystem::exists(stitching_vector)) {
+            if(!std::__fs::filesystem::exists(stitching_vector)) {
                 throw std::invalid_argument("Stitching vector does not exists. Was : " + stitching_vector);
             }
-            if(!std::experimental::filesystem::exists(outputDirectory)) {
+            if(!std::__fs::filesystem::exists(outputDirectory)) {
                 VLOG(1) << "WARNING - Output directory does not exists. It will be created : " + outputDirectory;
                 filesystem::create_directories(outputDirectory);
             }

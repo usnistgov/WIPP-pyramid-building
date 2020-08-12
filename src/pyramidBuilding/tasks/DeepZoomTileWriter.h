@@ -16,12 +16,12 @@
 #include <opencv2/imgcodecs.hpp>
 #include "pyramidBuilding/api/OptionsType.h"
 
-#include <experimental/filesystem>
+#include <filesystem>
 #include <pyramidBuilding/utils/Utils.h>
 
 namespace pb {
 
-using namespace std::experimental;
+ using namespace std::__fs;
 
 template <class T>
 class DeepZoomTileWriter : public htgs::ITask< Tile<T>, htgs::VoidData > {

@@ -17,7 +17,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include "pyramidBuilding/api/OptionsType.h"
 
-#include <experimental/filesystem>
+#include <filesystem>
 #include <pyramidBuilding/pyramid/PyramidBuilder.h>
 #include <pyramidBuilding/data/Pyramid.h>
 
@@ -33,7 +33,7 @@
 
 namespace pb {
 
-using namespace std::experimental;
+using namespace std::__fs;
 
 template <class T>
 class PyramidalTiffWriter : public htgs::ITask< Tile<T>, htgs::VoidData > {

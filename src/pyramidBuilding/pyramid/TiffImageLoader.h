@@ -12,7 +12,7 @@
 #include <mutex>
 #include <glog/logging.h>
 #include <tiffio.h>
-#include <experimental/filesystem>
+#include <filesystem>
 #include <pyramidBuilding/pyramid/data/PartialFOV.h>
 #include "htgs/api/MemoryData.hpp"
 

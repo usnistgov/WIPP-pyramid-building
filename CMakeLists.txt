@@ -30,12 +30,6 @@ endif()
 # IMPORTANT to allow CMAKE to find HTGS and FAST IMAGE
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules")
 
-# TODO CHECK On OSX we use Homebrew and need to additional paths or we need to symlink package files.
-if(APPLE)
-    set(TIFF_INCLUDE_DIR /usr/lib)
-    set(CMAKE_PREFIX_PATH /usr/local/opt/opencv@3/)
-endif(APPLE)
-
 # if installed through package manager a FindTIFF.cmake is available on the path
 # (ex : /usr/share/cmake-3.10/Modules/FindTIFF.cmake)
 # and provide default variables such as ${TIFF_LIBRARIES}

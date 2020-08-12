@@ -25,8 +25,8 @@
 
 
 
--v /Users/gerardin/Documents/images/dataset2/stitching_vector/pc/img-global-positions-1.txt
--i /Users/gerardin/Documents/images/dataset2/images
--o /home/gerardin/Documents/pyramidBuilding/outputs
--t 1024 -d 8U -n testFI4 
+-v /Users/gerardin/Documents/images/dataset1/stitching_vector/img-global-positions-1.txt
+-i /Users/gerardin/Documents/images/dataset1/tiled-images
+-o /Users/gerardin/Documents/projects/wipp++/pyramid-building/outputs
+-t 256 -d 8U -n testFI4 
 
