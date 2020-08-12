@@ -10,7 +10,7 @@
 #include <array>
 #include <assert.h>
 #include <sys/stat.h>
-#include <filesystem>
+#include <experimental/filesystem>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include "../data/Tile.h"
@@ -21,7 +21,7 @@
 
 namespace pb {
 
-     using namespace std::__fs;
+     #include <experimental/filesystem>namespace std::fs;
 
 /***
  * @class DeepZoomDownsamplingRule DeepZoomDownsamplingRule.h <pyramidBuilding/rules/DeepZoomDownsamplingRule.h>

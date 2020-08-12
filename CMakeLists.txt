@@ -60,6 +60,7 @@ set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${FastLoader_CXX_FLAGS})
 
 if (NOT CMAKE_COMPILER_IS_CLANGCXX)
     list(APPEND PYRAMID_LIBS "stdc++fs")
+    message("compiler will link to the filesystem library -lstdc++fs (experimental)")
 endif(NOT CMAKE_COMPILER_IS_CLANGCXX)
 
 # Enable logs

@@ -17,7 +17,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include "pyramidBuilding/api/OptionsType.h"
 
-#include <filesystem>
+#include <experimental/filesystem>
 #include <pyramidBuilding/pyramid/PyramidBuilder.h>
 #include <pyramidBuilding/data/Pyramid.h>
 
@@ -33,7 +33,7 @@
 
 namespace pb {
 
-using namespace std::__fs;
+    namespace fs = std::experimental::filesystem;
 
 template <class T>
 class PyramidalTiffWriter : public htgs::ITask< Tile<T>, htgs::VoidData > {
@@ -49,10 +49,10 @@ public:
             info(pyramid) {
 
         //create the images directory structure
-        filesystem::path path = _pathOut;
+        fs::path path = _pathOut;
 
-        if(! filesystem::exists(path)) {
-            filesystem::create_directory(path);
+        if(! fs::exists(path)) {
+            fs::create_directory(path);
         }
 
         size_t bitsPerSample = 0;

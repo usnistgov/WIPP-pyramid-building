@@ -16,12 +16,12 @@
 #include <opencv2/imgcodecs.hpp>
 #include "pyramidBuilding/api/OptionsType.h"
 
-#include <filesystem>
+#include <experimental/filesystem>
 #include <pyramidBuilding/utils/Utils.h>
 
 namespace pb {
 
- using namespace std::__fs;
+namespace fs = std::experimental::filesystem;
 
 template <class T>
 class DeepZoomTileWriter : public htgs::ITask< Tile<T>, htgs::VoidData > {
@@ -34,15 +34,15 @@ class DeepZoomTileWriter : public htgs::ITask< Tile<T>, htgs::VoidData > {
         _pathOut(_pathOut), nbPyramidLevel(nbPyramidLevel), imageDepth(imageDepth) {
 
             //create the images directory structure
-            filesystem::path path = _pathOut;
+            fs::path path = _pathOut;
 
-            if(! filesystem::exists(path)) {
-                    filesystem::create_directories(path);
+            if(! fs::exists(path)) {
+                    fs::create_directories(path);
             }
 
             for(auto i= 0; i < nbPyramidLevel; i++){
-                if(! filesystem::exists(path / std::to_string(i))) {
-                    filesystem::create_directories(path / std::to_string(i));
+                if(! fs::exists(path / std::to_string(i))) {
+                    fs::create_directories(path / std::to_string(i));
                 }
             }
 
@@ -52,7 +52,7 @@ class DeepZoomTileWriter : public htgs::ITask< Tile<T>, htgs::VoidData > {
 
         void executeTask(std::shared_ptr<Tile<T>> data) override {
 
-            filesystem::path path = _pathOut;
+            fs::path path = _pathOut;
 
             //deepzoom levels are reversed. level 0 represent the top of the pyramid
             size_t l = this->nbPyramidLevel - 1 - data->getLevel();

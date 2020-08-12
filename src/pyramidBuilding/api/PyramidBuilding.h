@@ -21,7 +21,7 @@
 #include <assert.h>
 #include <string>
 #include <sstream>
-#include <filesystem>
+#include <experimental/filesystem>
 #include <glog/logging.h>
 #include <pyramidBuilding/utils/AverageDownsampler.h>
 #include <pyramidBuilding/memory/TileAllocator.h>
@@ -40,10 +40,11 @@
 #include <pyramidBuilding/tasks/TileResizer.h>
 #include <pyramidBuilding/pyramid/RecursiveBlockTraversal.h>
 #include <mem/Mem.h>
+#include <experimental/filesystem>
+
+namespace fs = std::experimental::filesystem;
 
 namespace pb {
-
-     using namespace std::__fs;
 
     /***
      *  @class The pyramid building algorithm.
@@ -162,15 +163,15 @@ namespace pb {
                         const std::string &outputDirectory,
                         Options* options) :
                 _inputDir(inputDirectory), _inputVector(stitching_vector), _outputDir(outputDirectory), options(options) {
-            if(!std::__fs::filesystem::exists(inputDirectory)) {
+            if(!fs::exists(inputDirectory)) {
                 throw std::invalid_argument("Images directory does not exists. Was : " + inputDirectory);
             }
-            if(!std::__fs::filesystem::exists(stitching_vector)) {
+            if(!fs::exists(stitching_vector)) {
                 throw std::invalid_argument("Stitching vector does not exists. Was : " + stitching_vector);
             }
-            if(!std::__fs::filesystem::exists(outputDirectory)) {
+            if(!fs::exists(outputDirectory)) {
                 VLOG(1) << "WARNING - Output directory does not exists. It will be created : " + outputDirectory;
-                filesystem::create_directories(outputDirectory);
+                fs::create_directories(outputDirectory);
             }
         };
 
@@ -307,7 +308,7 @@ namespace pb {
             if(this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM || this->options->getPyramidFormat() == PyramidFormat::DEEPZOOM_AND_PYRAMIDAL_TIFF) {
 
                 //write tiles in the deepzoom directory layout
-                auto outputPath = filesystem::path(_outputDir) / (pyramidName + "_files");
+                auto outputPath = fs::path(_outputDir) / (pyramidName + "_files");
                 writeTask = new DeepZoomTileWriter<px_t>(writerThreads, outputPath, deepZoomLevel, this->options->getDepth());
                 graph->addRuleEdge(bookkeeper, writeRule, writeTask);
 
@@ -326,7 +327,7 @@ namespace pb {
                     << "\"/></Image>";
 
                 std::ofstream outFile;
-                outFile.open(filesystem::path(_outputDir) / (pyramidName + ".dzi"));
+                outFile.open(fs::path(_outputDir) / (pyramidName + ".dzi"));
                 outFile << oss.str();
                 outFile.close();
             }
