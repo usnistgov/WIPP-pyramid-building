@@ -58,14 +58,14 @@ include_directories(${HTGS_INCLUDE_DIR})
 include_directories(${FastImage_INCLUDE_DIR})
 link_libraries(${FastImage_LIBRARIES})
 
-find_package(OpenCV 3 REQUIRED)
+find_package(OpenCV REQUIRED)
 link_libraries(${OpenCV_LIBRARIES} )
 message("OpenCV Version: ${OpenCV_VERSION}")
 
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${FastLoader_CXX_FLAGS})
 
 if (NOT CMAKE_COMPILER_IS_CLANGCXX)
-    list(APPEND FAST_VIZ_LIBS "stdc++fs")
+    list(APPEND PYRAMID_LIBS "stdc++fs")
 endif(NOT CMAKE_COMPILER_IS_CLANGCXX)
 
 # Enable logs
@@ -122,10 +122,9 @@ set(SRC_FILES
         src/pyramidBuilding/pyramid/RecursiveBlockTraversal.h
         )
 
-#add_executable(mainFastImage main.cpp)
-add_executable(main main.cpp
+add_executable(commandLineCli commandLineCli.cpp
         ${SRC_FILES}
         )
 
 
-target_link_libraries(main)
+target_link_libraries(commandLineCli ${PYRAMID_LIBS})

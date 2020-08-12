@@ -22,3 +22,11 @@
 -o /home/gerardin/Documents/pyramidBuilding/outputs 
 -t 16 -d 8U -n FIFINAL 
 -e reader=2;builder=2;writer=30;downsampler=1;tile=4;
+
+
+
+-v /Users/gerardin/Documents/images/dataset2/stitching_vector/pc/img-global-positions-1.txt
+-i /Users/gerardin/Documents/images/dataset2/images
+-o /home/gerardin/Documents/pyramidBuilding/outputs
+-t 1024 -d 8U -n testFI4 
+
