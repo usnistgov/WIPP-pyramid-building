@@ -65,6 +65,11 @@ namespace pb {
 
             std::ifstream infile(stitchingVectorPath);
 
+            if(infile.peek() == std::ifstream::traits_type::eof()) {
+                throw std::runtime_error("empty stitching vector file or error reading the stitching vector.");
+            }
+
+
             uint32_t row = 0;
             uint32_t col = 0;
 
