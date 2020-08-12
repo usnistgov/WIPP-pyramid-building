@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.7)
 
 project(pyramidBuilding CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(LOG ON)
