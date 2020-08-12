@@ -18,6 +18,7 @@ set(LOG ON)
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     # using regular Clang or AppleClang
     set(CMAKE_COMPILER_IS_CLANGCXX 1)
+    message(Clang Detected!)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_COMPILER_IS_GNUCXX 1)
     # using GCC
@@ -44,16 +45,15 @@ message(libTiff path :  ${TIFF_LIBRARIES} )
 
 #TODO Set only in debug mode
 find_package(NVTX QUIET)
-#if(NVTX_FOUND)
-#    message(STATUS "FOUND NVTX!")
-#    add_definitions(-DUSE_NVTX)
-#    include_directories(${NVTX_INCLUDE_DIR})
-#    link_libraries(${NVTX_LIBRARIES})
-#endif()
+if(NVTX_FOUND)
+    message(STATUS "FOUND NVTX!")
+    add_definitions(-DUSE_NVTX)
+    include_directories(${NVTX_INCLUDE_DIR})
+    link_libraries(${NVTX_LIBRARIES})
+endif()
 
 # FAST IMAGE pull HTGS transitively
 find_package(FastImage REQUIRED)
-
 include_directories(${HTGS_INCLUDE_DIR})
 include_directories(${FastImage_INCLUDE_DIR})
 link_libraries(${FastImage_LIBRARIES})
@@ -126,5 +126,5 @@ add_executable(commandLineCli commandLineCli.cpp
         ${SRC_FILES}
         )
 
-
+message("extra libs to link to :  ${PYRAMID_LIBS}")
 target_link_libraries(commandLineCli ${PYRAMID_LIBS})
