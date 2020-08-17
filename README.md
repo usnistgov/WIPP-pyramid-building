@@ -29,12 +29,18 @@ Linking statically to OpenCV is recommended for container distribution in order 
 
 ## Distribution with Docker Container
 
-A docker image can also be build from source.
+Docker distribution available on DockerHub at https://hub.docker.com/r/wipp/pyramid-building
 
-```Dockerfile``` is the development version of the container dockerfile.
-in which all dependencies are build from source and dynamically linked the pyramid building executable.
+A Docker image can also be build from source.
 
-The ```dist/Dockerfile``` contains the production version of the container. Its size is much smaller than the first one.
+To build the Docker image for development/testing, run:
+```
+docker build -t pyramid-building:dev .
+```
+You can then run a simple test for building a pyramid using the Docker image:
+```
+sh run-simple-test.sh
+```
 
 
 ## Running the executable
