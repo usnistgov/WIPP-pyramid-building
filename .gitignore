@@ -30,3 +30,6 @@ dist/deps
 dist/build
 
 **/*.xdot
+
+* macOS files
+**/.DS_Store

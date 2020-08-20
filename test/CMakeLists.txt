@@ -3,3 +3,8 @@ add_executable(testbasePerfMultiThreadHTGS testBasePerfMultiThreadHTGS.cpp Simpl
 add_executable(pyramidBuildingCLITest PyramidBuildingCLITest.cpp ../src/mem/Mem.cpp)
 add_executable(testBasePerf testBasePerf.cpp testBasePerf.h)
 add_executable(traversal traversal.cpp ${SRC_FILES})
+target_link_libraries(libtiff ${PYRAMID_LIBS})
+target_link_libraries(testbasePerfMultiThreadHTGS ${PYRAMID_LIBS})
+target_link_libraries(pyramidBuildingCLITest ${PYRAMID_LIBS})
+target_link_libraries(testBasePerf ${PYRAMID_LIBS})
+target_link_libraries(traversal ${PYRAMID_LIBS})
